@@ -1,64 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:orientation="vertical"
+    android:padding="16dp"
     >
 
 
-    <LinearLayout
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/image_title_sudoku"/>
-
-    </LinearLayout>
+        android:src="@drawable/image_title_sudoku"
+        android:layout_gravity="top"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
-        android:layout_gravity="bottom"
-        android:orientation="vertical">
+        android:layout_gravity="center|center_horizontal"
+        android:orientation="vertical" >
 
         <Button
+            android:id="@+id/btnSinglePlayer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
             android:text="Singleplayer"
             android:onClick="onClickSinglePlayer"
+
             />
 
         <Button
+            android:id="@+id/btnMultiplayer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             android:text="Multiplayer"
             android:onClick="onClickMultiplayer"
             />
 
         <Button
+            android:id="@+id/btnMultiplayerNetwork"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
             android:text="Multiplayer Network"
             android:onClick="onClickMultiplayerNetwork"
             />
+
     </LinearLayout>
+     <ImageButton
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:adjustViewBounds="true"
+         android:maxWidth="80dp"
+         android:maxHeight="80dp"
+         android:scaleType="fitCenter"
+         android:layout_gravity="bottom|right"
+         android:layout_marginLeft="3dp"
+         android:src="@drawable/image_camera_user"
+         android:onClick="onClickCameraUser"/>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivTeste"
+        android:layout_gravity="bottom|left"/>
 
 
-
-</LinearLayout>
+</FrameLayout>
