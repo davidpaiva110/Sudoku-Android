@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Sudoku</string>
+    <string name="title_activity_credits">CreditsActivity</string>
+    <string name="title_activity_player_profile">PlayerProfileActivity</string>
+    <string name="title_activity_results_historic">ResultsHistoricActivity</string>
+    <string name="title_activity_choose_client_server">ChooseClientServerActivity</string>
+    <string name="title_activity_choose_difficulty">ChooseDifficultyActivity</string>
+    <string name="title_activity_game_board_m1">GameBoardM1Activity</string>
 </resources>

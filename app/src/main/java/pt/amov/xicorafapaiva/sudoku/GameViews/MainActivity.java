@@ -1,4 +1,4 @@
-package pt.amov.xicorafapaiva.sudoku;
+package pt.amov.xicorafapaiva.sudoku.GameViews;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +17,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 import java.io.File;
+
+import pt.amov.xicorafapaiva.sudoku.R;
 
 public class MainActivity extends AppCompatActivity {
 
