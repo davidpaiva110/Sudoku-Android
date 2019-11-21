@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickSinglePlayer(View view) {
+        Intent myIntent = new Intent(getBaseContext(),   CreditsActivity.class);
+        startActivity(myIntent);
     }
 
     public void onClickMultiplayer(View view) {
