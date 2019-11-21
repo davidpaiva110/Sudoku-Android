@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickSinglePlayer(View view) {
+
     }
 
     public void onClickMultiplayer(View view) {
