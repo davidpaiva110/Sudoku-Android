@@ -43,6 +43,12 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_player_profile);
         this.player = ViewModelProviders.of(this).get(Player.class);
+
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        // path to /data/data/sudoku/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        this.player.setDirectory(directory);
+        this.loadImageFromStorage(player.getDirPath());
     }
 
 
@@ -96,11 +102,11 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
 
     // Guardar a foto no InternalStorage
     private String saveToInternalStorage(Bitmap bitmapImage){
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        //ContextWrapper cw = new ContextWrapper(getApplicationContext());
         // path to /data/data/sudoku/app_data/imageDir
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        //File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
         // Create imageDir
-        File mypath=new File(directory,"profile.jpg");
+        File mypath=new File(player.getDirectory(),"profile.jpg");
 
         FileOutputStream fos = null;
         try {
@@ -115,7 +121,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
 
             }
         }
-        return directory.getAbsolutePath();
+        return player.getDirectory().getAbsolutePath();
     }
 
     //Ir buscar a imagem do internal Strorage
