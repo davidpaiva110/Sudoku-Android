@@ -1,4 +1,6 @@
 package pt.amov.xicorafapaiva.sudoku.GameClasss;
 
-public class Board {
+import java.io.Serializable;
+
+public class Board implements Serializable {
 }

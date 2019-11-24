@@ -1,5 +1,6 @@
 package pt.amov.xicorafapaiva.sudoku.GameViews;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,19 +14,29 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
+import pt.amov.xicorafapaiva.sudoku.Player;
 import pt.amov.xicorafapaiva.sudoku.R;
 
 public class MainActivity extends AppCompatActivity {
 
-    //Varíaveis referentes à captura da selfie
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private Uri uri;
-    Bitmap foto;
+
+
+
+    private GameData gamedata;
+    private Player player;
+
 
 
     @Override
@@ -33,10 +44,64 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        this.gamedata = new GameData("paiva teste");
+        this.player = new Player();
     }
 
+    //Criação do Menu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main_activity, menu);
+        return true;
+    }
+
+    //Processamento das opções selecionadas no meu
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+// Handle item selection
+        switch (item.getItemId()) {
+            case R.id.optionEditarPerfil:
+                EditPlayerProfile();
+                return true;
+            case R.id.optionPerfilJogador:
+                PlayerProfile();
+                return true;
+            case R.id.optionCredits:
+                Credits();
+                return true;
+            case R.id.optionHistorico:
+                Historic();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void Historic() {
+        Intent myIntent = new Intent(getBaseContext(), ResultsHistoricActivity.class);
+        startActivity(myIntent);
+    }
+
+    private void Credits() {
+        Intent myIntent = new Intent(getBaseContext(), CreditsActivity.class);
+        startActivity(myIntent);
+    }
+
+    private void PlayerProfile() {
+        Intent myIntent = new Intent(getBaseContext(),   PlayerProfileActivity.class);
+        startActivity(myIntent);
+    }
+
+    private void EditPlayerProfile() {
+       Intent myIntent = new Intent(getBaseContext(),   EditPlayerProfileActivity.class);
+      startActivity(myIntent);
+    }
+
+
     public void onClickSinglePlayer(View view) {
-        Intent myIntent = new Intent(getBaseContext(),   CreditsActivity.class);
+        Intent myIntent = new Intent(getBaseContext(),   ChooseDifficultyActivity.class);
         startActivity(myIntent);
     }
 
@@ -44,34 +109,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickMultiplayerNetwork(View view) {
+        Intent myIntent = new Intent(getBaseContext(),   ChooseClientServerActivity.class);
+        startActivity(myIntent);
     }
 
-    public void onClickCameraUser(View view) {
-        // Preparar o URI para depois guardar o caminho da foto
-        File diretorio = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        File imagem = new File(diretorio.getPath() + "/" + System.currentTimeMillis() + ".jpg");
-        uri  = Uri.fromFile(imagem);
 
-        //Inciar a Câmera e tirar uma foto
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
-    }
 
+    //Guardar o estado atual
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(requestCode == REQUEST_IMAGE_CAPTURE){
-            if(resultCode == RESULT_OK){
-                Intent scannerIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri);
-                sendBroadcast(scannerIntent);
-
-                ImageView img = findViewById(R.id.ivTeste);
-                foto = (Bitmap)data.getExtras().get("data");
-                img.setImageBitmap(foto);
-            }
-        }
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("objeto", gamedata);
     }
+
+    //Recuperar o estado anterior
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        this.gamedata = (GameData) savedInstanceState.getSerializable("objeto");
+       // Snackbar.make(findViewById(android.R.id.content).getRootView(), gamedata.getTeste(), Snackbar.LENGTH_LONG).show();
+    }
+
+
+
 }

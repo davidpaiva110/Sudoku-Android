@@ -1,4 +1,6 @@
 package pt.amov.xicorafapaiva.sudoku.GameClasss;
 
-public class Cell {
+import java.io.Serializable;
+
+public class Cell implements Serializable {
 }

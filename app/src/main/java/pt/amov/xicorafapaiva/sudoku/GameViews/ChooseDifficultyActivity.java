@@ -18,17 +18,21 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_difficulty);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
+    public void onClickCFacil(View view) {
+
+        //finish();
+    }
+
+    public void onClickMedio(View view) {
+
+        //finish();
+    }
+
+    public void onClickDificil(View view) {
+
+        //finish();
+    }
 }

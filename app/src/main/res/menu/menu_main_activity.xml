@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/optionPerfilJogador"
+        android:title="Perfil Jogador"/>
+    <item android:id="@+id/optionEditarPerfil"
+        android:title="Editar Pefil" />
+    <item
+        android:id="@+id/optionHistorico"
+        android:title="Histórico de Resultados"/>
+    <item
+        android:id="@+id/optionCredits"
+        android:title="Créditos"/>
+
+</menu>

@@ -1,76 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".GameViews.MainActivity"
-    android:padding="16dp"
-    >
+    android:background="@color/colorPrimary">
 
 
     <ImageView
-        android:layout_width="match_parent"
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_marginTop="16dp"
         android:src="@drawable/image_title_sudoku"
-        android:layout_gravity="top"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="378dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal"
-        android:orientation="vertical" >
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="24dp"
+        android:orientation="vertical"
+        android:weightSum="3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView">
 
         <Button
-            android:id="@+id/btnSinglePlayer"
+            android:id="@+id/btnFacil"
+            style="@style/Widget.AppCompat.Button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
-            android:text="Singleplayer"
+            android:layout_weight="1"
+
             android:onClick="onClickSinglePlayer"
-
-            />
+            android:text="Singleplayer" />
 
         <Button
-            android:id="@+id/btnMultiplayer"
+            android:id="@+id/btnMedio"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginLeft="40dp"
-            android:layout_marginRight="40dp"
             android:layout_marginTop="10dp"
+            android:layout_marginRight="40dp"
             android:layout_marginBottom="10dp"
-            android:text="Multiplayer"
+            android:layout_weight="1"
             android:onClick="onClickMultiplayer"
-            />
+            android:text="Multiplayer" />
 
         <Button
             android:id="@+id/btnMultiplayerNetwork"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
-            android:text="Multiplayer Network"
+            android:layout_weight="1"
             android:onClick="onClickMultiplayerNetwork"
-            />
+            android:text="Multiplayer Network" />
 
     </LinearLayout>
-     <ImageButton
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:adjustViewBounds="true"
-         android:maxWidth="80dp"
-         android:maxHeight="80dp"
-         android:scaleType="fitCenter"
-         android:layout_gravity="bottom|right"
-         android:layout_marginLeft="3dp"
-         android:src="@drawable/image_camera_user"
-         android:onClick="onClickCameraUser"/>
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/ivTeste"
-        android:layout_gravity="bottom|left"/>
 
-
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
