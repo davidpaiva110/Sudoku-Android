@@ -3,6 +3,7 @@ package pt.amov.xicorafapaiva.sudoku.GameViews;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -33,7 +34,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     //Varíaveis referentes à captura da selfie
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private Uri uri;
-    Bitmap foto;
+    private Player player;
     private String dirPhotosPath;
 
 
@@ -41,6 +42,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_player_profile);
+        this.player = ViewModelProviders.of(this).get(Player.class);
     }
 
 
@@ -67,20 +69,18 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
                 sendBroadcast(scannerIntent);
 
                 ImageView img = findViewById(R.id.imgPlayerPhoto);
-                foto = (Bitmap)data.getExtras().get("data");
-                img.setImageBitmap(foto);
-                this.dirPhotosPath = this.saveToInternalStorage(foto);
+                this.player.setFoto((Bitmap)data.getExtras().get("data"));
+                img.setImageBitmap(player.getFoto());
+                this.dirPhotosPath = this.saveToInternalStorage( player.getFoto() );
             }
         }
     }
-
-
 
     //Guardar o estado atual
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-       // outState.putSerializable("userPic", foto);
+       //outState.putSerializable("userPic", foto);
         outState.putString("dirPath", this.dirPhotosPath);
     }
 
@@ -89,8 +89,9 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         this.dirPhotosPath = savedInstanceState.getString("dirPath");
-        this.loadImageFromStorage(this.dirPhotosPath);
-
+        //this.loadImageFromStorage(this.dirPhotosPath);
+        ImageView img = findViewById(R.id.imgPlayerPhoto);
+        img.setImageBitmap(player.getFoto());
     }
 
     // Guardar a foto no InternalStorage
@@ -107,7 +108,6 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
             // Use the compress method on the BitMap object to write image to the OutputStream
             bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
         } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             try {
                 fos.close();
@@ -121,12 +121,11 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     //Ir buscar a imagem do internal Strorage
     private void loadImageFromStorage(String path)
     {
-
         try {
             File f=new File(path, "profile.jpg");
-            foto = BitmapFactory.decodeStream(new FileInputStream(f));
+            this.player.setFoto( BitmapFactory.decodeStream(new FileInputStream(f)) );
             ImageView img = findViewById(R.id.imgPlayerPhoto);
-            img.setImageBitmap(foto);
+            img.setImageBitmap(player.getFoto());
         }
         catch (FileNotFoundException e)
         {

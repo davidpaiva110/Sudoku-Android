@@ -8,8 +8,8 @@ public class GameData extends ViewModel implements Serializable {
 
     private String teste;
 
-    public GameData(String teste) {
-        this.teste = teste;
+    public GameData() {
+
     }
 
     public String getTeste(){
@@ -17,4 +17,7 @@ public class GameData extends ViewModel implements Serializable {
     }
 
 
+    public void setTeste(String teste) {
+        this.teste = teste;
+    }
 }

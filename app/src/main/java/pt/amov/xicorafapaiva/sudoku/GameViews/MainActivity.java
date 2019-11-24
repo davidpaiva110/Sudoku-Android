@@ -3,6 +3,7 @@ package pt.amov.xicorafapaiva.sudoku.GameViews;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.Manifest;
 import android.content.Intent;
@@ -32,11 +33,7 @@ import pt.amov.xicorafapaiva.sudoku.R;
 public class MainActivity extends AppCompatActivity {
 
 
-
-
     private GameData gamedata;
-    private Player player;
-
 
 
     @Override
@@ -44,8 +41,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        this.gamedata = new GameData("paiva teste");
-        this.player = new Player();
+        this.gamedata = ViewModelProviders.of(this).get(GameData.class);
+        gamedata.setTeste("david");
+
     }
 
     //Criação do Menu
@@ -119,15 +117,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("objeto", gamedata);
     }
 
     //Recuperar o estado anterior
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        this.gamedata = (GameData) savedInstanceState.getSerializable("objeto");
-       // Snackbar.make(findViewById(android.R.id.content).getRootView(), gamedata.getTeste(), Snackbar.LENGTH_LONG).show();
+       //Snackbar.make(findViewById(android.R.id.content).getRootView(), gamedata.getTeste(), Snackbar.LENGTH_LONG).show();
     }
 
 

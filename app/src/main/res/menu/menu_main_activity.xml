@@ -3,7 +3,7 @@
     <item android:id="@+id/optionPerfilJogador"
         android:title="Perfil Jogador"/>
     <item android:id="@+id/optionEditarPerfil"
-        android:title="Editar Pefil" />
+        android:title="Editar Perfil" />
     <item
         android:id="@+id/optionHistorico"
         android:title="Histórico de Resultados"/>
