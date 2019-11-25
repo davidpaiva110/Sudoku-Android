@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -34,8 +35,9 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     //Varíaveis referentes à captura da selfie
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private Uri uri;
+
     private Player player;
-    private String dirPhotosPath;
+
 
 
     @Override
@@ -49,6 +51,8 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
         this.player.setDirectory(directory);
         this.loadImageFromStorage(player.getDirPath());
+        TextView tvPlayerName = findViewById(R.id.inputPlayerName);
+        tvPlayerName.setText(player.getPlayerName());
     }
 
 
@@ -61,7 +65,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     }
 
     public void onClickGuardar(View view){
-        //Guardar a informação do perfil
+        // Guardar a informação do perfil
         finish();
     }
 
@@ -77,7 +81,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
                 ImageView img = findViewById(R.id.imgPlayerPhoto);
                 this.player.setFoto((Bitmap)data.getExtras().get("data"));
                 img.setImageBitmap(player.getFoto());
-                this.dirPhotosPath = this.saveToInternalStorage( player.getFoto() );
+                this.saveToInternalStorage( player.getFoto() );
             }
         }
     }
@@ -86,18 +90,18 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-       //outState.putSerializable("userPic", foto);
-        outState.putString("dirPath", this.dirPhotosPath);
+        TextView tvPlayerName = findViewById(R.id.inputPlayerName);
+        tvPlayerName.setText(player.getPlayerName());
     }
 
     //Recuperar o estado anterior
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        this.dirPhotosPath = savedInstanceState.getString("dirPath");
-        //this.loadImageFromStorage(this.dirPhotosPath);
         ImageView img = findViewById(R.id.imgPlayerPhoto);
         img.setImageBitmap(player.getFoto());
+        TextView tvPlayerName = findViewById(R.id.inputPlayerName);
+        tvPlayerName.setText(player.getPlayerName());
     }
 
     // Guardar a foto no InternalStorage
@@ -137,6 +141,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
         {
         }
     }
+
 
 
 }

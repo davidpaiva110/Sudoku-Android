@@ -1,18 +1,16 @@
 package pt.amov.xicorafapaiva.sudoku;
 
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 
 import androidx.lifecycle.ViewModel;
-
 import java.io.File;
-import java.io.Serializable;
+
 
 public class Player extends ViewModel  {
     private Bitmap foto;
-    File directory;
-    String dirPath;
+    private File directory;
+    private String playerName;
+
 
     public Player() {
     }
@@ -36,4 +34,15 @@ public class Player extends ViewModel  {
     public String getDirPath() {
         return directory.getAbsolutePath();
     }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
 }
+
+
+//falta guardar um fiocheiro com esta informação sobre o jogador e buscar cada vez que se inicia o jogo
