@@ -59,7 +59,7 @@
         app:layout_constraintTop_toBottomOf="@+id/frameLayout4">
 
         <ImageView
-            android:id="@+id/imageView3"
+            android:id="@+id/playerPhotoProfile"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:srcCompat="@android:drawable/btn_star_big_on" />

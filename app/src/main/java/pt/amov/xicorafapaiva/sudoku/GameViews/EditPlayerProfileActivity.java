@@ -20,11 +20,15 @@ import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 import pt.amov.xicorafapaiva.sudoku.Player;
@@ -46,6 +50,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_player_profile);
         this.player = ViewModelProviders.of(this).get(Player.class);
 
+        loadFile();
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
         // path to /data/data/sudoku/app_data/imageDir
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
@@ -66,6 +71,9 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
 
     public void onClickGuardar(View view){
         // Guardar a informação do perfil
+        TextView tvPlayerName = findViewById(R.id.inputPlayerName);
+        player.setPlayerName(tvPlayerName.getText().toString());
+        saveFile();
         finish();
     }
 
@@ -91,6 +99,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         TextView tvPlayerName = findViewById(R.id.inputPlayerName);
+        player.setPlayerName(tvPlayerName.getText().toString());
         tvPlayerName.setText(player.getPlayerName());
     }
 
@@ -142,6 +151,31 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
         }
     }
 
+
+    public void saveFile(){
+        try {
+            FileOutputStream fos = getApplicationContext().openFileOutput("player.txt", Context.MODE_PRIVATE);
+            Writer out = new OutputStreamWriter(fos);
+            out.write(player.getPlayerName());
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadFile(){
+        try {
+            FileInputStream fis = getApplication().openFileInput("player.txt");
+            BufferedReader r = new BufferedReader(new InputStreamReader(fis));
+            String line= r.readLine();
+            player.setPlayerName(line);
+            r.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }
