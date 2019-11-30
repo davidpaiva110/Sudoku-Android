@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Créditos"
+        android:text="@string/strSobreNos"
         android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
@@ -49,7 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Rafael Sá - 21270564"
+            android:text="@string/strNomeRafael"
             android:textSize="18sp" />
 
         <TextView
@@ -57,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="David Paiva - 21260607"
+            android:text="@string/strNomeDavid"
             android:textSize="18sp" />
 
         <TextView
@@ -65,7 +65,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Francisco Silva - 21270547"
+            android:text="@string/strNomeFrancisco"
             android:textSize="18sp" />
 
     </LinearLayout>
@@ -75,7 +75,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Unidade Curricular de Arquiteturas Móveis | Engenharia Informática | DEIS-ISEC 2019/2020"
+        android:text="@string/strDescCreditos"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

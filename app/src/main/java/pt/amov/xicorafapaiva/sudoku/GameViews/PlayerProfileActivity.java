@@ -42,7 +42,7 @@ public class PlayerProfileActivity extends AppCompatActivity {
     }
 
 
-
+    //Onde está guardado o nome do jogador
     public void loadFile(){
         try {
             FileInputStream fis = getApplication().openFileInput("player.txt");
@@ -55,6 +55,7 @@ public class PlayerProfileActivity extends AppCompatActivity {
         }
     }
 
+    // Onde está guardada a foto do jogador
     private void loadImageFromStorage(String path)
     {
         try {

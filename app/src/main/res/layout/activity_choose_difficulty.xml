@@ -42,7 +42,7 @@
             android:layout_weight="1"
 
             android:onClick="onClickCFacil"
-            android:text="Fácil" />
+            android:text="@string/strFacil" />
 
         <Button
             android:id="@+id/btnMedio"
@@ -54,7 +54,7 @@
             android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:onClick="onClickMedio"
-            android:text="Médio" />
+            android:text="@string/strMedio" />
 
         <Button
             android:id="@+id/btnDificil"
@@ -65,7 +65,7 @@
             android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:onClick="onClickDificil"
-            android:text="Difícil" />
+            android:text="@string/strDificil" />
 
     </LinearLayout>
 

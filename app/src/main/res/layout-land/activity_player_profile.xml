@@ -21,7 +21,7 @@
             android:id="@+id/tvPerfil"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Perfil Jogador"
+            android:text="@string/strPerfilJogador"
             android:textSize="28sp"
             android:textStyle="bold" />
     </FrameLayout>
@@ -70,7 +70,8 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:layout_gravity="center_vertical"
-                        android:text="Sem nome"
+                        android:text="@string/strSemNome"
+                        android:textSize="24sp"
                         android:textAlignment="center" />
 
                 <LinearLayout

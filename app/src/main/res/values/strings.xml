@@ -6,4 +6,26 @@
     <string name="title_activity_choose_client_server">ChooseClientServerActivity</string>
     <string name="title_activity_choose_difficulty">ChooseDifficultyActivity</string>
     <string name="title_activity_game_board_m1">GameBoardM1Activity</string>
+    <string name="strUmJogador">Um Jogador</string>
+    <string name="strDoisJogadores">Dois Jogadores</string>
+    <string name="strJogoEmRede">Jogo em Rede</string>
+    <string name="strCliente">Cliente</string>
+    <string name="strServidor">Servidor</string>
+    <string name="strFacil">Fácil</string>
+    <string name="strMedio">Médio</string>
+    <string name="strDificil">Difícil</string>
+    <string name="strNomeRafael">Rafael Sá - 21270564</string>
+    <string name="strNomeDavid">David Paiva - 21260607</string>
+    <string name="strNomeFrancisco">Francisco Silva - 21270547</string>
+    <string name="strDescCreditos">Unidade Curricular de Arquiteturas Móveis | Engenharia Informática | DEIS-ISEC 2019/2020</string>
+    <string name="strSobreNos">Sobre Nós</string>
+    <string name="strPerfilJogador">Perfil Jogador</string>
+    <string name="strEditarPerfil">Editar Perfil</string>
+    <string name="strHistoricoResultados">Histórico de Resultados</string>
+    <string name="strTirarFotografia">Tirar Fotografia</string>
+    <string name="strNome">Nome</string>
+    <string name="strSeuNome">Seu Nome</string>
+    <string name="strGuardar">Guardar</string>
+    <string name="strPerfilJogador">Perfil Jogador</string>
+    <string name="strSemNome">Sem Nome</string>
 </resources>

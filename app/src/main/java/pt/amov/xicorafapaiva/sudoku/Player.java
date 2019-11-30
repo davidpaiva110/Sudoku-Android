@@ -45,4 +45,3 @@ public class Player extends ViewModel  {
 }
 
 
-//falta guardar um fiocheiro com esta informação sobre o jogador e buscar cada vez que se inicia o jogo

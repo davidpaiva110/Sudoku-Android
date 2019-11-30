@@ -42,7 +42,7 @@
             android:layout_weight="1"
 
             android:onClick="onClickCliente"
-            android:text="Cliente" />
+            android:text="@string/strCliente" />
 
         <Button
             android:id="@+id/btnMedio"
@@ -54,7 +54,7 @@
             android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:onClick="onClickServidor"
-            android:text="Servidor" />
+            android:text="@string/strServidor" />
 
     </LinearLayout>
 

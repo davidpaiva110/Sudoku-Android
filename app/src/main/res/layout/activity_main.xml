@@ -43,7 +43,7 @@
             android:layout_weight="1"
 
             android:onClick="onClickSinglePlayer"
-            android:text="Singleplayer" />
+            android:text="@string/strUmJogador" />
 
         <Button
             android:id="@+id/btnMedio"
@@ -55,7 +55,7 @@
             android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:onClick="onClickMultiplayer"
-            android:text="Multiplayer" />
+            android:text="@string/strDoisJogadores" />
 
         <Button
             android:id="@+id/btnMultiplayerNetwork"
@@ -65,7 +65,7 @@
             android:layout_marginRight="40dp"
             android:layout_weight="1"
             android:onClick="onClickMultiplayerNetwork"
-            android:text="Multiplayer Network" />
+            android:text="@string/strJogoEmRede" />
 
     </LinearLayout>
 

@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.URI;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 import pt.amov.xicorafapaiva.sudoku.Player;
@@ -36,10 +37,9 @@ import pt.amov.xicorafapaiva.sudoku.R;
 
 public class EditPlayerProfileActivity extends AppCompatActivity {
 
-    //Varíaveis referentes à captura da selfie
+    // Varíaveis referentes à captura da selfie
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private Uri uri;
-
     private Player player;
 
 
@@ -73,6 +73,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
         // Guardar a informação do perfil
         TextView tvPlayerName = findViewById(R.id.inputPlayerName);
         player.setPlayerName(tvPlayerName.getText().toString());
+        this.saveToInternalStorage( player.getFoto() );
         saveFile();
         finish();
     }
@@ -89,7 +90,6 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
                 ImageView img = findViewById(R.id.imgPlayerPhoto);
                 this.player.setFoto((Bitmap)data.getExtras().get("data"));
                 img.setImageBitmap(player.getFoto());
-                this.saveToInternalStorage( player.getFoto() );
             }
         }
     }
@@ -115,10 +115,6 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
 
     // Guardar a foto no InternalStorage
     private String saveToInternalStorage(Bitmap bitmapImage){
-        //ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        // path to /data/data/sudoku/app_data/imageDir
-        //File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
         File mypath=new File(player.getDirectory(),"profile.jpg");
 
         FileOutputStream fos = null;
@@ -152,6 +148,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     }
 
 
+    // Guardar o nome do jogador num ficheiro
     public void saveFile(){
         try {
             FileOutputStream fos = getApplicationContext().openFileOutput("player.txt", Context.MODE_PRIVATE);
@@ -165,6 +162,7 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
         }
     }
 
+    // Recuperar o nome do jogador num ficheiro
     public void loadFile(){
         try {
             FileInputStream fis = getApplication().openFileInput("player.txt");
