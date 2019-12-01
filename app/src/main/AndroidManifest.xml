@@ -18,13 +18,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".GameViews.ResultsHistoricActivity"></activity>
+        <activity android:name=".GameViews.GameBoardActivity"></activity>
+        <activity android:name=".GameViews.ResultsHistoricActivity" />
         <activity android:name=".GameViews.EditPlayerProfileActivity" />
         <activity android:name=".GameViews.PlayerProfileActivity" />
-        <activity
-            android:name=".GameViews.GameBoardActivity"
-            android:label="@string/title_activity_game_board_m1"
-            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".GameViews.ChooseDifficultyActivity"
             android:label="@string/title_activity_choose_difficulty"

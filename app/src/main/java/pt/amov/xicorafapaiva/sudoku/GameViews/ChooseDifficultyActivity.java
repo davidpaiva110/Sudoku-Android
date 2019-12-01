@@ -1,5 +1,6 @@
 package pt.amov.xicorafapaiva.sudoku.GameViews;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -22,7 +23,8 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     }
 
     public void onClickCFacil(View view) {
-
+        Intent myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
+        startActivity(myIntent);
         //finish();
     }
 

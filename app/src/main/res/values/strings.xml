@@ -26,6 +26,5 @@
     <string name="strNome">Nome</string>
     <string name="strSeuNome">Seu Nome</string>
     <string name="strGuardar">Guardar</string>
-    <string name="strPerfilJogador">Perfil Jogador</string>
     <string name="strSemNome">Sem Nome</string>
 </resources>
