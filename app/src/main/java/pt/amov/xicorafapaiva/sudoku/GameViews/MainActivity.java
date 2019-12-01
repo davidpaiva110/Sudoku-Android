@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-       //Snackbar.make(findViewById(android.R.id.content).getRootView(), gamedata.getTeste(), Snackbar.LENGTH_LONG).show();
+       Snackbar.make(findViewById(android.R.id.content).getRootView(), gamedata.getTeste(), Snackbar.LENGTH_LONG).show();
     }
 
 

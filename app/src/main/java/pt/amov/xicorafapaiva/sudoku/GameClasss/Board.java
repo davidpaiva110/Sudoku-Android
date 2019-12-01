@@ -7,8 +7,13 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.Serializable;
+
+import pt.amov.xicorafapaiva.sudoku.R;
 
 
 public class Board extends View implements View.OnTouchListener, Serializable {
@@ -26,7 +31,7 @@ public class Board extends View implements View.OnTouchListener, Serializable {
     private int cellWidth;
     private int cellHeight;
 
-    //Tabuleiro
+    // Tabuleiro
     private Cell [][] board;
 
     public Board(Context context, AttributeSet attrs) {
@@ -37,8 +42,14 @@ public class Board extends View implements View.OnTouchListener, Serializable {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        return false;
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+        //String msg = "x= " + x + " y=" + y;
+        //Snackbar.make(this, msg, Snackbar.LENGTH_LONG).show();
+
+        return true;
     }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -65,7 +76,17 @@ public class Board extends View implements View.OnTouchListener, Serializable {
                 paint.setStrokeWidth(3);
             canvas.drawLine(cellWidth * i, 0, cellWidth * i, displayHeight - HEIGHT_BOTTOM_FOR_BUTTON_AND_TIMER, paint);
         }
-
         //Linhas Horizontais
+        for(int i=0; i<= BOARD_HEIGHT; i++){
+            Paint paint = new Paint();
+            paint.setColor(Color.BLACK);
+            if(i % 3 == 0)
+                paint.setStrokeWidth(8);
+            else
+                paint.setStrokeWidth(3);
+            canvas.drawLine(0, cellHeight * i, displayWidth, cellHeight * i, paint);
+        }
     }
+
+
 }

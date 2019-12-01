@@ -9,6 +9,7 @@ public class Cell implements Serializable {
     private int player_value;
     private ArrayList<Integer> notes; // ????
 
+
     private int x;
     private int y;
 
