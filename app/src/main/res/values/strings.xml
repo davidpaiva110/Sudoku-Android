@@ -27,4 +27,6 @@
     <string name="strSeuNome">Seu Nome</string>
     <string name="strGuardar">Guardar</string>
     <string name="strSemNome">Sem Nome</string>
+    <string name="strNotas">Notas</string>
+    <string name="strtempo_restante">Tempo: </string>
 </resources>

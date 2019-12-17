@@ -33,16 +33,10 @@ import pt.amov.xicorafapaiva.sudoku.R;
 public class MainActivity extends AppCompatActivity {
 
 
-    private GameData gamedata;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        this.gamedata = ViewModelProviders.of(this).get(GameData.class);
-        gamedata.setTeste("david");
 
     }
 
@@ -123,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-       Snackbar.make(findViewById(android.R.id.content).getRootView(), gamedata.getTeste(), Snackbar.LENGTH_LONG).show();
+       //Snackbar.make(findViewById(android.R.id.content).getRootView(), gamedata.getTeste(), Snackbar.LENGTH_LONG).show();
     }
 
 
