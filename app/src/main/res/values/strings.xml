@@ -29,4 +29,6 @@
     <string name="strSemNome">Sem Nome</string>
     <string name="strNotas">Notas</string>
     <string name="strtempo_restante">Tempo: </string>
+    <string name="strVer_Solucao">Ver Solução</string>
+    <string name="strSairJogo">Sair do Jogo</string>
 </resources>

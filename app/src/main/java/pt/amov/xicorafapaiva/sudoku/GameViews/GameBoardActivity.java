@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModelProviders;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -39,6 +42,33 @@ public class GameBoardActivity extends AppCompatActivity {
             initializeButtons();
         }
     }
+
+
+    // Criação do Menu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_game_board_activity, menu);
+        return true;
+    }
+
+    // Processamento das opções selecionadas no meu
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+// Handle item selection
+        switch (item.getItemId()) {
+            case R.id.optionSairJogo:
+                finish();
+                return true;
+            //case R.id.optionVerSolucao:
+
+                //return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 
     private void initializeButtons(){
         Button btn = (Button)findViewById(R.id.btnNumber1);
