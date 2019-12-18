@@ -58,10 +58,12 @@ public class GameBoardActivity extends AppCompatActivity {
     {
 // Handle item selection
         switch (item.getItemId()) {
-            case R.id.optionSairJogo:
-                finish();
+            case R.id.homeIcon:
+                DialogConfirmBackHome dialog = new DialogConfirmBackHome();
+                dialog.show(getSupportFragmentManager(),"idConfirmarDialog");
+                //finish();
                 return true;
-            //case R.id.optionVerSolucao:
+            //case R.id.solutionIcon:
 
                 //return true;
             default:

@@ -13,13 +13,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.material.snackbar.Snackbar;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,9 +28,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.net.URI;
 
-import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 import pt.amov.xicorafapaiva.sudoku.Player;
 import pt.amov.xicorafapaiva.sudoku.R;
 
@@ -59,7 +55,6 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
             File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
             this.player.setDirectory(directory);
             this.loadImageFromStorage(player.getDirPath());
-            Snackbar.make(findViewById(android.R.id.content).getRootView(), "ONCREATE", Snackbar.LENGTH_LONG).show();
             TextView tvPlayerName = findViewById(R.id.inputPlayerName);
             tvPlayerName.setText(player.getPlayerName());
         }
