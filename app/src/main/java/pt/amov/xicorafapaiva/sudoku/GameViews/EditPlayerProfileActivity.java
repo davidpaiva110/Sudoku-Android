@@ -10,6 +10,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -48,16 +49,20 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_player_profile);
+
         this.player = ViewModelProviders.of(this).get(Player.class);
 
-        loadFile();
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        // path to /data/data/sudoku/app_data/imageDir
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        this.player.setDirectory(directory);
-        this.loadImageFromStorage(player.getDirPath());
-        TextView tvPlayerName = findViewById(R.id.inputPlayerName);
-        tvPlayerName.setText(player.getPlayerName());
+        if(savedInstanceState == null){
+            loadFile();
+            ContextWrapper cw = new ContextWrapper(getApplicationContext());
+            // path to /data/data/sudoku/app_data/imageDir
+            File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+            this.player.setDirectory(directory);
+            this.loadImageFromStorage(player.getDirPath());
+            Snackbar.make(findViewById(android.R.id.content).getRootView(), "ONCREATE", Snackbar.LENGTH_LONG).show();
+            TextView tvPlayerName = findViewById(R.id.inputPlayerName);
+            tvPlayerName.setText(player.getPlayerName());
+        }
     }
 
 
@@ -86,7 +91,6 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
             if(resultCode == RESULT_OK){
                 Intent scannerIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri);
                 sendBroadcast(scannerIntent);
-
                 ImageView img = findViewById(R.id.imgPlayerPhoto);
                 this.player.setFoto((Bitmap)data.getExtras().get("data"));
                 img.setImageBitmap(player.getFoto());
@@ -97,10 +101,13 @@ public class EditPlayerProfileActivity extends AppCompatActivity {
     //Guardar o estado atual
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
         TextView tvPlayerName = findViewById(R.id.inputPlayerName);
         player.setPlayerName(tvPlayerName.getText().toString());
-        tvPlayerName.setText(player.getPlayerName());
+        ImageView img = findViewById(R.id.imgPlayerPhoto);
+        BitmapDrawable drawable = (BitmapDrawable) img.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+        player.setFoto(bitmap);
+        super.onSaveInstanceState(outState);
     }
 
     //Recuperar o estado anterior
