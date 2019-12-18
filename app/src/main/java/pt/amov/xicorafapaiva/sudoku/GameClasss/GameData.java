@@ -14,15 +14,15 @@ import pt.isec.ans.sudokulibrary.Sudoku;
 public class GameData extends ViewModel implements Serializable {
 
     public static final int BOARD_SIZE = 9;
+    public static final int SUBGRID_SIZE = 3;
 
     private int [][] board = null;
-    private int [][] solution = null;
+    private int [][] invalidNumbers = null;
     private boolean [][] preSetNumbers = null;
     private int [][][] notes = null;
 
     public GameData() {
         generateBoard();
-        resolveBoard();
     }
 
     public int[][] getBoard() {
@@ -38,15 +38,42 @@ public class GameData extends ViewModel implements Serializable {
     }
 
     public boolean numberIsValid(int row, int column){
-        boolean isValid=true;
+        return invalidNumbers[row][column]==0;
+    }
+
+    public void validateNumber(int row, int column){
+        //Verifica se existe algum número igual na linha ou coluna
         for (int i = 0; i < BOARD_SIZE; i++) {
-            if((board[row][i] == board[row][column] && i!=column))
-                isValid = false;
-            if((board[i][column] == board[row][column] && i!=row))
-                isValid = false;
+            if((board[row][i] == board[row][column] && i!=column)) {
+                invalidNumbers[row][column] = board[row][column];
+                board[row][column] = 0;
+                return; //Como já é inválido não é necessário verificar as outras condições
+            }
+            if((board[i][column] == board[row][column] && i!=row)) {
+                invalidNumbers[row][column] = board[row][column];
+                board[row][column] = 0;
+                return;
+            }
         }
-        //return board[row][column]==solution[row][column];
-        return isValid;
+        //Verifica se existe algum número igual na subgrelha
+        int subGridX=(column / SUBGRID_SIZE) * SUBGRID_SIZE; //É feita a divisão para colocar o elemento na primeira posição da subgrelha
+        int subGridY=(row / SUBGRID_SIZE) * SUBGRID_SIZE; //É feita a divisão para colocar o elemento na primeira posição da subgrelha
+        for (int r = 0; r < SUBGRID_SIZE; r++) {
+            for (int c = 0; c < SUBGRID_SIZE; c++) {
+                int subRow = subGridY + r;
+                int subColumn = subGridX + c;
+                if((subRow != row && subColumn != column) && board[subRow][subColumn] == board[row][column]){
+                    invalidNumbers[row][column] = board[row][column];
+                    board[row][column] = 0;
+                    return;
+                }
+            }
+        }
+        //Verifica se ainda é possível a solução do puzzle
+        if(resolveBoard() == null){
+            invalidNumbers[row][column] = board[row][column];
+            board[row][column] = 0;
+        }
     }
 
     private void generateBoard(){
@@ -59,10 +86,18 @@ public class GameData extends ViewModel implements Serializable {
                 this.board=board;
                  setPreSetNumbers();
                  initializeNotes();
+                 initializeInvalidNumbers();
             }
         } catch (Exception e){
 
         }
+    }
+
+    private void initializeInvalidNumbers() {
+        invalidNumbers = new int[BOARD_SIZE][BOARD_SIZE];
+        for (int i = 0; i < BOARD_SIZE; i++)
+            for (int j = 0; j < BOARD_SIZE; j++)
+                invalidNumbers[i][j] = 0;
     }
 
     private int[][] convert(JSONArray jsonArray) {
@@ -127,7 +162,8 @@ public class GameData extends ViewModel implements Serializable {
         }
     }
 
-    private void resolveBoard() {
+    private int[][] resolveBoard() {
+        int [][] sol = null;
         try {
             JSONObject json = new JSONObject();
             JSONArray jsonArray = convert(board);
@@ -137,8 +173,7 @@ public class GameData extends ViewModel implements Serializable {
                 json = new JSONObject(strJson);
                 if(json.optInt("result", 0) == 1){
                     jsonArray = json.getJSONArray("board");
-                    int [][] sol = convert(jsonArray);
-                    solution = sol;
+                    sol = convert(jsonArray);
                 }
             } catch (Exception e){
 
@@ -146,6 +181,7 @@ public class GameData extends ViewModel implements Serializable {
         } catch (Exception e) {
 
         }
+        return sol;
     }
 
     private JSONArray convert(int[][] board) {
@@ -164,5 +200,13 @@ public class GameData extends ViewModel implements Serializable {
 
         }
         return jsonArray;
+    }
+
+    public void resetInvalidNumber(int row, int column) {
+        invalidNumbers[row][column] = 0;
+    }
+
+    public int getInvalidNumber(int row, int column) {
+        return invalidNumbers[row][column];
     }
 }

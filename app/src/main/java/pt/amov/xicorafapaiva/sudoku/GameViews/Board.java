@@ -104,25 +104,24 @@ public class Board extends View {
         for(int r = 0; r < BOARD_SIZE; r++){
             for(int c = 0; c < BOARD_SIZE; c++){
                 int n = gameData.getValue(r,c);
+                // Calcular o centro de cada célula
+                int x = c * cellW + cellW / 2;
+                int y = r * cellH + cellH /2 + cellH/6;    //cellH/6 -> deslocamento para centrar o número em altura
                 if(n != 0){  // 0 representa espaço em branco
-                    // Calcular o centro de cada célula
-                    int x = c * cellW + cellW / 2;
-                    int y = r * cellH + cellH /2 + cellH/6;    //cellH/6 -> deslocamento para centrar o número em altura
                     if(gameData.isPreSet(r,c))
                         canvas.drawText(""+n, x, y, paintPreSetNumbers);
                     else {
-                        if(!gameData.numberIsValid(r, c)) {
-                            canvas.drawText("" + n, x, y, paintWrongNumbers);
-                            Thread th = new Thread(new RunnableInvalidNumber(r, c, n));
-                            th.start();
-                        }else {
-                            canvas.drawText("" + n, x, y, paintMainNumbers);
-                        }
+                        canvas.drawText("" + n, x, y, paintMainNumbers);
                     }
+                } else if(!gameData.numberIsValid(r, c)) {
+                    n = gameData.getInvalidNumber(r ,c);
+                    canvas.drawText("" + n, x, y, paintWrongNumbers);
+                    Thread th = new Thread(new RunnableInvalidNumber(r, c, n));
+                    th.start();
                 } else {
                     //Primeira posição célula pequenina
-                    int x = c *cellW + cellW / 6;
-                    int y = r * cellH + cellH / 6;
+                    x = c *cellW + cellW / 6;
+                    y = r * cellH + cellH / 6;
                     int [] notes = gameData.getCellNotes(r,c);
                     for(int p = 0; p < BOARD_SIZE; p++){
                         if(notes[p]!=0){
@@ -156,6 +155,7 @@ public class Board extends View {
                 if(!gameData.isPreSet(cellY, cellX)) {
                     if(!onApagar && !onNotas) {
                         gameData.setValue(cellY, cellX, selectedValue);
+                        gameData.validateNumber(cellY, cellX);
                     } else if(!onApagar && onNotas) {
                         if(gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) //Verifica se o valor já está nas notas
                             gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
@@ -210,8 +210,8 @@ public class Board extends View {
         public void run() {
             try {
                 Thread.sleep(2000);
-                if(gameData.getValue(row, column)==value) {
-                    gameData.setValue(row, column, 0);
+                if(gameData.getInvalidNumber(row, column)==value) {
+                    gameData.resetInvalidNumber(row, column);
                     postInvalidate();
                 }
             } catch (InterruptedException e) {
