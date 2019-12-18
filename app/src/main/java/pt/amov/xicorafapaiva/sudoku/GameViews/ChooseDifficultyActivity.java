@@ -25,7 +25,7 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     public void onClickCFacil(View view) {
         Intent myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
         startActivity(myIntent);
-        //finish();
+        finish();
     }
 
     public void onClickMedio(View view) {

@@ -142,14 +142,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/strNotas" />
+                android:text="@string/strNotas"
+                android:onClick="onBtnNotas"/>
 
             <Button
                 android:id="@+id/btnApagar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Apagar" />
+                android:text="Apagar"
+                android:onClick="onBtnApagar"/>
         </LinearLayout>
     </LinearLayout>
 
