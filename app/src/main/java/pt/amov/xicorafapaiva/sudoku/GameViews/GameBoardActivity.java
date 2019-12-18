@@ -1,6 +1,8 @@
 package pt.amov.xicorafapaiva.sudoku.GameViews;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -9,23 +11,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 import pt.amov.xicorafapaiva.sudoku.R;
+import pt.isec.ans.sudokulibrary.Sudoku;
 
 public class GameBoardActivity extends AppCompatActivity {
 
     private Board sudokuView;
     private Drawable btBackground;
 
+    // ViewModel dos dados do Jogo
+    private GameData gameData;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_board);
 
-        FrameLayout flSudoku = findViewById(R.id.flSudoku);
-        sudokuView = new Board(this);
-        flSudoku.addView(sudokuView);
-        btBackground = findViewById(R.id.btnNotas).getBackground();
-        initializeButtons();
+        this.gameData = ViewModelProviders.of(this).get(GameData.class);
+
+        if(savedInstanceState == null) {
+            FrameLayout flSudoku = findViewById(R.id.flSudoku);
+            sudokuView = new Board(this, this.gameData);
+            flSudoku.addView(sudokuView);
+            btBackground = findViewById(R.id.btnNotas).getBackground();
+            initializeButtons();
+        }
     }
 
     private void initializeButtons(){
@@ -86,4 +98,61 @@ public class GameBoardActivity extends AppCompatActivity {
             ((Button)view).setTextColor(Color.WHITE);
         }
     }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        this.gameData = sudokuView.getGameData();
+        outState.putBoolean("onApagar", sudokuView.getOnApagar());
+        outState.putBoolean("onNotas", sudokuView.getOnNotas());
+        outState.putInt("selectedValue", sudokuView.getSelectedValue());
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        int selectedValue = savedInstanceState.getInt("selectedValue");
+        boolean isOnNotas = savedInstanceState.getBoolean("onNotas");
+        boolean isOnApagar = savedInstanceState.getBoolean("onApagar");
+        sudokuView = new Board(this, this.gameData, selectedValue,
+                isOnNotas,
+                isOnApagar);
+        FrameLayout flSudoku = findViewById(R.id.flSudoku);
+        flSudoku.addView(sudokuView);
+        btBackground = findViewById(R.id.btnNotas).getBackground();
+        restoreButtonsSettings(selectedValue, isOnNotas, isOnApagar);
+    }
+
+    private void restoreButtonsSettings(int selectedButton, boolean isOnNotas, boolean isOnApagar){
+        int [] buttonsIDs = {R.id.btnNumber1,
+                R.id.btnNumber2,
+                R.id.btnNumber3,
+                R.id.btnNumber4,
+                R.id.btnNumber5,
+                R.id.btnNumber6,
+                R.id.btnNumber7,
+                R.id.btnNumber8,
+                R.id.btnNumber9};
+
+        selectedButton--;
+        resetNumbersColor();
+        for (int i = 0; i < 9; i++) {
+            if(i == selectedButton){
+                findViewById(buttonsIDs[i]).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                ((Button)findViewById(buttonsIDs[i])).setTextColor(Color.WHITE);
+            }
+        }
+        if(isOnNotas){
+            Button btnNotas = (Button)findViewById(R.id.btnNotas);
+            btnNotas.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            btnNotas.setTextColor(Color.WHITE);
+        }
+        if(isOnApagar){
+            Button btnApagar = (Button)findViewById(R.id.btnApagar);
+            btnApagar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            btnApagar.setTextColor(Color.WHITE);
+        }
+    }
+
+
 }

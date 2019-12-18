@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 import pt.isec.ans.sudokulibrary.Sudoku;
 
-public class GameData extends ViewModel implements Serializable {
+public class GameData extends ViewModel{
 
     public static final int BOARD_SIZE = 9;
 

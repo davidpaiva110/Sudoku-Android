@@ -5,17 +5,10 @@ import android.graphics.Canvas;
 
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.SystemClock;
 
 import android.view.MotionEvent;
 import android.view.View;
 
-import androidx.lifecycle.ViewModelProviders;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 
@@ -37,12 +30,18 @@ public class Board extends View {
     private Paint paintMainNumbers;
     private Paint paintSmallNumbers;
 
-    public Board(Context context) {
+    public Board(Context context, GameData gameData) {
         super(context);
-        gameData = new GameData();
-        //this.gameData = ViewModelProviders.of(this).get(GameData.class);
+        this.gameData = gameData;
     }
 
+    public Board(Context context, GameData gameData, int selectedValue, boolean onNotas, boolean onApagar) {
+        super(context);
+        this.gameData = gameData;
+        this.selectedValue = selectedValue;
+        this.onNotas = onNotas;
+        this.onApagar = onApagar;
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -181,4 +180,13 @@ public class Board extends View {
     public boolean isOnApagar() {
         return onApagar;
     }
+
+    public void setGameData(GameData gameData) {
+        this.gameData = gameData;
+    }
+
+    public GameData getGameData() { return gameData; }
+    public int getSelectedValue() { return selectedValue; }
+    public boolean getOnNotas(){return onNotas;}
+    public boolean getOnApagar(){return onApagar;}
 }
