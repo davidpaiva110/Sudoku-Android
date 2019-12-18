@@ -36,10 +36,12 @@ public class Board extends View {
     private Paint paintPreSetNumbers;
     private Paint paintMainNumbers;
     private Paint paintSmallNumbers;
+    private Paint paintWrongNumbers;
 
     public Board(Context context) {
         super(context);
         gameData = new GameData();
+        createPaints();
         //this.gameData = ViewModelProviders.of(this).get(GameData.class);
     }
 
@@ -47,7 +49,6 @@ public class Board extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        createPaints();
         drawBoard(canvas);
     }
 
@@ -73,6 +74,9 @@ public class Board extends View {
 
         paintPreSetNumbers = new Paint(paintMainNumbers);
         paintPreSetNumbers.setColor(Color.BLACK);
+
+        paintWrongNumbers = new Paint(paintMainNumbers);
+        paintWrongNumbers.setColor(Color.RED);
     }
 
 
@@ -93,6 +97,7 @@ public class Board extends View {
 
         //Alterar o tamanho da letra em função do tamanho de cada célula
         paintMainNumbers.setTextSize(cellH/2);
+        paintWrongNumbers.setTextSize(cellH/2);
         paintPreSetNumbers.setTextSize(cellH/2);
         paintSmallNumbers.setTextSize(cellH/4);
 
@@ -105,8 +110,15 @@ public class Board extends View {
                     int y = r * cellH + cellH /2 + cellH/6;    //cellH/6 -> deslocamento para centrar o número em altura
                     if(gameData.isPreSet(r,c))
                         canvas.drawText(""+n, x, y, paintPreSetNumbers);
-                    else
-                        canvas.drawText(""+n, x, y, paintMainNumbers);
+                    else {
+                        if(!gameData.numberIsValid(r, c)) {
+                            canvas.drawText("" + n, x, y, paintWrongNumbers);
+                            Thread th = new Thread(new RunnableInvalidNumber(r, c, n));
+                            th.start();
+                        }else {
+                            canvas.drawText("" + n, x, y, paintMainNumbers);
+                        }
+                    }
                 } else {
                     //Primeira posição célula pequenina
                     int x = c *cellW + cellW / 6;
@@ -142,9 +154,9 @@ public class Board extends View {
                 int cellY = py / cellH;
 
                 if(!gameData.isPreSet(cellY, cellX)) {
-                    if(!onApagar && !onNotas)
+                    if(!onApagar && !onNotas) {
                         gameData.setValue(cellY, cellX, selectedValue);
-                    else if(!onApagar && onNotas) {
+                    } else if(!onApagar && onNotas) {
                         if(gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) //Verifica se o valor já está nas notas
                             gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
                         else
@@ -180,5 +192,30 @@ public class Board extends View {
 
     public boolean isOnApagar() {
         return onApagar;
+    }
+
+    class RunnableInvalidNumber implements Runnable{
+
+        private int row;
+        private int column;
+        private int value;
+
+        public RunnableInvalidNumber(int row, int column, int value) {
+            this.row = row;
+            this.column = column;
+            this.value = value;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(2000);
+                if(gameData.getValue(row, column)==value) {
+                    gameData.setValue(row, column, 0);
+                    postInvalidate();
+                }
+            } catch (InterruptedException e) {
+            }
+        }
     }
 }
