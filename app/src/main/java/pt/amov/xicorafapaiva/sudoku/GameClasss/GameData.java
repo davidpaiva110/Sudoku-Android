@@ -20,6 +20,7 @@ public class GameData extends ViewModel implements Serializable {
     private int [][] invalidNumbers = null;
     private boolean [][] preSetNumbers = null;
     private int [][][] notes = null;
+    private int [][][] invalideNotes = null;
 
     public GameData() {
         generateBoard();
@@ -41,16 +42,35 @@ public class GameData extends ViewModel implements Serializable {
         return invalidNumbers[row][column]==0;
     }
 
+    public boolean noteIsValid(int row, int column, int position){
+        return invalideNotes[row][column][position]==0;
+    }
+
     public void validateNumber(int row, int column){
+        validateNumber(row, column, 0);
+    }
+
+    public void validateNumber(int row, int column, int value){
+        if (value != 0) board[row][column] = value;
         //Verifica se existe algum número igual na linha ou coluna
         for (int i = 0; i < BOARD_SIZE; i++) {
             if((board[row][i] == board[row][column] && i!=column)) {
-                invalidNumbers[row][column] = board[row][column];
+                if(value == 0)
+                    invalidNumbers[row][column] = board[row][column];
+                else {
+                    invalideNotes[row][column][value - 1] = value;
+                    notes[row][column][value - 1] = 0;
+                }
                 board[row][column] = 0;
                 return; //Como já é inválido não é necessário verificar as outras condições
             }
             if((board[i][column] == board[row][column] && i!=row)) {
-                invalidNumbers[row][column] = board[row][column];
+                if(value == 0)
+                    invalidNumbers[row][column] = board[row][column];
+                else {
+                    invalideNotes[row][column][value - 1] = value;
+                    notes[row][column][value - 1] = 0;
+                }
                 board[row][column] = 0;
                 return;
             }
@@ -63,7 +83,12 @@ public class GameData extends ViewModel implements Serializable {
                 int subRow = subGridY + r;
                 int subColumn = subGridX + c;
                 if((subRow != row && subColumn != column) && board[subRow][subColumn] == board[row][column]){
-                    invalidNumbers[row][column] = board[row][column];
+                    if(value == 0)
+                        invalidNumbers[row][column] = board[row][column];
+                    else {
+                        invalideNotes[row][column][value - 1] = value;
+                        notes[row][column][value - 1] = 0;
+                    }
                     board[row][column] = 0;
                     return;
                 }
@@ -71,13 +96,20 @@ public class GameData extends ViewModel implements Serializable {
         }
         //Verifica se ainda é possível a solução do puzzle
         if(resolveBoard() == null){
-            invalidNumbers[row][column] = board[row][column];
+            if(value == 0)
+                invalidNumbers[row][column] = board[row][column];
+            else {
+                invalideNotes[row][column][value - 1] = value;
+                notes[row][column][value - 1] = 0;
+            }
             board[row][column] = 0;
         }
+
+        if (value != 0) board[row][column] = 0;
     }
 
     private void generateBoard(){
-        String strJson = Sudoku.generate(10);
+        String strJson = Sudoku.generate(25);
         try{
             JSONObject json = new JSONObject(strJson);
             if(json.optInt("result", 0) == 1){
@@ -86,7 +118,7 @@ public class GameData extends ViewModel implements Serializable {
                 this.board=board;
                  setPreSetNumbers();
                  initializeNotes();
-                 initializeInvalidNumbers();
+                initializeInvalidNumbers();
             }
         } catch (Exception e){
 
@@ -138,10 +170,13 @@ public class GameData extends ViewModel implements Serializable {
 
     private void initializeNotes(){
         notes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
+        invalideNotes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
         for (int i = 0; i < BOARD_SIZE; i++)
             for (int j = 0; j < BOARD_SIZE; j++)
-                for (int k = 0; k < BOARD_SIZE; k++)
+                for (int k = 0; k < BOARD_SIZE; k++) {
                     notes[i][j][k] = 0;
+                    invalideNotes[i][j][k] = 0;
+                }
     }
 
     public int[] getCellNotes(int row, int column){
@@ -206,7 +241,39 @@ public class GameData extends ViewModel implements Serializable {
         invalidNumbers[row][column] = 0;
     }
 
+    public void resetInvalidNote(int row, int column, int position) {
+        invalideNotes[row][column][position] = 0;
+    }
+
     public int getInvalidNumber(int row, int column) {
         return invalidNumbers[row][column];
+    }
+
+    public int getInvalidNote(int row, int column, int position){
+        return invalideNotes[row][column][position];
+    }
+
+    public void validateNotesAfterNewValidNumber(int row, int column) {
+        //Valida as notas da linha e coluna
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) { //Percorre todas as notas
+                if(i!=column && notes[row][i][j] != 0 && board[row][i] == 0)
+                    validateNumber(row, i, j + 1);
+                if(i!=row && notes[i][column][j] != 0 && board[i][column] == 0)
+                    validateNumber(i, column, j + 1);
+            }
+        }
+        //Valida as notas da subgrelha
+        int subGridX=(column / SUBGRID_SIZE) * SUBGRID_SIZE; //É feita a divisão para colocar o elemento na primeira posição da subgrelha
+        int subGridY=(row / SUBGRID_SIZE) * SUBGRID_SIZE; //É feita a divisão para colocar o elemento na primeira posição da subgrelha
+        for (int r = 0; r < SUBGRID_SIZE; r++) {
+            for (int c = 0; c < SUBGRID_SIZE; c++) {
+                int subRow = subGridY + r;
+                int subColumn = subGridX + c;
+                for (int j = 0; j < BOARD_SIZE; j++) //Percorre todas as notas
+                    if(subRow != row && subColumn != column && notes[subRow][subColumn][j] != 0 && board[subRow][subColumn] == 0)
+                    validateNumber(subRow, subColumn, j + 1);
+            }
+        }
     }
 }

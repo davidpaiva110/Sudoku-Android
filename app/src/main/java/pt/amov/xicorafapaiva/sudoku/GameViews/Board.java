@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.SystemClock;
 
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -23,6 +24,7 @@ import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 public class Board extends View {
 
     public static final int BOARD_SIZE = 9;
+    public static final int INVALID_TIME = 2000;
 
     //Dados do jogo
     private GameData gameData;
@@ -37,6 +39,7 @@ public class Board extends View {
     private Paint paintMainNumbers;
     private Paint paintSmallNumbers;
     private Paint paintWrongNumbers;
+    private Paint paintSmallWrongNumbers;
 
     public Board(Context context) {
         super(context);
@@ -77,6 +80,9 @@ public class Board extends View {
 
         paintWrongNumbers = new Paint(paintMainNumbers);
         paintWrongNumbers.setColor(Color.RED);
+
+        paintSmallWrongNumbers = new Paint(paintSmallNumbers);
+        paintSmallWrongNumbers.setColor(Color.RED);
     }
 
 
@@ -100,6 +106,7 @@ public class Board extends View {
         paintWrongNumbers.setTextSize(cellH/2);
         paintPreSetNumbers.setTextSize(cellH/2);
         paintSmallNumbers.setTextSize(cellH/4);
+        paintSmallWrongNumbers.setTextSize(cellH/4);
 
         for(int r = 0; r < BOARD_SIZE; r++){
             for(int c = 0; c < BOARD_SIZE; c++){
@@ -116,7 +123,7 @@ public class Board extends View {
                 } else if(!gameData.numberIsValid(r, c)) {
                     n = gameData.getInvalidNumber(r ,c);
                     canvas.drawText("" + n, x, y, paintWrongNumbers);
-                    Thread th = new Thread(new RunnableInvalidNumber(r, c, n));
+                    Thread th = new Thread(new RunnableInvalidNumber(r, c, n, false));
                     th.start();
                 } else {
                     //Primeira posição célula pequenina
@@ -124,17 +131,22 @@ public class Board extends View {
                     y = r * cellH + cellH / 6;
                     int [] notes = gameData.getCellNotes(r,c);
                     for(int p = 0; p < BOARD_SIZE; p++){
+                        int xp = x + p % 3 * cellW/3 ;
+                        int yp = y + p / 3 * cellH/3 + cellH/9;
                         if(notes[p]!=0){
-                            int xp = x + p % 3 * cellW/3 ;
-                            int yp = y + p / 3 * cellH/3 + cellH/9;
                             canvas.drawText("" + notes[p], xp, yp, paintSmallNumbers);
+                        }
+                        else if(!gameData.noteIsValid(r, c, p)) {
+                                n = gameData.getInvalidNote(r ,c, p);
+                                canvas.drawText("" + n, xp, yp, paintSmallWrongNumbers);
+                                Thread th = new Thread(new RunnableInvalidNumber(r, c, n, true));
+                                th.start();
                         }
                     }
                 }
             }
         }
     }
-
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -156,10 +168,14 @@ public class Board extends View {
                     if(!onApagar && !onNotas) {
                         gameData.setValue(cellY, cellX, selectedValue);
                         gameData.validateNumber(cellY, cellX);
+                        if(gameData.getValue(cellY, cellX) != 0){ //Se o número inserido for válido
+                            gameData.validateNotesAfterNewValidNumber(cellY, cellX);
+                        }
                     } else if(!onApagar && onNotas) {
-                        if(gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) //Verifica se o valor já está nas notas
+                        if(gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
                             gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
-                        else
+                            gameData.validateNumber(cellY, cellX, selectedValue);
+                        } else
                             gameData.setCellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
                     }
                     else if(onApagar){
@@ -199,20 +215,29 @@ public class Board extends View {
         private int row;
         private int column;
         private int value;
+        private boolean isNota;
 
-        public RunnableInvalidNumber(int row, int column, int value) {
+        public RunnableInvalidNumber(int row, int column, int value, boolean isNota) {
             this.row = row;
             this.column = column;
             this.value = value;
+            this.isNota = isNota;
         }
 
         @Override
         public void run() {
             try {
-                Thread.sleep(2000);
-                if(gameData.getInvalidNumber(row, column)==value) {
-                    gameData.resetInvalidNumber(row, column);
-                    postInvalidate();
+                Thread.sleep(INVALID_TIME);
+                if(isNota){
+                    if (gameData.getInvalidNote(row, column, value - 1) == value) {
+                        gameData.resetInvalidNote(row, column, value - 1);
+                        postInvalidate();
+                    }
+                }else {
+                    if (gameData.getInvalidNumber(row, column) == value) {
+                        gameData.resetInvalidNumber(row, column);
+                        postInvalidate();
+                    }
                 }
             } catch (InterruptedException e) {
             }
