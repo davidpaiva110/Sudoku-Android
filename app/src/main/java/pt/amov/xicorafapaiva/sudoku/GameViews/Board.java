@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -16,6 +17,7 @@ import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 public class Board extends View {
 
     public static final int BOARD_SIZE = 9;
+    public static final int INVALID_TIME = 2000;
 
     //Dados do jogo
     private GameData gameData;
@@ -29,6 +31,8 @@ public class Board extends View {
     private Paint paintPreSetNumbers;
     private Paint paintMainNumbers;
     private Paint paintSmallNumbers;
+    private Paint paintWrongNumbers;
+    private Paint paintSmallWrongNumbers;
 
     public Board(Context context, GameData gameData) {
         super(context);
@@ -72,6 +76,12 @@ public class Board extends View {
 
         paintPreSetNumbers = new Paint(paintMainNumbers);
         paintPreSetNumbers.setColor(Color.BLACK);
+
+        paintWrongNumbers = new Paint(paintMainNumbers);
+        paintWrongNumbers.setColor(Color.RED);
+
+        paintSmallWrongNumbers = new Paint(paintSmallNumbers);
+        paintSmallWrongNumbers.setColor(Color.RED);
     }
 
 
@@ -92,37 +102,50 @@ public class Board extends View {
 
         //Alterar o tamanho da letra em função do tamanho de cada célula
         paintMainNumbers.setTextSize(cellH/2);
+        paintWrongNumbers.setTextSize(cellH/2);
         paintPreSetNumbers.setTextSize(cellH/2);
         paintSmallNumbers.setTextSize(cellH/4);
+        paintSmallWrongNumbers.setTextSize(cellH/4);
 
         for(int r = 0; r < BOARD_SIZE; r++){
             for(int c = 0; c < BOARD_SIZE; c++){
                 int n = gameData.getValue(r,c);
+                // Calcular o centro de cada célula
+                int x = c * cellW + cellW / 2;
+                int y = r * cellH + cellH /2 + cellH/6;    //cellH/6 -> deslocamento para centrar o número em altura
                 if(n != 0){  // 0 representa espaço em branco
-                    // Calcular o centro de cada célula
-                    int x = c * cellW + cellW / 2;
-                    int y = r * cellH + cellH /2 + cellH/6;    //cellH/6 -> deslocamento para centrar o número em altura
                     if(gameData.isPreSet(r,c))
                         canvas.drawText(""+n, x, y, paintPreSetNumbers);
-                    else
-                        canvas.drawText(""+n, x, y, paintMainNumbers);
+                    else {
+                        canvas.drawText("" + n, x, y, paintMainNumbers);
+                    }
+                } else if(!gameData.numberIsValid(r, c)) {
+                    n = gameData.getInvalidNumber(r ,c);
+                    canvas.drawText("" + n, x, y, paintWrongNumbers);
+                    Thread th = new Thread(new RunnableInvalidNumber(r, c, n, false));
+                    th.start();
                 } else {
                     //Primeira posição célula pequenina
-                    int x = c *cellW + cellW / 6;
-                    int y = r * cellH + cellH / 6;
+                    x = c *cellW + cellW / 6;
+                    y = r * cellH + cellH / 6;
                     int [] notes = gameData.getCellNotes(r,c);
                     for(int p = 0; p < BOARD_SIZE; p++){
+                        int xp = x + p % 3 * cellW/3 ;
+                        int yp = y + p / 3 * cellH/3 + cellH/9;
                         if(notes[p]!=0){
-                            int xp = x + p % 3 * cellW/3 ;
-                            int yp = y + p / 3 * cellH/3 + cellH/9;
                             canvas.drawText("" + notes[p], xp, yp, paintSmallNumbers);
+                        }
+                        else if(!gameData.noteIsValid(r, c, p)) {
+                                n = gameData.getInvalidNote(r ,c, p);
+                                canvas.drawText("" + n, xp, yp, paintSmallWrongNumbers);
+                                Thread th = new Thread(new RunnableInvalidNumber(r, c, n, true));
+                                th.start();
                         }
                     }
                 }
             }
         }
     }
-
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -141,12 +164,17 @@ public class Board extends View {
                 int cellY = py / cellH;
 
                 if(!gameData.isPreSet(cellY, cellX)) {
-                    if(!onApagar && !onNotas)
+                    if(!onApagar && !onNotas) {
                         gameData.setValue(cellY, cellX, selectedValue);
-                    else if(!onApagar && onNotas) {
-                        if(gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) //Verifica se o valor já está nas notas
+                        gameData.validateNumber(cellY, cellX);
+                        if(gameData.getValue(cellY, cellX) != 0){ //Se o número inserido for válido
+                            gameData.validateNotesAfterNewValidNumber(cellY, cellX);
+                        }
+                    } else if(!onApagar && onNotas) {
+                        if(gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
                             gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
-                        else
+                            gameData.validateNumber(cellY, cellX, selectedValue);
+                        } else
                             gameData.setCellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
                     }
                     else if(onApagar){
@@ -189,4 +217,38 @@ public class Board extends View {
     public int getSelectedValue() { return selectedValue; }
     public boolean getOnNotas(){return onNotas;}
     public boolean getOnApagar(){return onApagar;}
+
+    class RunnableInvalidNumber implements Runnable{
+
+        private int row;
+        private int column;
+        private int value;
+        private boolean isNota;
+
+        public RunnableInvalidNumber(int row, int column, int value, boolean isNota) {
+            this.row = row;
+            this.column = column;
+            this.value = value;
+            this.isNota = isNota;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(INVALID_TIME);
+                if(isNota){
+                    if (gameData.getInvalidNote(row, column, value - 1) == value) {
+                        gameData.resetInvalidNote(row, column, value - 1);
+                        postInvalidate();
+                    }
+                }else {
+                    if (gameData.getInvalidNumber(row, column) == value) {
+                        gameData.resetInvalidNumber(row, column);
+                        postInvalidate();
+                    }
+                }
+            } catch (InterruptedException e) {
+            }
+        }
+    }
 }
