@@ -1,6 +1,8 @@
 package pt.amov.xicorafapaiva.sudoku.GameViews;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -9,11 +11,25 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
 import pt.amov.xicorafapaiva.sudoku.R;
+import pt.isec.ans.sudokulibrary.Sudoku;
 
 public class ChooseDifficultyActivity extends AppCompatActivity {
+
+    public int nr;
+    public int nc;
+    public ProgressDialog pd;
+    private ArrayList<Integer> aa;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,8 +38,40 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
 
     }
 
+    Handler h = new Handler(); // Create this object in UI Thread
+
     public void onClickCFacil(View view) {
         Intent myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
+        pd = ProgressDialog.show(this, "Loading..", "Please Wait..", true, true);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // your code here
+                aa = getSudokuBoard();
+                h.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        pd.dismiss();
+                    }
+                });
+            }
+        });
+        t.start();
+
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+
+        }
+
+        for(int i=0; i<aa.size(); i++){
+            myIntent.putExtra("numero"+i, aa.get(i));
+        }
+        myIntent.putExtra("board", aa);
+        myIntent.putExtra("nr", nr);
+        myIntent.putExtra("nc", nc);
+
+
         startActivity(myIntent);
         finish();
     }
@@ -37,4 +85,58 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
 
         //finish();
     }
+
+    public ArrayList<Integer> getSudokuBoard(){
+        ArrayList<Integer> board = null;
+        String strJson = Sudoku.generate(15);
+        try{
+            JSONObject json = new JSONObject(strJson);
+            if(json.optInt("result", 0) == 1){
+                JSONArray jsonArray = json.getJSONArray("board");
+                board = convert(jsonArray);
+
+            }
+        } catch (Exception e){
+
+        }
+        return  board;
+    }
+
+    private ArrayList<Integer> convert(JSONArray jsonArray) {
+        int [][] array = null;
+        ArrayList<Integer> al = new ArrayList<>();
+
+        int rows = 0, columns = 0;
+        try {
+            rows = jsonArray.length();
+            columns = 0;
+            for(int r = 0; r < rows; r++){
+                JSONArray jsonRow = jsonArray.getJSONArray(r);
+                if(r == 0){
+                    columns = jsonRow.length();
+                    array = new int[rows][columns];
+                }
+                for(int c = 0; c < columns; c++){
+                    array[r][c] = jsonRow.getInt(c);
+                }
+            }
+        } catch (Exception e){
+            array=null;
+        }
+
+        this.nr = rows;
+        this.nc = columns;
+        for (int r = 0; r < rows; r++){
+            for(int c = 0; c < columns; c++){
+                al.add(array[r][c]);
+            }
+        }
+        Log.i("eu123", ""+nr);
+        return al;
+    }
+
+
+
+
+
 }

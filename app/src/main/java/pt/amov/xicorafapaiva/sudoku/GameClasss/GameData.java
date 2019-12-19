@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import pt.isec.ans.sudokulibrary.Sudoku;
 
@@ -20,7 +21,6 @@ public class GameData extends ViewModel{
     private int [][][] notes = null;
 
     public GameData() {
-        generateBoard();
     }
 
     public int[][] getBoard() {
@@ -35,7 +35,7 @@ public class GameData extends ViewModel{
         board[row][column] = value;
     }
 
-    private void generateBoard(){
+    public void generateBoard(){
         String strJson = Sudoku.generate(10);
         try{
             JSONObject json = new JSONObject(strJson);
@@ -49,6 +49,28 @@ public class GameData extends ViewModel{
         } catch (Exception e){
 
         }
+    }
+
+    public void setBoard(ArrayList<Integer> tab, int nr, int nc) {
+        board = new int[nr][nc];
+        int aux = 0;
+        for(int r = 0; r < nr; r++) {
+            for (int c = 0; c < nc; c++) {
+                //Log.i("PAIVAAAA", "nr: "+board.get(aux));
+                board[r][c] = tab.get(aux++);
+            }
+        }
+    }
+
+    public  void setBoard(int [][] board){
+        try {
+            this.board = board;
+            setPreSetNumbers();
+            initializeNotes();
+        }catch (Exception e){
+            Log.i("PAIVAAAA", "excollooldlkgsldkglks");
+        }
+
     }
 
     private int[][] convert(JSONArray jsonArray) {
@@ -112,4 +134,5 @@ public class GameData extends ViewModel{
             notes[row][column][i] = 0;
         }
     }
+
 }

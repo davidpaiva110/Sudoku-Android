@@ -4,15 +4,23 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
+
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.ArrayList;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 import pt.amov.xicorafapaiva.sudoku.R;
@@ -27,6 +35,8 @@ public class GameBoardActivity extends AppCompatActivity {
     private GameData gameData;
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,11 +45,23 @@ public class GameBoardActivity extends AppCompatActivity {
         this.gameData = ViewModelProviders.of(this).get(GameData.class);
 
         if(savedInstanceState == null) {
+            int nr = getIntent().getIntExtra("nr", 9);
+            int nc = getIntent().getIntExtra("nc", 9);
+            int [][] tabuleiro = new int[nr][nc];
+            int aux = 0;
+            for(int r = 0; r < nr; r++) {
+                for (int c = 0; c < nc; c++) {
+                    tabuleiro[r][c] = getIntent().getIntExtra("numero"+aux, 0);
+                    aux++;
+                }
+            }
+            this.gameData.setBoard(tabuleiro);
             FrameLayout flSudoku = findViewById(R.id.flSudoku);
             sudokuView = new Board(this, this.gameData);
             flSudoku.addView(sudokuView);
             btBackground = findViewById(R.id.btnNotas).getBackground();
             initializeButtons();
+
         }
     }
 
@@ -185,6 +207,8 @@ public class GameBoardActivity extends AppCompatActivity {
             btnApagar.setTextColor(Color.WHITE);
         }
     }
+
+
 
 
 }

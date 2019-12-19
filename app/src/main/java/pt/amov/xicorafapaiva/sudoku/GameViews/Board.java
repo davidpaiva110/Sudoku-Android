@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -41,6 +42,7 @@ public class Board extends View {
         this.selectedValue = selectedValue;
         this.onNotas = onNotas;
         this.onApagar = onApagar;
+
     }
 
     @Override
