@@ -121,9 +121,7 @@ public class GameData extends ViewModel{
             setPreSetNumbers();
             initializeNotes();
             initializeInvalidNumbers();
-            Log.i("PAIVAAAA", "setBoard");
         }catch (Exception e){
-            Log.i("PAIVAAAA", "setBoardException");
         }
     }
 
