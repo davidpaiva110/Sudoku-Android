@@ -18,6 +18,7 @@ public class GameData extends ViewModel{
     private boolean [][] preSetNumbers = null;
     private int [][][] notes = null;
     private int [][][] invalideNotes = null;
+    private int gameTime = 0;
 
     public GameData() {
     }
@@ -270,5 +271,9 @@ public class GameData extends ViewModel{
                     validateNumber(subRow, subColumn, j + 1);
             }
         }
+    }
+
+    public void incrementGameTime(){
+        this.gameTime++;
     }
 }
