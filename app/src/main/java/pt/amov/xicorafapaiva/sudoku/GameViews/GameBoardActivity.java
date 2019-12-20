@@ -71,12 +71,12 @@ public class GameBoardActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-// Handle item selection
         switch (item.getItemId()) {
             case R.id.homeIcon:
-               // finish();
+                DialogConfirmBackHome dialog = new DialogConfirmBackHome();
+                dialog.show(getSupportFragmentManager(),"idConfirmarDialog");
                 return true;
-            //case R.id.optionVerSolucao:
+            //case R.id.solutionIcon:
 
             //return true;
             default:
