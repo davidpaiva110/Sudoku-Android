@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".GameViews.GameBoardActivity">
 
+
+
     <FrameLayout
         android:id="@+id/flSudoku"
         android:layout_width="0dp"

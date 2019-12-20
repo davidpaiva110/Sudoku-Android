@@ -136,10 +136,10 @@ public class Board extends View {
                             canvas.drawText("" + notes[p], xp, yp, paintSmallNumbers);
                         }
                         else if(!gameData.noteIsValid(r, c, p)) {
-                                n = gameData.getInvalidNote(r ,c, p);
-                                canvas.drawText("" + n, xp, yp, paintSmallWrongNumbers);
-                                Thread th = new Thread(new RunnableInvalidNumber(r, c, n, true));
-                                th.start();
+                            n = gameData.getInvalidNote(r ,c, p);
+                            canvas.drawText("" + n, xp, yp, paintSmallWrongNumbers);
+                            Thread th = new Thread(new RunnableInvalidNumber(r, c, n, true));
+                            th.start();
                         }
                     }
                 }
@@ -153,38 +153,38 @@ public class Board extends View {
             return  true;
         }
         if(event.getAction() == MotionEvent.ACTION_UP){
-                int px = (int) event.getX();
-                int py = (int) event.getY();
-                int w = getWidth();
-                int cellW = w / BOARD_SIZE;
-                int h = getHeight();
-                int cellH = h / BOARD_SIZE;
-                //Célula Selecionada
-                int cellX = px / cellW;
-                int cellY = py / cellH;
+            int px = (int) event.getX();
+            int py = (int) event.getY();
+            int w = getWidth();
+            int cellW = w / BOARD_SIZE;
+            int h = getHeight();
+            int cellH = h / BOARD_SIZE;
+            //Célula Selecionada
+            int cellX = px / cellW;
+            int cellY = py / cellH;
 
-                if(!gameData.isPreSet(cellY, cellX)) {
-                    if(!onApagar && !onNotas) {
-                        gameData.setValue(cellY, cellX, selectedValue);
-                        gameData.validateNumber(cellY, cellX);
-                        if(gameData.getValue(cellY, cellX) != 0){ //Se o número inserido for válido
-                            gameData.validateNotesAfterNewValidNumber(cellY, cellX);
-                        }
-                    } else if(!onApagar && onNotas) {
-                        if(gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
-                            gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
-                            gameData.validateNumber(cellY, cellX, selectedValue);
-                        } else
-                            gameData.setCellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
+            if(!gameData.isPreSet(cellY, cellX)) {
+                if(!onApagar && !onNotas) {
+                    gameData.setValue(cellY, cellX, selectedValue);
+                    gameData.validateNumber(cellY, cellX);
+                    if(gameData.getValue(cellY, cellX) != 0){ //Se o número inserido for válido
+                        gameData.validateNotesAfterNewValidNumber(cellY, cellX);
                     }
-                    else if(onApagar){
-                        if(gameData.getValue(cellY, cellX)>0)
-                            gameData.setValue(cellY, cellX, 0);
-                        else
-                            gameData.resetCellNotes(cellY, cellX); //Apaga todas as notas
-                    }
-                    invalidate(); // faz um refresh
+                } else if(!onApagar && onNotas) {
+                    if(gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
+                        gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
+                        gameData.validateNumber(cellY, cellX, selectedValue);
+                    } else
+                        gameData.setCellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
                 }
+                else if(onApagar){
+                    if(gameData.getValue(cellY, cellX)>0)
+                        gameData.setValue(cellY, cellX, 0);
+                    else
+                        gameData.resetCellNotes(cellY, cellX); //Apaga todas as notas
+                }
+                invalidate(); // faz um refresh
+            }
         }
         return super.onTouchEvent(event);
     }

@@ -1,13 +1,10 @@
 package pt.amov.xicorafapaiva.sudoku.GameClasss;
 
 import android.util.Log;
-
 import androidx.lifecycle.ViewModel;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 
 import pt.isec.ans.sudokulibrary.Sudoku;
 
@@ -23,7 +20,6 @@ public class GameData extends ViewModel{
     private int [][][] invalideNotes = null;
 
     public GameData() {
-        generateBoard();
     }
 
     public int[][] getBoard() {
@@ -37,6 +33,7 @@ public class GameData extends ViewModel{
     public void setValue(int row, int column, int value){
         board[row][column] = value;
     }
+
 
     public boolean numberIsValid(int row, int column){
         return invalidNumbers[row][column]==0;
@@ -108,28 +105,25 @@ public class GameData extends ViewModel{
         if (value != 0) board[row][column] = 0;
     }
 
-    private void generateBoard(){
-        String strJson = Sudoku.generate(25);
-        try{
-            JSONObject json = new JSONObject(strJson);
-            if(json.optInt("result", 0) == 1){
-                JSONArray jsonArray = json.getJSONArray("board");
-                int [][] board = convert(jsonArray);
-                this.board=board;
-                 setPreSetNumbers();
-                 initializeNotes();
-                initializeInvalidNumbers();
-            }
-        } catch (Exception e){
-
-        }
-    }
 
     private void initializeInvalidNumbers() {
         invalidNumbers = new int[BOARD_SIZE][BOARD_SIZE];
         for (int i = 0; i < BOARD_SIZE; i++)
             for (int j = 0; j < BOARD_SIZE; j++)
                 invalidNumbers[i][j] = 0;
+    }
+
+
+    public  void setBoard(int [][] board){
+        try {
+            this.board = board;
+            setPreSetNumbers();
+            initializeNotes();
+            initializeInvalidNumbers();
+            Log.i("PAIVAAAA", "setBoard");
+        }catch (Exception e){
+            Log.i("PAIVAAAA", "setBoardException");
+        }
     }
 
     private int[][] convert(JSONArray jsonArray) {
@@ -196,6 +190,7 @@ public class GameData extends ViewModel{
             notes[row][column][i] = 0;
         }
     }
+
 
     private int[][] resolveBoard() {
         int [][] sol = null;
