@@ -47,11 +47,12 @@ public class GameBoardActivity extends AppCompatActivity {
         if(savedInstanceState == null) {
             int nr = getIntent().getIntExtra("nr", 9);
             int nc = getIntent().getIntExtra("nc", 9);
+            ArrayList<Integer> alBoard = getIntent().getIntegerArrayListExtra("board");
             int [][] tabuleiro = new int[nr][nc];
             int aux = 0;
             for(int r = 0; r < nr; r++) {
                 for (int c = 0; c < nc; c++) {
-                    tabuleiro[r][c] = getIntent().getIntExtra("numero"+aux, 0);
+                    tabuleiro[r][c] = alBoard.get(aux);
                     aux++;
                 }
             }
@@ -78,12 +79,10 @@ public class GameBoardActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-// Handle item selection
         switch (item.getItemId()) {
             case R.id.homeIcon:
                 DialogConfirmBackHome dialog = new DialogConfirmBackHome();
                 dialog.show(getSupportFragmentManager(),"idConfirmarDialog");
-                //finish();
                 return true;
             //case R.id.solutionIcon:
 

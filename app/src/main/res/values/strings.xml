@@ -34,4 +34,6 @@
     <string name="strCancelar">Cancelar</string>
     <string name="strConfirmar">Confirmar</string>
     <string name="strDialogMSG">Deseja voltar à página principal?</string>
+    <string name="strCarregarJogo">Carregar Jogo</string>
+    <string name="strPorFavorAguarde">Por favor, aguarde...</string>
 </resources>

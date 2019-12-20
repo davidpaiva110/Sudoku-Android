@@ -1,13 +1,9 @@
 package pt.amov.xicorafapaiva.sudoku.GameClasss;
 
 import android.util.Log;
-
 import androidx.lifecycle.ViewModel;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import pt.isec.ans.sudokulibrary.Sudoku;

@@ -29,6 +29,7 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     public int nc;
     public ProgressDialog pd;
     private ArrayList<Integer> aa;
+    private Handler h = new Handler();
 
 
     @Override
@@ -38,11 +39,14 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
 
     }
 
-    Handler h = new Handler(); // Create this object in UI Thread
-
     public void onClickCFacil(View view) {
-        Intent myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
-        pd = ProgressDialog.show(this, "Loading..", "Please Wait..", true, true);
+        pd = ProgressDialog.show(this, getString(R.string.strCarregarJogo), getString(R.string.strPorFavorAguarde), false, false);
+//        pd = new ProgressDialog(getApplicationContext(), R.style.AppCompatAlertDialogStyle);
+//        pd.setTitle(getString(R.string.strCarregarJogo));
+//        pd.setMessage(getString(R.string.strPorFavorAguarde));
+//        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//        pd.setCancelable(false);
+//        pd.show();
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -51,26 +55,21 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
                 h.post(new Runnable() {
                     @Override
                     public void run() {
-                        pd.dismiss();
+                        if(pd != null)
+                            pd.dismiss();
+                        startGameBoardActivity();
                     }
                 });
             }
         });
         t.start();
+    }
 
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-
-        }
-
-        for(int i=0; i<aa.size(); i++){
-            myIntent.putExtra("numero"+i, aa.get(i));
-        }
+    public void startGameBoardActivity(){
+        Intent myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
         myIntent.putExtra("board", aa);
         myIntent.putExtra("nr", nr);
         myIntent.putExtra("nc", nc);
-
 
         startActivity(myIntent);
         finish();
