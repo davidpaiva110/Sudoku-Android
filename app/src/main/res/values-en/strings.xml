@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sudoku</string>
+    <string name="strCancelar">Cancel</string>
+    <string name="strCliente">Client</string>
+    <string name="strConfirmar">Confirm</string>
+    <string name="strDificil">Hard</string>
+    <string name="strFacil">Easy</string>
+    <string name="strMedio">Medium</string>
+    <string name="strNome">Name</string>
+    <string name="strNomeDavid">David Paiva - 21260607</string>
+    <string name="strNomeFrancisco">Francisco Silva - 21270547</string>
+    <string name="strNomeRafael">Rafael Sá - 21270564</string>
+    <string name="strNotas">Notes</string>
+    <string name="strPerfilJogador">Player Profile</string>
+    <string name="strSairJogo">Exit Game</string>
+    <string name="strSemNome">No Name</string>
+    <string name="strServidor">Server</string>
+    <string name="strSeuNome">Your Name</string>
+    <string name="strSobreNos">About Us</string>
+    <string name="strTirarFotografia">Take a Picture</string>
+    <string name="strUmJogador">One Player</string>
+    <string name="strVer_Solucao">Solution</string>
+    <string name="strtempo_restante">Time:</string>
+    <string name="strJogoEmRede">Network Game</string>
+    <string name="strHistoricoResultados">Results History</string>
+    <string name="strGuardar">Save</string>
+    <string name="strEditarPerfil">Edit Profile</string>
+    <string name="strDoisJogadores">Multiplayer</string>
+    <string name="strDialogMSG">" Do you want to return to the main page?"</string>
+    <string name="strDescCreditos">Unidade Curricular de Arquiteturas Móveis | Engenharia Informática | DEIS-ISEC 2019/2020</string>
+    <string name="strCarregarJogo">" Upload Game"</string>
+    <string name="strPorFavorAguarde">" Please wait..."</string>
+</resources>

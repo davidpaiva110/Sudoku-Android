@@ -43,7 +43,6 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_difficulty);
-
     }
 
     @Override
@@ -58,7 +57,6 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
         isProgressDialogActive = savedInstanceState.getBoolean("pd");
         if(isProgressDialogActive == true)
            createProgressDialog();
-
     }
 
     public void onClickCFacil(View view) {
@@ -67,7 +65,6 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                // your code here
                 aa = getSudokuBoard(EASY);
                 h.post(new Runnable() {
                     @Override
@@ -87,7 +84,6 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                // your code here
                 aa = getSudokuBoard(MEDIUM);
                 h.post(new Runnable() {
                     @Override
@@ -107,7 +103,6 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                // your code here
                 aa = getSudokuBoard(HARD);
                 h.post(new Runnable() {
                     @Override
@@ -181,12 +176,7 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
                 al.add(array[r][c]);
             }
         }
-        Log.i("eu123", ""+nr);
         return al;
     }
-
-
-
-
 
 }

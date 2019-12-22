@@ -23,7 +23,8 @@
             android:layout_height="wrap_content"
             android:text="@string/strPerfilJogador"
             android:textSize="28sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"/>
     </FrameLayout>
 
     <FrameLayout
@@ -42,7 +43,8 @@
             android:layout_weight="1"
             android:text="@string/strSemNome"
             android:textSize="24sp"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+            android:textColor="#FFFFFF"/>
 
     </FrameLayout>
 
