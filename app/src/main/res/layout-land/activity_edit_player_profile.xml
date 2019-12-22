@@ -34,7 +34,8 @@
             android:id="@+id/imgPlayerPhoto"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@android:drawable/ic_menu_gallery" />
+            android:src="@android:drawable/ic_menu_gallery"
+            app:srcCompat="@drawable/ghost1" />
 
     </FrameLayout>
 

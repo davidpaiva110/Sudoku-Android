@@ -31,4 +31,9 @@
     <string name="strDescCreditos">Unidade Curricular de Arquiteturas Móveis | Engenharia Informática | DEIS-ISEC 2019/2020</string>
     <string name="strCarregarJogo">" Upload Game"</string>
     <string name="strPorFavorAguarde">" Please wait..."</string>
+    <string name="strJogador_1">Player 1</string>
+    <string name="strJogador_2">Player 2</string>
+    <string name="strPontos">Score</string>
+    <string name="strPontos_">"Score: "</string>
+    <string name="strApagar">Erase</string>
 </resources>

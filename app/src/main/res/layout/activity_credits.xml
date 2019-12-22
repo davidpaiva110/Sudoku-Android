@@ -29,7 +29,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView"
         app:layout_constraintVertical_bias="0.839"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="#ffffff"/>
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -50,7 +51,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/strNomeRafael"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:textColor="#ffffff"/>
 
         <TextView
             android:id="@+id/textView4"
@@ -58,7 +60,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/strNomeDavid"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:textColor="#ffffff"/>
 
         <TextView
             android:id="@+id/textView5"
@@ -66,7 +69,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/strNomeFrancisco"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:textColor="#ffffff"/>
 
     </LinearLayout>
 
@@ -82,7 +86,8 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        app:layout_constraintVertical_bias="0.822" />
+        app:layout_constraintVertical_bias="0.822"
+        android:textColor="#ffffff"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

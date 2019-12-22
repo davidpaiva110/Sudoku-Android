@@ -64,7 +64,7 @@
             android:id="@+id/playerPhotoProfile"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:srcCompat="@android:drawable/btn_star_big_on" />
+            app:srcCompat="@drawable/ghost1" />
     </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

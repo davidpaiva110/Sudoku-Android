@@ -94,10 +94,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickSinglePlayer(View view) {
         Intent myIntent = new Intent(getBaseContext(),   ChooseDifficultyActivity.class);
+        myIntent.putExtra("gameModeFlag", 0);
         startActivity(myIntent);
     }
 
     public void onClickMultiplayer(View view) {
+        Intent myIntent = new Intent(getBaseContext(),   ChooseDifficultyActivity.class);
+        myIntent.putExtra("gameModeFlag", 1);
+        startActivity(myIntent);
     }
 
     public void onClickMultiplayerNetwork(View view) {
@@ -105,20 +109,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(myIntent);
     }
 
-
-
-    //Guardar o estado atual
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    //Recuperar o estado anterior
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-       //Snackbar.make(findViewById(android.R.id.content).getRootView(), gamedata.getTeste(), Snackbar.LENGTH_LONG).show();
-    }
 
 
 

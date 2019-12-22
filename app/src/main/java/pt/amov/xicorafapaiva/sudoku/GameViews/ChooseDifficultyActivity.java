@@ -38,23 +38,30 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     private Handler h = new Handler();
     private boolean isProgressDialogActive = false;
 
+    //Flag para saber se é o modo SinglePlayer ou Multiplayer
+    private int gameModeFlag = 0;   // 0 -> SinglePlayer    |    1 -> Multiplayer
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_difficulty);
+        if(savedInstanceState == null)
+            gameModeFlag = getIntent().getIntExtra("gameModeFlag", 0);
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("pd", isProgressDialogActive);
+        outState.putInt("gameMode", gameModeFlag);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         isProgressDialogActive = savedInstanceState.getBoolean("pd");
+        gameModeFlag = savedInstanceState.getInt("gameMode");
         if(isProgressDialogActive == true)
            createProgressDialog();
     }
@@ -117,7 +124,11 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     }
 
     public void startGameBoardActivity(){
-        Intent myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
+        Intent myIntent;
+        if(gameModeFlag == 1)
+            myIntent = new Intent(getBaseContext(),   GameBoardM2Activity.class);
+        else
+            myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
         myIntent.putExtra("board", aa);
         myIntent.putExtra("nr", nr);
         myIntent.putExtra("nc", nc);
