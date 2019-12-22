@@ -19,6 +19,7 @@ public class GameData extends ViewModel{
     private int [][][] notes = null;
     private int [][][] invalideNotes = null;
     private int gameTime = 0;
+    private boolean finished = false;
 
     public GameData() {
     }
@@ -273,5 +274,30 @@ public class GameData extends ViewModel{
 
     public void incrementGameTime(){
         this.gameTime++;
+    }
+
+    public int getGameTime() {
+        return gameTime;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void checkTerminateGame(){
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                if(board[i][j] == 0)
+                    return; // Ainda existem espaços em branco e o jogo ainda não acabou
+            }
+        }
+        // O jogo terminou
+        finished = true;
+        // -------------- Falta aqui gravar o resultado --------------
+    }
+
+    public void showSolution(){
+        board = resolveBoard();
+        finished = true;
     }
 }

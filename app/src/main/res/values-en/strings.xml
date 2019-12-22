@@ -28,6 +28,7 @@
     <string name="strEditarPerfil">Edit Profile</string>
     <string name="strDoisJogadores">Multiplayer</string>
     <string name="strDialogMSG">" Do you want to return to the main page?"</string>
+    <string name="strSolutionMSG">Do you want to see the solution?</string>
     <string name="strDescCreditos">Unidade Curricular de Arquiteturas Móveis | Engenharia Informática | DEIS-ISEC 2019/2020</string>
     <string name="strCarregarJogo">" Upload Game"</string>
     <string name="strPorFavorAguarde">" Please wait..."</string>
@@ -36,4 +37,7 @@
     <string name="strPontos">Score</string>
     <string name="strPontos_">"Score: "</string>
     <string name="strApagar">Erase</string>
+    <string name="strTerminouJogo">Congratulations! You win the game!</string>
+    <string name="strGanhou">Win</string>
+    <string name="strOK">Ok</string>
 </resources>

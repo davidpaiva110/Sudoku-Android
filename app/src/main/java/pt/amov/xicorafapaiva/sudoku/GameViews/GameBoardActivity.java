@@ -7,12 +7,14 @@ import androidx.lifecycle.ViewModelProviders;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -22,12 +24,13 @@ import pt.isec.ans.sudokulibrary.Sudoku;
 
 public class GameBoardActivity extends AppCompatActivity {
 
+    public static final int SECOND = 1000;
+
     private Board sudokuView;
     private Drawable btBackground;
 
     // ViewModel dos dados do Jogo
     private GameData gameData;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +57,31 @@ public class GameBoardActivity extends AppCompatActivity {
             flSudoku.addView(sudokuView);
             btBackground = findViewById(R.id.btnNotas).getBackground();
             initializeButtons();
-
+            setupTimer();
         }
+    }
+
+    private void setupTimer() {
+        Thread thTempo = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!gameData.isFinished()) {
+                    try {
+                        Thread.sleep(SECOND);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                TextView tvTempoJogo = findViewById(R.id.tvTempoJogo);
+                                gameData.incrementGameTime();
+                                tvTempoJogo.setText(""+gameData.getGameTime());
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        });
+        thTempo.start();
     }
 
 
@@ -76,9 +102,10 @@ public class GameBoardActivity extends AppCompatActivity {
                 DialogConfirmBackHome dialog = new DialogConfirmBackHome();
                 dialog.show(getSupportFragmentManager(),"idConfirmarDialog");
                 return true;
-            //case R.id.solutionIcon:
-
-            //return true;
+            case R.id.solutionIcon:
+                DialogConfirmShowSolution dialogSol = new DialogConfirmShowSolution(sudokuView);
+                dialogSol.show(getSupportFragmentManager(), "idSolutionDialog");
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

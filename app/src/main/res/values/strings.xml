@@ -34,6 +34,7 @@
     <string name="strCancelar">Cancelar</string>
     <string name="strConfirmar">Confirmar</string>
     <string name="strDialogMSG">Deseja voltar à página principal?</string>
+    <string name="strSolutionMSG">Deseja ver a solução?</string>
     <string name="strCarregarJogo">Carregar Jogo</string>
     <string name="strPorFavorAguarde">Por favor, aguarde...</string>
     <string name="strApagar">Apagar</string>
@@ -41,4 +42,7 @@
     <string name="strJogador_1">Jogador 1 </string>
     <string name="strPontos_">Pontos:</string>
     <string name="strJogador_2">Jogador 2 </string>
+    <string name="strTerminouJogo">Parabéns! Ganhou o jogo!</string>
+    <string name="strGanhou">Ganhou</string>
+    <string name="strOK">Ok</string>
 </resources>

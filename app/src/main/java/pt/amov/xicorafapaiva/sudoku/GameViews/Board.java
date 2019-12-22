@@ -1,6 +1,8 @@
 package pt.amov.xicorafapaiva.sudoku.GameViews;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 
 import android.graphics.Color;
@@ -9,9 +11,11 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
+import pt.amov.xicorafapaiva.sudoku.R;
 
 
 public class Board extends View {
@@ -163,12 +167,27 @@ public class Board extends View {
             int cellX = px / cellW;
             int cellY = py / cellH;
 
-            if(!gameData.isPreSet(cellY, cellX)) {
+            if(!gameData.isPreSet(cellY, cellX) && !gameData.isFinished()) {
                 if(!onApagar && !onNotas) {
                     gameData.setValue(cellY, cellX, selectedValue);
                     gameData.validateNumber(cellY, cellX);
                     if(gameData.getValue(cellY, cellX) != 0){ //Se o número inserido for válido
                         gameData.validateNotesAfterNewValidNumber(cellY, cellX);
+                        gameData.checkTerminateGame();
+                        if(gameData.isFinished()){
+                            AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AppCompatAlertDialogStyle)
+                                    .setTitle(R.string.strGanhou)
+                                    .setMessage(R.string.strTerminouJogo)
+                                    .setIcon(android.R.drawable.ic_dialog_info)
+                                    .setPositiveButton(R.string.strOK, null) //Ao clicar no botão voltar à página principal. Como fazer?
+                                    .create();
+                            Button btn;
+                            btn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                            if(btn != null){
+                                btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                            }
+                            dialog.show();
+                        }
                     }
                 } else if(!onApagar && onNotas) {
                     if(gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
