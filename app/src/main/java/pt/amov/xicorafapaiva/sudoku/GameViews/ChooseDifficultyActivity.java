@@ -8,6 +8,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -25,11 +26,17 @@ import pt.isec.ans.sudokulibrary.Sudoku;
 
 public class ChooseDifficultyActivity extends AppCompatActivity {
 
-    public int nr;
-    public int nc;
-    public ProgressDialog pd;
+    // Levels
+    public static final int EASY =  7;
+    public static final int MEDIUM = 13;
+    public static final int HARD = 17;
+
+    private int nr;
+    private int nc;
+    private ProgressDialog pd;
     private ArrayList<Integer> aa;
     private Handler h = new Handler();
+    private boolean isProgressDialogActive = false;
 
 
     @Override
@@ -39,24 +46,73 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("pd", isProgressDialogActive);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        isProgressDialogActive = savedInstanceState.getBoolean("pd");
+        if(isProgressDialogActive == true)
+           createProgressDialog();
+
+    }
+
     public void onClickCFacil(View view) {
-        pd = ProgressDialog.show(this, getString(R.string.strCarregarJogo), getString(R.string.strPorFavorAguarde), false, false);
-//        pd = new ProgressDialog(getApplicationContext(), R.style.AppCompatAlertDialogStyle);
-//        pd.setTitle(getString(R.string.strCarregarJogo));
-//        pd.setMessage(getString(R.string.strPorFavorAguarde));
-//        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-//        pd.setCancelable(false);
-//        pd.show();
+        createProgressDialog();
+        isProgressDialogActive = true;
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 // your code here
-                aa = getSudokuBoard();
+                aa = getSudokuBoard(EASY);
                 h.post(new Runnable() {
                     @Override
                     public void run() {
-                        if(pd != null)
-                            pd.dismiss();
+                        isProgressDialogActive = false;
+                        startGameBoardActivity();
+                    }
+                });
+            }
+        });
+        t.start();
+    }
+
+    public void onClickMedio(View view) {
+        createProgressDialog();
+        isProgressDialogActive = true;
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // your code here
+                aa = getSudokuBoard(MEDIUM);
+                h.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        isProgressDialogActive = false;
+                        startGameBoardActivity();
+                    }
+                });
+            }
+        });
+        t.start();
+    }
+
+    public void onClickDificil(View view) {
+        createProgressDialog();
+        isProgressDialogActive = true;
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // your code here
+                aa = getSudokuBoard(HARD);
+                h.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        isProgressDialogActive = false;
                         startGameBoardActivity();
                     }
                 });
@@ -75,19 +131,14 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
         finish();
     }
 
-    public void onClickMedio(View view) {
-
-        //finish();
+    public void createProgressDialog(){
+        pd = ProgressDialog.show(this, getString(R.string.strCarregarJogo), getString(R.string.strPorFavorAguarde), false, false);
     }
 
-    public void onClickDificil(View view) {
 
-        //finish();
-    }
-
-    public ArrayList<Integer> getSudokuBoard(){
+    public ArrayList<Integer> getSudokuBoard(int level){
         ArrayList<Integer> board = null;
-        String strJson = Sudoku.generate(15);
+        String strJson = Sudoku.generate(level);
         try{
             JSONObject json = new JSONObject(strJson);
             if(json.optInt("result", 0) == 1){
