@@ -45,4 +45,8 @@
     <string name="strTerminouJogo">Parabéns! Ganhou o jogo!</string>
     <string name="strGanhou">Ganhou</string>
     <string name="strOK">Ok</string>
+    <string name="strVencedor">Vencedor</string>
+    <string name="strmodo_de_jogo">Modo de Jogo</string>
+    <string name="str_tempo">Tempo</string>
+    <string name="str_n_meros_acertados">Números Acertados</string>
 </resources>

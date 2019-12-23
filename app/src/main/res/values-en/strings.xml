@@ -40,4 +40,8 @@
     <string name="strTerminouJogo">Congratulations! You win the game!</string>
     <string name="strGanhou">Win</string>
     <string name="strOK">Ok</string>
+    <string name="strVencedor">Winner</string>
+    <string name="str_n_meros_acertados">" Hit Numbers"</string>
+    <string name="str_tempo">Time</string>
+    <string name="strmodo_de_jogo">Game Mode</string>
 </resources>

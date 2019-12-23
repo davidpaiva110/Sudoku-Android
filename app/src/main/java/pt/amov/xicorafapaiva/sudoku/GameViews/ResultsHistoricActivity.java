@@ -87,12 +87,14 @@ public class ResultsHistoricActivity extends AppCompatActivity {
             GameHistoryData hist = (GameHistoryData) getItem(position);
             String vendedor = hist.getWiner();
             String modo = hist.getGameMode();
-            int valor = hist.getTime();
+            int time = hist.getTime();
+            int nNumbers = hist.getNumbersAchive();
 
 
             ((TextView)layout.findViewById(R.id.text0)).setText(vendedor);
-            ((TextView)layout.findViewById(R.id.text1)).setText(""+modo);
-            ((TextView)layout.findViewById(R.id.text2)).setText(""+valor);
+            ((TextView)layout.findViewById(R.id.text1)).setText(modo);
+            ((TextView)layout.findViewById(R.id.text2)).setText(""+time);
+            ((TextView)layout.findViewById(R.id.text3)).setText(""+nNumbers);
 
             return layout;
         }
