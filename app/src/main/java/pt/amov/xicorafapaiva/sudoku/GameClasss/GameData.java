@@ -1,11 +1,12 @@
 package pt.amov.xicorafapaiva.sudoku.GameClasss;
 
-import android.util.Log;
+
 import androidx.lifecycle.ViewModel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 
+import pt.amov.xicorafapaiva.sudoku.GameViews.PlayerProfileActivity;
 import pt.isec.ans.sudokulibrary.Sudoku;
 
 public class GameData extends ViewModel{
@@ -20,6 +21,7 @@ public class GameData extends ViewModel{
     private int [][][] invalideNotes = null;
     private int gameTime = 0;
     private boolean finished = false;
+    private int numbersAchive = 0;
 
     public GameData() {
     }
@@ -50,7 +52,9 @@ public class GameData extends ViewModel{
     }
 
     public void validateNumber(int row, int column, int value){
-        if (value != 0) board[row][column] = value;
+        if (value != 0){
+            board[row][column] = value;
+        }
         //Verifica se existe algum número igual na linha ou coluna
         for (int i = 0; i < BOARD_SIZE; i++) {
             if((board[row][i] == board[row][column] && i!=column)) {
@@ -293,11 +297,18 @@ public class GameData extends ViewModel{
         }
         // O jogo terminou
         finished = true;
-        // -------------- Falta aqui gravar o resultado --------------
     }
 
     public void showSolution(){
         board = resolveBoard();
         finished = true;
+    }
+
+    public void incrementNumbersAchive(){
+        this.numbersAchive++;
+    }
+
+    public int getNumbersAchive() {
+        return numbersAchive;
     }
 }

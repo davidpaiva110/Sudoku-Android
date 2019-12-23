@@ -1,5 +1,6 @@
 package pt.amov.xicorafapaiva.sudoku.GameViews;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,13 +9,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryData;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryViewModel;
 import pt.amov.xicorafapaiva.sudoku.R;
 
 
@@ -167,19 +169,30 @@ public class Board extends View {
             int cellX = px / cellW;
             int cellY = py / cellH;
 
+
             if(!gameData.isPreSet(cellY, cellX) && !gameData.isFinished()) {
                 if(!onApagar && !onNotas) {
                     gameData.setValue(cellY, cellX, selectedValue);
                     gameData.validateNumber(cellY, cellX);
                     if(gameData.getValue(cellY, cellX) != 0){ //Se o número inserido for válido
+                        gameData.incrementNumbersAchive();
                         gameData.validateNotesAfterNewValidNumber(cellY, cellX);
                         gameData.checkTerminateGame();
                         if(gameData.isFinished()){
+                            // =========== Gravar os resultados do jogo ===========
+                            saveGameResult();
+                            // ====================================================
                             AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AppCompatAlertDialogStyle)
                                     .setTitle(R.string.strGanhou)
                                     .setMessage(R.string.strTerminouJogo)
                                     .setIcon(android.R.drawable.ic_dialog_info)
-                                    .setPositiveButton(R.string.strOK, null) //Ao clicar no botão voltar à página principal. Como fazer?
+                                    .setPositiveButton(R.string.strOK, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Activity activity = (Activity)getContext();
+                                            activity.finish();
+                                        }
+                                    }) //Ao clicar no botão voltar à página principal. Como fazer?
                                     .create();
                             Button btn;
                             btn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
@@ -270,4 +283,16 @@ public class Board extends View {
             }
         }
     }
+
+    /**
+     * Gravar os resultados do jogo
+     */
+    public void saveGameResult(){
+        GameHistoryData ghd = new GameHistoryData( PlayerProfileActivity.getPlayerName(getContext()), "M1", gameData.getGameTime(), gameData.getNumbersAchive());
+        GameHistoryViewModel ghvm = new GameHistoryViewModel(getContext());
+        ghvm.addNewGame(ghd);
+        ghvm.saveHistory();
+    }
+
+
 }

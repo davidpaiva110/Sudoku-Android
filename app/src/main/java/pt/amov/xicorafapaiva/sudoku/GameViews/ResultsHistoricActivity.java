@@ -3,24 +3,25 @@ package pt.amov.xicorafapaiva.sudoku.GameViews;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
-import pt.amov.xicorafapaiva.sudoku.GameClasss.Historico;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryData;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryViewModel;
 import pt.amov.xicorafapaiva.sudoku.R;
 
 public class ResultsHistoricActivity extends AppCompatActivity {
 
-    String[] strings = {"David", "Rafael", "Francisco"};
-    ArrayList<Historico> historicos;
+    ArrayList<GameHistoryData> historicos;
+    ArrayList<GameHistoryData> historicosInvertido;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,40 +29,37 @@ public class ResultsHistoricActivity extends AppCompatActivity {
         setContentView(R.layout.activity_results_historic);
 
         historicos = new ArrayList<>();
-        historicos.add(new Historico("Paiva", 1, 50));
-        historicos.add(new Historico("Rafael", 2, 2));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
-        historicos.add(new Historico("Francisco", 1, 1));
+        historicosInvertido = new ArrayList<>();
+        readHistory();
+        invertHistorico();
 
         ListView lv = findViewById(R.id.list);
         lv.setAdapter(new MyAdapter());
+    }
 
-//        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Toast.makeText(ResultsHistoricActivity.this,">> "+i+";"+l+":"+strings[(int)l],
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//        });
+    /**
+     * Vai buscar o arraylist do histórico à memória.
+     */
+    public void readHistory() {
+        try {
+            FileInputStream fis = getApplicationContext().openFileInput(GameHistoryViewModel.HISTORY_FILE_NAME);
+            ObjectInputStream is = new ObjectInputStream(fis);
+            ArrayList<GameHistoryData> array = (ArrayList<GameHistoryData>) is.readObject();
+            historicos = array;
+            is.close();
+            fis.close();
+        } catch (Exception e) {
+        }
 
+    }
+
+    /**
+     * Ordena o Histórico do mais recente para o mais antigo
+     */
+    public void invertHistorico(){
+        for(int i=historicos.size()-1; i >= 0; i--){
+            historicosInvertido.add(historicos.get(i));
+        }
     }
 
 
@@ -69,12 +67,12 @@ public class ResultsHistoricActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return historicos.size();
+            return historicosInvertido.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return historicos.get(position);
+            return historicosInvertido.get(position);
         }
 
         @Override
@@ -86,14 +84,11 @@ public class ResultsHistoricActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             View layout = getLayoutInflater().inflate(R.layout.list_item,null);
 
-            Historico hist = (Historico) getItem(position);
-            String vendedor = hist.getVencedor();
-            int modo = hist.getModoJogo();
-            int valor;
-            if(modo == 1)
-                valor = hist.getTempo();
-            else
-                valor = hist.getNumerosDescobertos();
+            GameHistoryData hist = (GameHistoryData) getItem(position);
+            String vendedor = hist.getWiner();
+            String modo = hist.getGameMode();
+            int valor = hist.getTime();
+
 
             ((TextView)layout.findViewById(R.id.text0)).setText(vendedor);
             ((TextView)layout.findViewById(R.id.text1)).setText(""+modo);

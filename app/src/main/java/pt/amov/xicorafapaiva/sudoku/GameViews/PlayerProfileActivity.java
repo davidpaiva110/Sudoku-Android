@@ -51,7 +51,6 @@ public class PlayerProfileActivity extends AppCompatActivity {
             player.setPlayerName(line);
             r.close();
         } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -67,5 +66,17 @@ public class PlayerProfileActivity extends AppCompatActivity {
         catch (FileNotFoundException e)
         {
         }
+    }
+
+    public static String getPlayerName(Context context){
+        String name = null;
+        try {
+            FileInputStream fis = context.openFileInput("player.txt");
+            BufferedReader r = new BufferedReader(new InputStreamReader(fis));
+            name = r.readLine();
+            r.close();
+        } catch (IOException e) {
+        }
+        return name;
     }
 }
