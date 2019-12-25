@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/homeIcon"
+        android:title=""
+        app:showAsAction="always"
+        android:icon="@drawable/icon_home"
+        />
+    <item
+        android:id="@+id/m1ButtonMenu"
+        app:showAsAction="always"
+        android:title=""
+        android:icon="@drawable/oneplayer"/>
+    <item
+        android:id="@+id/solutionIcon"
+        android:title=""
+        app:showAsAction="always"
+        android:icon="@drawable/icon_lamp"
+        />
+
+</menu>

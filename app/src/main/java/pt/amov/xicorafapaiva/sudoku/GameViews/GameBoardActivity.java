@@ -124,7 +124,12 @@ public class GameBoardActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_game_board_activity, menu);
+        int mode = getIntent().getIntExtra("mode", 1);
+        if(mode == 0)
+            inflater.inflate(R.menu.menu_game_board_activity, menu);
+        else if(mode == 1)
+            inflater.inflate(R.menu.menu_modo_2_e_3, menu);
+
         return true;
     }
 
@@ -140,6 +145,8 @@ public class GameBoardActivity extends AppCompatActivity {
             case R.id.solutionIcon:
                 DialogConfirmShowSolution dialogSol = new DialogConfirmShowSolution(sudokuView);
                 dialogSol.show(getSupportFragmentManager(), "idSolutionDialog");
+                return true;
+            case R.id.m1ButtonMenu:   // Botão de voltao ao modo 1
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
