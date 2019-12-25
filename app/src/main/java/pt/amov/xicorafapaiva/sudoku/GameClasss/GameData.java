@@ -25,10 +25,9 @@ public class GameData extends ViewModel{
     private int gameTime = 0;
     private boolean finished = false;
     private int gameMode;
-
+    private int [] playerScores = null;
     private int [][] numberInsertedPlayer = null; // Jogador que inseriu um número
     // Estruturas para modos 2 e 3
-    private int [] playerScores = null;
     private int [][][] notesPlayer2 = null;
     private int playerTime = INITIAL_PLAYER_TIME; // Tempo que um jogador tem numa jogada
     private int player = 1; // Indica qual o jogador que está a jogar
