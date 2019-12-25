@@ -52,7 +52,7 @@
                 android:textSize="20sp" />
 
             <TextView
-                android:id="@+id/textView10"
+                android:id="@+id/tvStrPontosJogador1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -84,7 +84,7 @@
                 android:paddingLeft="7sp"/>
 
             <TextView
-                android:id="@+id/textView9"
+                android:id="@+id/tvStrPontosJogador2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -113,7 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="60"
+                android:text="0"
                 android:textSize="20sp" />
         </LinearLayout>
 
