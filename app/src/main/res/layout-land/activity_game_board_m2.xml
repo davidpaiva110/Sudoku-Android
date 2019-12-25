@@ -51,7 +51,7 @@
                 android:paddingBottom="4sp">
 
                 <TextView
-                    android:id="@+id/textView14"
+                    android:id="@+id/tvStrPontosJogador1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -95,7 +95,7 @@
                 android:paddingBottom="4sp">
 
                 <TextView
-                    android:id="@+id/textView12"
+                    android:id="@+id/tvStrPontosJogador2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -150,7 +150,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="60"
+                android:text="30"
                 android:textSize="20sp" />
         </LinearLayout>
 

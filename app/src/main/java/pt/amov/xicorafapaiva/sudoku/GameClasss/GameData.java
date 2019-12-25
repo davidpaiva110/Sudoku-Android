@@ -13,6 +13,9 @@ public class GameData extends ViewModel{
 
     public static final int BOARD_SIZE = 9;
     public static final int SUBGRID_SIZE = 3;
+    public static final int INITIAL_PLAYER_TIME = 30;
+    public static final int CORRECT_NUMBER_TIME = 20;
+    public static final int MAX_PLAYERS = 3;
 
     private int [][] board = null;
     private int [][] invalidNumbers = null;
@@ -21,7 +24,14 @@ public class GameData extends ViewModel{
     private int [][][] invalideNotes = null;
     private int gameTime = 0;
     private boolean finished = false;
-    private int numbersAchive = 0;
+    private int gameMode;
+
+    private int [][] numberInsertedPlayer = null; // Jogador que inseriu um número
+    // Estruturas para modos 2 e 3
+    private int [] playerScores = null;
+    private int [][][] notesPlayer2 = null;
+    private int playerTime = INITIAL_PLAYER_TIME; // Tempo que um jogador tem numa jogada
+    private int player = 1; // Indica qual o jogador que está a jogar
 
     public GameData() {
     }
@@ -38,6 +48,43 @@ public class GameData extends ViewModel{
         board[row][column] = value;
     }
 
+    public int getGameMode() {
+        return gameMode;
+    }
+
+    public void setGameMode(int gameMode) {
+        this.gameMode = gameMode;
+    }
+
+    public int getPlayerOfInsertedNumber(int row, int column){
+        return numberInsertedPlayer[row][column];
+    }
+
+    public void setPlayerOfInsertedNumber(int row, int column){
+        numberInsertedPlayer[row][column] = player;
+    }
+
+    public int getPlayer() {
+        return player;
+    }
+
+    public void nextPlayer() {
+        if(player == 1) {
+            player = 2;
+        } else {
+            player = 1;
+        }
+        playerTime = INITIAL_PLAYER_TIME;
+        resetInvalidNotes(); //Reset para não aparecerem as jogadas inválidas do outro jogador na mudança de jogador
+    }
+
+    public void decrementPlayerTime(){
+        this.playerTime--;
+    }
+
+    public int getPlayerTime() {
+        return playerTime;
+    }
 
     public boolean numberIsValid(int row, int column){
         return invalidNumbers[row][column]==0;
@@ -62,9 +109,13 @@ public class GameData extends ViewModel{
                     invalidNumbers[row][column] = board[row][column];
                 else {
                     invalideNotes[row][column][value - 1] = value;
-                    notes[row][column][value - 1] = 0;
+                    if(player == 1)
+                        notes[row][column][value - 1] = 0;
+                    else if(player == 2)
+                        notesPlayer2[row][column][value - 1] = 0;
                 }
                 board[row][column] = 0;
+                numberInsertedPlayer[row][column] = 0;
                 return; //Como já é inválido não é necessário verificar as outras condições
             }
             if((board[i][column] == board[row][column] && i!=row)) {
@@ -72,9 +123,13 @@ public class GameData extends ViewModel{
                     invalidNumbers[row][column] = board[row][column];
                 else {
                     invalideNotes[row][column][value - 1] = value;
-                    notes[row][column][value - 1] = 0;
+                    if(player == 1)
+                        notes[row][column][value - 1] = 0;
+                    else if(player == 2)
+                        notesPlayer2[row][column][value - 1] = 0;
                 }
                 board[row][column] = 0;
+                numberInsertedPlayer[row][column] = 0;
                 return;
             }
         }
@@ -90,9 +145,13 @@ public class GameData extends ViewModel{
                         invalidNumbers[row][column] = board[row][column];
                     else {
                         invalideNotes[row][column][value - 1] = value;
-                        notes[row][column][value - 1] = 0;
+                        if(player == 1)
+                            notes[row][column][value - 1] = 0;
+                        else if(player == 2)
+                            notesPlayer2[row][column][value - 1] = 0;
                     }
                     board[row][column] = 0;
+                    numberInsertedPlayer[row][column] = 0;
                     return;
                 }
             }
@@ -103,9 +162,13 @@ public class GameData extends ViewModel{
                 invalidNumbers[row][column] = board[row][column];
             else {
                 invalideNotes[row][column][value - 1] = value;
-                notes[row][column][value - 1] = 0;
+                if(player == 1)
+                    notes[row][column][value - 1] = 0;
+                else if(player == 2)
+                    notesPlayer2[row][column][value - 1] = 0;
             }
             board[row][column] = 0;
+            numberInsertedPlayer[row][column] = 0;
         }
 
         if (value != 0) board[row][column] = 0;
@@ -126,8 +189,17 @@ public class GameData extends ViewModel{
             setPreSetNumbers();
             initializeNotes();
             initializeInvalidNumbers();
+            initializeNumberInsertedPlayer();
+            initializePlayerScores();
         }catch (Exception e){
         }
+    }
+
+    private void initializeNumberInsertedPlayer() {
+        numberInsertedPlayer = new int[BOARD_SIZE][BOARD_SIZE];
+        for (int i = 0; i < BOARD_SIZE; i++)
+            for (int j = 0; j < BOARD_SIZE; j++)
+                numberInsertedPlayer[i][j] = 0;
     }
 
     private int[][] convert(JSONArray jsonArray) {
@@ -168,11 +240,13 @@ public class GameData extends ViewModel{
 
     private void initializeNotes(){
         notes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
+        notesPlayer2 = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
         invalideNotes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
         for (int i = 0; i < BOARD_SIZE; i++)
             for (int j = 0; j < BOARD_SIZE; j++)
                 for (int k = 0; k < BOARD_SIZE; k++) {
                     notes[i][j][k] = 0;
+                    notesPlayer2[i][j][k] = 0;
                     invalideNotes[i][j][k] = 0;
                 }
     }
@@ -181,17 +255,35 @@ public class GameData extends ViewModel{
         return notes[row][column];
     }
 
+    public int[] getPlayer2CellNotes(int row, int column){
+        return notesPlayer2[row][column];
+    }
+
     public int getCellNote(int row, int column, int position){
         return notes[row][column][position];
+    }
+
+    public int getPlayer2CellNote(int row, int column, int position){
+        return notesPlayer2[row][column][position];
     }
 
     public void setCellNote(int row, int column, int position, int value){
         notes[row][column][position] = value;
     }
 
+    public void setPlayer2CellNote(int row, int column, int position, int value){
+        notesPlayer2[row][column][position] = value;
+    }
+
     public void resetCellNotes(int row, int column){
         for (int i = 0; i < BOARD_SIZE; i++) {
             notes[row][column][i] = 0;
+        }
+    }
+
+    public void resetPlayer2CellNotes(int row, int column){
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            notesPlayer2[row][column][i] = 0;
         }
     }
 
@@ -242,6 +334,16 @@ public class GameData extends ViewModel{
 
     public void resetInvalidNote(int row, int column, int position) {
         invalideNotes[row][column][position] = 0;
+    }
+
+    public void resetInvalidNotes(){
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                for (int k = 0; k < BOARD_SIZE; k++) {
+                    resetInvalidNote(i, j, k);
+                }
+            }
+        }
     }
 
     public int getInvalidNumber(int row, int column) {
@@ -304,11 +406,22 @@ public class GameData extends ViewModel{
         finished = true;
     }
 
-    public void incrementNumbersAchive(){
-        this.numbersAchive++;
+    public void setCorrectNumberTime(){
+        playerTime = CORRECT_NUMBER_TIME;
     }
 
-    public int getNumbersAchive() {
-        return numbersAchive;
+    public void updatePlayerScore() {
+        playerScores[player - 1]++;
+    }
+
+    private void initializePlayerScores(){
+        playerScores = new int [MAX_PLAYERS];
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            playerScores[i] = 0;
+        }
+    }
+
+    public int getPlayerScore(int player){
+        return playerScores[player - 1];
     }
 }

@@ -35,8 +35,12 @@ public class GameBoardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game_board);
 
+        int mode = getIntent().getIntExtra("mode", 1);
+        if(mode == 0)
+            setContentView(R.layout.activity_game_board);
+        else if(mode == 1)
+            setContentView(R.layout.activity_game_board_m2);
         this.gameData = ViewModelProviders.of(this).get(GameData.class);
 
         if(savedInstanceState == null) {
@@ -52,6 +56,7 @@ public class GameBoardActivity extends AppCompatActivity {
                 }
             }
             this.gameData.setBoard(tabuleiro);
+            this.gameData.setGameMode(mode);
             FrameLayout flSudoku = findViewById(R.id.flSudoku);
             sudokuView = new Board(this, this.gameData);
             flSudoku.addView(sudokuView);
@@ -73,7 +78,37 @@ public class GameBoardActivity extends AppCompatActivity {
                             public void run() {
                                 TextView tvTempoJogo = findViewById(R.id.tvTempoJogo);
                                 gameData.incrementGameTime();
-                                tvTempoJogo.setText(""+gameData.getGameTime());
+                                if(gameData.getGameMode() == 0)
+                                    tvTempoJogo.setText("" + gameData.getGameTime());
+                                else if(gameData.getGameMode() == 1){
+                                    gameData.decrementPlayerTime();
+                                    if(gameData.getPlayer() == 1)
+                                        ((TextView)findViewById(R.id.tvPontosJogador1)).setText("" + gameData.getPlayerScore(1));
+                                    else if(gameData.getPlayer() == 2)
+                                        ((TextView)findViewById(R.id.tvPontosJogador2)).setText("" + gameData.getPlayerScore(2));
+                                    if(gameData.getPlayerTime() < 0){
+                                        gameData.nextPlayer();
+                                    }
+                                    tvTempoJogo.setText("" + gameData.getPlayerTime());
+                                    //Atualiza as cores dos nomes do jogador para destacar o jogador atual
+                                    if(gameData.getPlayer() == 1){
+                                        ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(Color.rgb(0,0,128));
+                                        ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(Color.rgb(0,0,128));
+                                        ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(Color.rgb(0,0,128));
+                                        ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(Color.GRAY);
+                                        ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(Color.GRAY);
+                                        ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(Color.GRAY);
+
+                                    }
+                                    else if(gameData.getPlayer() == 2){
+                                        ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(Color.rgb(11, 102, 35));
+                                        ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(Color.rgb(11, 102, 35));
+                                        ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(Color.rgb(11, 102, 35));
+                                        ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(Color.GRAY);
+                                        ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(Color.GRAY);
+                                        ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(Color.GRAY);
+                                    }
+                                }
                             }
                         });
                     } catch (InterruptedException e) {

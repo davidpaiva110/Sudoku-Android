@@ -19,7 +19,7 @@
     <string name="strSeuNome">Your Name</string>
     <string name="strSobreNos">About Us</string>
     <string name="strTirarFotografia">Take a Picture</string>
-    <string name="strUmJogador">One Player</string>
+    <string name="strUmJogador">Single Player</string>
     <string name="strVer_Solucao">Solution</string>
     <string name="strtempo_restante">Time:</string>
     <string name="strJogoEmRede">Network Game</string>
@@ -34,14 +34,14 @@
     <string name="strPorFavorAguarde">" Please wait..."</string>
     <string name="strJogador_1">Player 1</string>
     <string name="strJogador_2">Player 2</string>
-    <string name="strPontos">Score</string>
-    <string name="strPontos_">"Score: "</string>
+    <string name="strPontos">Points</string>
+    <string name="strPontos_">"Points: "</string>
     <string name="strApagar">Erase</string>
-    <string name="strTerminouJogo">Congratulations! You win the game!</string>
+    <string name="strTerminouJogo">Congratulations! You won the game!</string>
     <string name="strGanhou">Win</string>
     <string name="strOK">Ok</string>
     <string name="strVencedor">Winner</string>
-    <string name="str_n_meros_acertados">" Hit Numbers"</string>
+    <string name="str_n_meros_acertados">" Score"</string>
     <string name="str_tempo">Time</string>
     <string name="strmodo_de_jogo">Game Mode</string>
 </resources>

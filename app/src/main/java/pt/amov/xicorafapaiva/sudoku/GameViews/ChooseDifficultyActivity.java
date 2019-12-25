@@ -125,15 +125,17 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
 
     public void startGameBoardActivity(){
         Intent myIntent;
-        if(gameModeFlag == 1)
-            myIntent = new Intent(getBaseContext(),   GameBoardM2Activity.class);
-        else
+        //if(gameModeFlag == 1)
+            //myIntent = new Intent(getBaseContext(),   GameBoardM2Activity.class);
+        //else
             myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
         myIntent.putExtra("board", aa);
         myIntent.putExtra("nr", nr);
         myIntent.putExtra("nc", nc);
+        myIntent.putExtra("mode", gameModeFlag);
 
         startActivity(myIntent);
+        pd.dismiss();
         finish();
     }
 

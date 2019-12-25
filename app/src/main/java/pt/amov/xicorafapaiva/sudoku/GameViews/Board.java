@@ -12,6 +12,7 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
@@ -36,7 +37,9 @@ public class Board extends View {
     private Paint paintSubLines;
     private Paint paintPreSetNumbers;
     private Paint paintMainNumbers;
+    private Paint paintPlayer2MainNumbers;
     private Paint paintSmallNumbers;
+    private Paint paintPlayer2SmallNumbers;
     private Paint paintWrongNumbers;
     private Paint paintSmallWrongNumbers;
 
@@ -78,7 +81,7 @@ public class Board extends View {
         paintSmallNumbers = new Paint(paintMainNumbers);
         paintSmallNumbers.setTextSize(12);
         paintSmallNumbers.setStrokeWidth(2);
-        paintSmallNumbers.setColor(Color.rgb(0x40, 0x80, 0xa0));
+        paintSmallNumbers.setColor(Color.rgb(0,0,128));
 
         paintPreSetNumbers = new Paint(paintMainNumbers);
         paintPreSetNumbers.setColor(Color.BLACK);
@@ -88,6 +91,12 @@ public class Board extends View {
 
         paintSmallWrongNumbers = new Paint(paintSmallNumbers);
         paintSmallWrongNumbers.setColor(Color.RED);
+
+        paintPlayer2SmallNumbers = new Paint(paintSmallNumbers);
+        paintPlayer2SmallNumbers.setColor(Color.rgb(11, 102, 35));
+
+        paintPlayer2MainNumbers = new Paint(paintMainNumbers);
+        paintPlayer2MainNumbers.setColor(Color.rgb(11, 102, 35));
     }
 
 
@@ -108,9 +117,11 @@ public class Board extends View {
 
         //Alterar o tamanho da letra em função do tamanho de cada célula
         paintMainNumbers.setTextSize(cellH/2);
+        paintPlayer2MainNumbers.setTextSize(cellH/2);
         paintWrongNumbers.setTextSize(cellH/2);
         paintPreSetNumbers.setTextSize(cellH/2);
         paintSmallNumbers.setTextSize(cellH/4);
+        paintPlayer2SmallNumbers.setTextSize(cellH/4);
         paintSmallWrongNumbers.setTextSize(cellH/4);
 
         for(int r = 0; r < BOARD_SIZE; r++){
@@ -123,7 +134,15 @@ public class Board extends View {
                     if(gameData.isPreSet(r,c))
                         canvas.drawText(""+n, x, y, paintPreSetNumbers);
                     else {
-                        canvas.drawText("" + n, x, y, paintMainNumbers);
+                        if(gameData.getGameMode() == 0 || gameData.isFinished()){
+                            canvas.drawText("" + n, x, y, paintMainNumbers);
+                        }
+                        else {
+                            if (gameData.getPlayerOfInsertedNumber(r, c) == 1)
+                                canvas.drawText("" + n, x, y, paintMainNumbers);
+                            else if (gameData.getPlayerOfInsertedNumber(r, c) == 2)
+                                canvas.drawText("" + n, x, y, paintPlayer2MainNumbers);
+                        }
                     }
                 } else if(!gameData.numberIsValid(r, c)) {
                     n = gameData.getInvalidNumber(r ,c);
@@ -134,12 +153,19 @@ public class Board extends View {
                     //Primeira posição célula pequenina
                     x = c *cellW + cellW / 6;
                     y = r * cellH + cellH / 6;
-                    int [] notes = gameData.getCellNotes(r,c);
+                    int [] notes = null;
+                    if(gameData.getPlayer() == 1)
+                        notes = gameData.getCellNotes(r,c);
+                    else if(gameData.getPlayer() == 2)
+                        notes = gameData.getPlayer2CellNotes(r,c);
                     for(int p = 0; p < BOARD_SIZE; p++){
                         int xp = x + p % 3 * cellW/3 ;
                         int yp = y + p / 3 * cellH/3 + cellH/9;
                         if(notes[p]!=0){
-                            canvas.drawText("" + notes[p], xp, yp, paintSmallNumbers);
+                            if(gameData.getPlayer() == 1)
+                                canvas.drawText("" + notes[p], xp, yp, paintSmallNumbers);
+                            else if(gameData.getPlayer() == 2)
+                                canvas.drawText("" + notes[p], xp, yp, paintPlayer2SmallNumbers);
                         }
                         else if(!gameData.noteIsValid(r, c, p)) {
                             n = gameData.getInvalidNote(r ,c, p);
@@ -175,8 +201,10 @@ public class Board extends View {
                     gameData.setValue(cellY, cellX, selectedValue);
                     gameData.validateNumber(cellY, cellX);
                     if(gameData.getValue(cellY, cellX) != 0){ //Se o número inserido for válido
-                        gameData.incrementNumbersAchive();
                         gameData.validateNotesAfterNewValidNumber(cellY, cellX);
+                        gameData.setPlayerOfInsertedNumber(cellY, cellX);
+                        gameData.setCorrectNumberTime();
+                        gameData.updatePlayerScore();
                         gameData.checkTerminateGame();
                         if(gameData.isFinished()){
                             // =========== Gravar os resultados do jogo ===========
@@ -203,17 +231,29 @@ public class Board extends View {
                         }
                     }
                 } else if(!onApagar && onNotas) {
-                    if(gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
-                        gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
-                        gameData.validateNumber(cellY, cellX, selectedValue);
-                    } else
-                        gameData.setCellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
+                    if(gameData.getPlayer() == 1) {
+                        if (gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
+                            gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
+                            gameData.validateNumber(cellY, cellX, selectedValue);
+                        } else
+                            gameData.setCellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
+                    } else if(gameData.getPlayer() == 2){
+                        if (gameData.getPlayer2CellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
+                            gameData.setPlayer2CellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
+                            gameData.validateNumber(cellY, cellX, selectedValue);
+                        } else
+                            gameData.setPlayer2CellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
+                    }
                 }
                 else if(onApagar){
                     if(gameData.getValue(cellY, cellX)>0)
                         gameData.setValue(cellY, cellX, 0);
-                    else
-                        gameData.resetCellNotes(cellY, cellX); //Apaga todas as notas
+                    else {
+                        if(gameData.getPlayer() == 1)
+                            gameData.resetCellNotes(cellY, cellX); //Apaga todas as notas do jogador 1
+                        else if(gameData.getPlayer() == 2)
+                            gameData.resetPlayer2CellNotes(cellY, cellX); //Apaga todas as notas do jogador 2
+                    }
                 }
                 invalidate(); // faz um refresh
             }
@@ -288,7 +328,7 @@ public class Board extends View {
      * Gravar os resultados do jogo
      */
     public void saveGameResult(){
-        GameHistoryData ghd = new GameHistoryData( PlayerProfileActivity.getPlayerName(getContext()), "M1", gameData.getGameTime(), gameData.getNumbersAchive());
+        GameHistoryData ghd = new GameHistoryData( PlayerProfileActivity.getPlayerName(getContext()), "M1", gameData.getGameTime(), gameData.getPlayerScore(1));
         GameHistoryViewModel ghvm = new GameHistoryViewModel(getContext());
         ghvm.addNewGame(ghd);
         ghvm.saveHistory();
