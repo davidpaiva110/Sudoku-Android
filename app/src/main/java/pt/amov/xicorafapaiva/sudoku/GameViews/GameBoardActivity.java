@@ -4,6 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -42,21 +46,24 @@ public class GameBoardActivity extends AppCompatActivity {
         else if(mode == 1)
             setContentView(R.layout.activity_game_board_m2);
         this.gameData = ViewModelProviders.of(this).get(GameData.class);
-
         if(savedInstanceState == null) {
-            int nr = getIntent().getIntExtra("nr", 9);
-            int nc = getIntent().getIntExtra("nc", 9);
-            ArrayList<Integer> alBoard = getIntent().getIntegerArrayListExtra("board");
-            int [][] tabuleiro = new int[nr][nc];
-            int aux = 0;
-            for(int r = 0; r < nr; r++) {
-                for (int c = 0; c < nc; c++) {
-                    tabuleiro[r][c] = alBoard.get(aux);
-                    aux++;
+            if(getIntent().getBooleanExtra("existingGame", false) == true){
+                gameData = (GameData) getIntent().getSerializableExtra("gameData");
+            } else {
+                int nr = getIntent().getIntExtra("nr", 9);
+                int nc = getIntent().getIntExtra("nc", 9);
+                ArrayList<Integer> alBoard = getIntent().getIntegerArrayListExtra("board");
+                int[][] tabuleiro = new int[nr][nc];
+                int aux = 0;
+                for (int r = 0; r < nr; r++) {
+                    for (int c = 0; c < nc; c++) {
+                        tabuleiro[r][c] = alBoard.get(aux);
+                        aux++;
+                    }
                 }
+                this.gameData.setBoard(tabuleiro);
+                this.gameData.setGameMode(mode);
             }
-            this.gameData.setBoard(tabuleiro);
-            this.gameData.setGameMode(mode);
             FrameLayout flSudoku = findViewById(R.id.flSudoku);
             sudokuView = new Board(this, this.gameData);
             flSudoku.addView(sudokuView);
@@ -88,6 +95,7 @@ public class GameBoardActivity extends AppCompatActivity {
                                         ((TextView)findViewById(R.id.tvPontosJogador2)).setText("" + gameData.getPlayerScore(2));
                                     if(gameData.getPlayerTime() < 0){
                                         gameData.nextPlayer();
+                                        sudokuView.postInvalidate();
                                     }
                                     tvTempoJogo.setText("" + gameData.getPlayerTime());
                                     //Atualiza as cores dos nomes do jogador para destacar o jogador atual
@@ -133,7 +141,7 @@ public class GameBoardActivity extends AppCompatActivity {
         return true;
     }
 
-    // Processamento das opções selecionadas no meu
+    // Processamento das opções selecionadas no menu
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
@@ -146,8 +154,16 @@ public class GameBoardActivity extends AppCompatActivity {
                 DialogConfirmShowSolution dialogSol = new DialogConfirmShowSolution(sudokuView);
                 dialogSol.show(getSupportFragmentManager(), "idSolutionDialog");
                 return true;
-            case R.id.m1ButtonMenu:   // Botão de voltao ao modo 1
+            case R.id.m1ButtonMenu:   // Botão de volta ao modo 1
+                Intent myIntent;
+                myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
+                myIntent.putExtra("gameData", gameData);
+                myIntent.putExtra("mode", 0);
+                myIntent.putExtra("existingGame", true);
+                DialogConfirmChangeToM1 dialogChange = new DialogConfirmChangeToM1(gameData, myIntent);
+                dialogChange.show(getSupportFragmentManager(), "idChangeDialog");
                 return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }

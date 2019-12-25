@@ -234,13 +234,13 @@ public class Board extends View {
                     if(gameData.getPlayer() == 1) {
                         if (gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
                             gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
-                            gameData.validateNumber(cellY, cellX, selectedValue);
+                            gameData.validateNumber(cellY, cellX, selectedValue, 1);
                         } else
                             gameData.setCellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
                     } else if(gameData.getPlayer() == 2){
                         if (gameData.getPlayer2CellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
                             gameData.setPlayer2CellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
-                            gameData.validateNumber(cellY, cellX, selectedValue);
+                            gameData.validateNumber(cellY, cellX, selectedValue, 2);
                         } else
                             gameData.setPlayer2CellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
                     }

@@ -1,15 +1,19 @@
 package pt.amov.xicorafapaiva.sudoku.GameClasss;
 
 
+import android.util.Log;
+
 import androidx.lifecycle.ViewModel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 
+import java.io.Serializable;
+
 import pt.amov.xicorafapaiva.sudoku.GameViews.PlayerProfileActivity;
 import pt.isec.ans.sudokulibrary.Sudoku;
 
-public class GameData extends ViewModel{
+public class GameData extends ViewModel implements Serializable {
 
     public static final int BOARD_SIZE = 9;
     public static final int SUBGRID_SIZE = 3;
@@ -94,10 +98,10 @@ public class GameData extends ViewModel{
     }
 
     public void validateNumber(int row, int column){
-        validateNumber(row, column, 0);
+        validateNumber(row, column, 0, 0);
     }
 
-    public void validateNumber(int row, int column, int value){
+    public void validateNumber(int row, int column, int value, int playerOfNotes){
         if (value != 0){
             board[row][column] = value;
         }
@@ -107,10 +111,11 @@ public class GameData extends ViewModel{
                 if(value == 0)
                     invalidNumbers[row][column] = board[row][column];
                 else {
-                    invalideNotes[row][column][value - 1] = value;
-                    if(player == 1)
+                    if(playerOfNotes == player)
+                        invalideNotes[row][column][value - 1] = value;
+                    if(playerOfNotes == 1)
                         notes[row][column][value - 1] = 0;
-                    else if(player == 2)
+                    if(playerOfNotes == 2)
                         notesPlayer2[row][column][value - 1] = 0;
                 }
                 board[row][column] = 0;
@@ -121,10 +126,11 @@ public class GameData extends ViewModel{
                 if(value == 0)
                     invalidNumbers[row][column] = board[row][column];
                 else {
-                    invalideNotes[row][column][value - 1] = value;
-                    if(player == 1)
+                    if(playerOfNotes == player)
+                        invalideNotes[row][column][value - 1] = value;
+                    if(playerOfNotes == 1)
                         notes[row][column][value - 1] = 0;
-                    else if(player == 2)
+                    if(playerOfNotes == 2)
                         notesPlayer2[row][column][value - 1] = 0;
                 }
                 board[row][column] = 0;
@@ -143,10 +149,11 @@ public class GameData extends ViewModel{
                     if(value == 0)
                         invalidNumbers[row][column] = board[row][column];
                     else {
-                        invalideNotes[row][column][value - 1] = value;
-                        if(player == 1)
+                        if(playerOfNotes == player)
+                            invalideNotes[row][column][value - 1] = value;
+                        if(playerOfNotes == 1)
                             notes[row][column][value - 1] = 0;
-                        else if(player == 2)
+                        if(playerOfNotes == 2)
                             notesPlayer2[row][column][value - 1] = 0;
                     }
                     board[row][column] = 0;
@@ -160,10 +167,11 @@ public class GameData extends ViewModel{
             if(value == 0)
                 invalidNumbers[row][column] = board[row][column];
             else {
-                invalideNotes[row][column][value - 1] = value;
-                if(player == 1)
+                if(playerOfNotes == player)
+                    invalideNotes[row][column][value - 1] = value;
+                if(playerOfNotes == 1)
                     notes[row][column][value - 1] = 0;
-                else if(player == 2)
+                if(playerOfNotes == 2)
                     notesPlayer2[row][column][value - 1] = 0;
             }
             board[row][column] = 0;
@@ -357,10 +365,16 @@ public class GameData extends ViewModel{
         //Valida as notas da linha e coluna
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) { //Percorre todas as notas
-                if(i!=column && notes[row][i][j] != 0 && board[row][i] == 0)
-                    validateNumber(row, i, j + 1);
-                if(i!=row && notes[i][column][j] != 0 && board[i][column] == 0)
-                    validateNumber(i, column, j + 1);
+                if (i != column && notes[row][i][j] != 0 && board[row][i] == 0)
+                    validateNumber(row, i, j + 1, 1);
+                if (i != row && notes[i][column][j] != 0 && board[i][column] == 0)
+                    validateNumber(i, column, j + 1, 1);
+                if(gameMode == 1){
+                    if (i != column && notesPlayer2[row][i][j] != 0 && board[row][i] == 0)
+                        validateNumber(row, i, j + 1, 2);
+                    if (i != row && notesPlayer2[i][column][j] != 0 && board[i][column] == 0)
+                        validateNumber(i, column, j + 1, 2);
+                }
             }
         }
         //Valida as notas da subgrelha
@@ -370,9 +384,14 @@ public class GameData extends ViewModel{
             for (int c = 0; c < SUBGRID_SIZE; c++) {
                 int subRow = subGridY + r;
                 int subColumn = subGridX + c;
-                for (int j = 0; j < BOARD_SIZE; j++) //Percorre todas as notas
-                    if(subRow != row && subColumn != column && notes[subRow][subColumn][j] != 0 && board[subRow][subColumn] == 0)
-                    validateNumber(subRow, subColumn, j + 1);
+                for (int j = 0; j < BOARD_SIZE; j++) { //Percorre todas as notas
+                    if (subRow != row && subColumn != column && notes[subRow][subColumn][j] != 0 && board[subRow][subColumn] == 0)
+                        validateNumber(subRow, subColumn, j + 1, 1);
+                    if (gameMode == 1) {
+                        if (subRow != row && subColumn != column && notesPlayer2[subRow][subColumn][j] != 0 && board[subRow][subColumn] == 0)
+                            validateNumber(subRow, subColumn, j + 1, 2);
+                    }
+                }
             }
         }
     }
@@ -422,5 +441,9 @@ public class GameData extends ViewModel{
 
     public int getPlayerScore(int player){
         return playerScores[player - 1];
+    }
+
+    public void setPlayer(int player) {
+        this.player = player;
     }
 }
