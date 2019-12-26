@@ -1,6 +1,8 @@
 package pt.amov.xicorafapaiva.sudoku.GameViews;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,7 +16,12 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.os.Handler;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,8 +45,9 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     private Handler h = new Handler();
     private boolean isProgressDialogActive = false;
 
-    //Flag para saber se é o modo SinglePlayer ou Multiplayer
-    private int gameModeFlag = 0;   // 0 -> SinglePlayer    |    1 -> Multiplayer
+    //Flag para saber se é o modo SinglePlayer ou Multiplayer ou Jogo em Rede
+    private int gameModeFlag = 0;   // 0 -> SinglePlayer    |    1 -> Multiplayer     |    2 -> Jogo Em Rede
+
 
 
     @Override
@@ -133,11 +141,48 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
         myIntent.putExtra("nr", nr);
         myIntent.putExtra("nc", nc);
         myIntent.putExtra("mode", gameModeFlag);
-
-        startActivity(myIntent);
         pd.dismiss();
-        finish();
+        if(gameModeFlag == 1){
+            //Pedir Nome do Jogador
+            createDialogPlayer2Name(myIntent);
+        }else{
+            startActivity(myIntent);
+            finish();
+        }
+
     }
+
+    /**
+     *  Alert Dialog para pedir o nome do Jogador 2 -> Modo Multiplayer
+     * @param myIntent
+     */
+    public void createDialogPlayer2Name(final Intent myIntent){
+        final EditText editName = new EditText(new ContextThemeWrapper(this, R.style.AppCompatAlertDialogStyle));
+        final AlertDialog ad = new AlertDialog.Builder(this).setTitle("Jogador 2")
+                .setView(editName)
+                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        myIntent.putExtra("player2Name", editName.getText().toString());
+                        startActivity(myIntent);
+                        finish();
+                    }
+                }).setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        finish();
+                    }
+                }).create();
+        editName.setMaxLines(1);
+        editName.setText(R.string.strNome);
+        Button btn;
+        btn = ad.getButton(AlertDialog.BUTTON_POSITIVE);
+        if(btn != null){
+            btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        }
+        ad.show();
+    }
+
 
     public void createProgressDialog(){
         pd = ProgressDialog.show(this, getString(R.string.strCarregarJogo), getString(R.string.strPorFavorAguarde), false, false);
