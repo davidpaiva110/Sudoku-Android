@@ -12,7 +12,6 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
@@ -197,14 +196,14 @@ public class Board extends View {
 
 
             if(!gameData.isPreSet(cellY, cellX) && !gameData.isFinished()) {
-                if(!onApagar && !onNotas) {
+                if(!onApagar && !onNotas && gameData.getValue(cellY, cellX) == 0) {
                     gameData.setValue(cellY, cellX, selectedValue);
                     gameData.validateNumber(cellY, cellX);
                     if(gameData.getValue(cellY, cellX) != 0){ //Se o número inserido for válido
                         gameData.validateNotesAfterNewValidNumber(cellY, cellX);
                         gameData.setPlayerOfInsertedNumber(cellY, cellX);
                         gameData.setCorrectNumberTime();
-                        gameData.updatePlayerScore();
+                        gameData.incrementPlayerScore();
                         gameData.checkTerminateGame();
                         if(gameData.isFinished()){
                             // =========== Gravar os resultados do jogo ===========
@@ -246,8 +245,10 @@ public class Board extends View {
                     }
                 }
                 else if(onApagar){
-                    if(gameData.getValue(cellY, cellX)>0)
+                    if(gameData.getValue(cellY, cellX)>0 && gameData.getPlayerOfInsertedNumber(cellY, cellX) == gameData.getPlayer()) {
                         gameData.setValue(cellY, cellX, 0);
+                        gameData.decrementPlayerScore();
+                    }
                     else {
                         if(gameData.getPlayer() == 1)
                             gameData.resetCellNotes(cellY, cellX); //Apaga todas as notas do jogador 1

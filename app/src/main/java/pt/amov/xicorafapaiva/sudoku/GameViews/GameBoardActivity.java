@@ -151,8 +151,10 @@ public class GameBoardActivity extends AppCompatActivity {
                 dialog.show(getSupportFragmentManager(),"idConfirmarDialog");
                 return true;
             case R.id.solutionIcon:
-                DialogConfirmShowSolution dialogSol = new DialogConfirmShowSolution(sudokuView);
-                dialogSol.show(getSupportFragmentManager(), "idSolutionDialog");
+                if(!gameData.isFinished()) {
+                    DialogConfirmShowSolution dialogSol = new DialogConfirmShowSolution(sudokuView);
+                    dialogSol.show(getSupportFragmentManager(), "idSolutionDialog");
+                }
                 return true;
             case R.id.m1ButtonMenu:   // Botão de volta ao modo 1
                 Intent myIntent;
