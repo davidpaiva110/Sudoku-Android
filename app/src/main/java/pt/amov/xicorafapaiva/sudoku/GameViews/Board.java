@@ -66,36 +66,36 @@ public class Board extends View {
     void createPaints(){
         paintMainLines = new Paint(Paint.DITHER_FLAG);
         paintMainLines.setStyle(Paint.Style.FILL_AND_STROKE);
-        paintMainLines.setColor(Color.BLACK);
+        paintMainLines.setColor(getResources().getColor(R.color.colorBlack));
         paintMainLines.setStrokeWidth(8);
 
         paintSubLines = new Paint(paintMainLines);
         paintSubLines.setStrokeWidth(3);
 
         paintMainNumbers = new Paint(paintSubLines);
-        paintMainNumbers.setColor(Color.rgb(0,0,128));
+        paintMainNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer1));
         paintMainNumbers.setTextSize(32);  //Default value que depois será recalculado tendo em conta o tamanho ca célula
         paintMainNumbers.setTextAlign(Paint.Align.CENTER);
 
         paintSmallNumbers = new Paint(paintMainNumbers);
         paintSmallNumbers.setTextSize(12);
         paintSmallNumbers.setStrokeWidth(2);
-        paintSmallNumbers.setColor(Color.rgb(0,0,128));
+        paintSmallNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer1));
 
         paintPreSetNumbers = new Paint(paintMainNumbers);
-        paintPreSetNumbers.setColor(Color.BLACK);
+        paintPreSetNumbers.setColor(getResources().getColor(R.color.colorBlack));
 
         paintWrongNumbers = new Paint(paintMainNumbers);
-        paintWrongNumbers.setColor(Color.RED);
+        paintWrongNumbers.setColor(getResources().getColor(R.color.colorWrongNumbers));
 
         paintSmallWrongNumbers = new Paint(paintSmallNumbers);
-        paintSmallWrongNumbers.setColor(Color.RED);
+        paintSmallWrongNumbers.setColor(getResources().getColor(R.color.colorWrongNumbers));
 
         paintPlayer2SmallNumbers = new Paint(paintSmallNumbers);
-        paintPlayer2SmallNumbers.setColor(Color.rgb(11, 102, 35));
+        paintPlayer2SmallNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer2));
 
         paintPlayer2MainNumbers = new Paint(paintMainNumbers);
-        paintPlayer2MainNumbers.setColor(Color.rgb(11, 102, 35));
+        paintPlayer2MainNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer2));
     }
 
 
