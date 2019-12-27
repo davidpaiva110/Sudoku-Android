@@ -44,7 +44,7 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     private ArrayList<Integer> aa;
     private Handler h = new Handler();
     private boolean isProgressDialogActive = false;
-
+    private boolean isServidor = false;
     //Flag para saber se é o modo SinglePlayer ou Multiplayer ou Jogo em Rede
     private int gameModeFlag = 0;   // 0 -> SinglePlayer    |    1 -> Multiplayer     |    2 -> Jogo Em Rede
 
@@ -54,8 +54,10 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_difficulty);
-        if(savedInstanceState == null)
+        if(savedInstanceState == null) {
             gameModeFlag = getIntent().getIntExtra("gameModeFlag", 0);
+            isServidor = getIntent().getBooleanExtra("isServidor", false);
+        }
     }
 
     @Override
@@ -63,6 +65,7 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         outState.putBoolean("pd", isProgressDialogActive);
         outState.putInt("gameMode", gameModeFlag);
+        outState.putBoolean("isServidor", isServidor);
     }
 
     @Override
@@ -70,6 +73,7 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
         isProgressDialogActive = savedInstanceState.getBoolean("pd");
         gameModeFlag = savedInstanceState.getInt("gameMode");
+        isServidor = savedInstanceState.getBoolean("isServidor");
         if(isProgressDialogActive == true)
            createProgressDialog();
     }
@@ -133,14 +137,12 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
 
     public void startGameBoardActivity(){
         Intent myIntent;
-        //if(gameModeFlag == 1)
-            //myIntent = new Intent(getBaseContext(),   GameBoardM2Activity.class);
-        //else
-            myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
+        myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
         myIntent.putExtra("board", aa);
         myIntent.putExtra("nr", nr);
         myIntent.putExtra("nc", nc);
         myIntent.putExtra("mode", gameModeFlag);
+        myIntent.putExtra("isServidor", isServidor);
         pd.dismiss();
         if(gameModeFlag == 1){
             //Pedir Nome do Jogador

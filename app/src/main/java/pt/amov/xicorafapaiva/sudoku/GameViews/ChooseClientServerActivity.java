@@ -1,5 +1,6 @@
 package pt.amov.xicorafapaiva.sudoku.GameViews;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -26,7 +27,10 @@ public class ChooseClientServerActivity extends AppCompatActivity {
     }
 
     public void onClickServidor(View view) {
-
-        //finish();
+        Intent myIntent = new Intent(getBaseContext(),   ChooseDifficultyActivity.class);
+        myIntent.putExtra("gameModeFlag", 2);
+        myIntent.putExtra("isServidor", true);
+        startActivity(myIntent);
+        finish();
     }
 }

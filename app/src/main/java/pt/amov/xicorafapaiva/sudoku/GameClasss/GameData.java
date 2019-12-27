@@ -8,7 +8,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 
+import java.io.BufferedReader;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import pt.amov.xicorafapaiva.sudoku.GameViews.PlayerProfileActivity;
 import pt.isec.ans.sudokulibrary.Sudoku;
@@ -58,6 +62,8 @@ public class GameData extends ViewModel implements Serializable {
     public void setGameMode(int gameMode) {
         this.gameMode = gameMode;
     }
+
+
 
     public int getPlayerOfInsertedNumber(int row, int column){
         return numberInsertedPlayer[row][column];
