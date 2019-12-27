@@ -4,45 +4,48 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 import pt.amov.xicorafapaiva.sudoku.R;
-import pt.isec.ans.sudokulibrary.Sudoku;
 
 public class GameBoardActivity extends AppCompatActivity {
 
     public static final int SECOND = 1000;
     private static final int PORT = 8899;
+    private static final int MAX_CLIENTS = 2;
 
     private Board sudokuView;
     private Drawable btBackground;
@@ -55,9 +58,9 @@ public class GameBoardActivity extends AppCompatActivity {
     private boolean isProgressDialogActive = false;
     private Handler procMsg = new Handler();
     private ServerSocket serverSocket=null;
-    private Socket[] clientSockets = null;
-    private BufferedReader[] clientInput;
-    private PrintWriter[] clientOutput;
+    private Socket[] gameSockets = null;
+    private BufferedReader[] gameInputs;
+    private PrintWriter[] gameOutputs;
     private boolean isServidor = false; //Indica se é servidor ou cliente
 
     @Override
@@ -69,8 +72,17 @@ public class GameBoardActivity extends AppCompatActivity {
             setContentView(R.layout.activity_game_board);
         else if(mode == 1)
             setContentView(R.layout.activity_game_board_m2);
-        else if(mode == 2)
+        else if(mode == 2) {
             setContentView(R.layout.activity_game_board_m3);
+            gameSockets = new Socket[MAX_CLIENTS];
+            gameInputs = new BufferedReader[MAX_CLIENTS];
+            gameOutputs = new PrintWriter[MAX_CLIENTS];
+            for (int i = 0; i < MAX_CLIENTS; i++) {
+                gameSockets[i] = null;
+                gameInputs[i] = null;
+                gameOutputs[i] = null;
+            }
+        }
         this.gameData = ViewModelProviders.of(this).get(GameData.class);
         if(savedInstanceState == null) {
             if(getIntent().getBooleanExtra("existingGame", false) == true){  //Modo 2/3 -> Modo 1
@@ -122,23 +134,26 @@ public class GameBoardActivity extends AppCompatActivity {
                     Thread t = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            /*try {
+                            try {
                                 serverSocket = new ServerSocket(PORT);
-                                socketGame = serverSocket.accept();
+                                for (int i = 0; i < MAX_CLIENTS; i++)
+                                        gameSockets[i] = serverSocket.accept();
                                 serverSocket.close();
-                                serverSocket=null;
-                            } catch (Exception e) {
+                                serverSocket = null;
+                            } catch (SocketException ex){
+
+                            }catch (Exception e) {
                                 e.printStackTrace();
-                                socketGame = null;
+                                gameSockets = null;
                             }
                             procMsg.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     pd.dismiss();
-                                    if (socketGame == null)
+                                    if (gameSockets == null) //Colocar toast de aviso
                                         finish();
                                 }
-                            });*/
+                            });
                         }
                     });
                     t.start();
@@ -315,9 +330,9 @@ public class GameBoardActivity extends AppCompatActivity {
         outState.putBoolean("pd", isProgressDialogActive);
         outState.putBoolean("onNotas", sudokuView.getOnNotas());
         outState.putInt("selectedValue", sudokuView.getSelectedValue());
-        outState.putSerializable("clientSockets", clientSockets);
-        outState.putSerializable("clientInputs", clientInput);
-        outState.putSerializable("clientOutputs", clientOutput);
+        outState.putSerializable("gameSockets", gameSockets);
+        outState.putSerializable("clientInputs", gameInputs);
+        outState.putSerializable("clientOutputs", gameOutputs);
         outState.putBoolean("isServidor", isServidor);
         super.onSaveInstanceState(outState);
     }
@@ -328,9 +343,9 @@ public class GameBoardActivity extends AppCompatActivity {
         int selectedValue = savedInstanceState.getInt("selectedValue");
         isProgressDialogActive = savedInstanceState.getBoolean("pd");
         isServidor = savedInstanceState.getBoolean("isServidor");
-        clientSockets = (Socket[]) savedInstanceState.getSerializable("clientSockets");
-        clientInput = (BufferedReader[]) savedInstanceState.getSerializable("clientInputs");
-        clientOutput = (PrintWriter[]) savedInstanceState.getSerializable("clientOutputs");
+        gameSockets = (Socket[]) savedInstanceState.getSerializable("gameSockets");
+        gameInputs = (BufferedReader[]) savedInstanceState.getSerializable("clientInputs");
+        gameOutputs = (PrintWriter[]) savedInstanceState.getSerializable("clientOutputs");
         boolean isOnNotas = savedInstanceState.getBoolean("onNotas");
         boolean isOnApagar = savedInstanceState.getBoolean("onApagar");
         sudokuView = new Board(this, this.gameData, selectedValue,
@@ -346,9 +361,10 @@ public class GameBoardActivity extends AppCompatActivity {
     }
 
     public void createProgressDialog(){
+        String ip = getLocalIpAddress();
         pd = new ProgressDialog(this);
         pd.setTitle(getString(R.string.strEsperarClientes));
-        pd.setMessage(getString(R.string.strIniciarJogo));
+        pd.setMessage(getString(R.string.strIniciarJogo) + "\n(IP: " + ip + ")");
         pd.setCancelable(false);
         pd.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.strCancelar), new DialogInterface.OnClickListener() {
             @Override
@@ -357,14 +373,43 @@ public class GameBoardActivity extends AppCompatActivity {
                 finish();
             }
         });
-        pd.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.strIniciar), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        pd.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.strIniciar), (DialogInterface.OnClickListener) null);
+        pd.show();
 
-                dialog.dismiss();
+        Button pdButton = pd.getButton(DialogInterface.BUTTON_POSITIVE);
+        pdButton.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick ( View view ) {
+                if(gameSockets[0] != null) { //Se houver pelo menos 1 cliente
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else{
+                    Toast.makeText(getApplicationContext(), R.string.strSemJogadoresLigados, Toast.LENGTH_LONG).show();
+                }
             }
         });
-        pd.show();
+    }
+
+    public static String getLocalIpAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf
+                        .getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()
+                            && inetAddress instanceof Inet4Address) {
+                        return inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     private void restoreButtonsSettings(int selectedButton, boolean isOnNotas, boolean isOnApagar){

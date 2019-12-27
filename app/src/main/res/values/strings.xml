@@ -56,4 +56,5 @@
     <string name="strIniciar">Iniciar</string>
     <string name="str_erro_ligacao_net">Erro: Não existe ligação à Internet!</string>
     <string name="str_ip_do_servidor">IP do Servidor</string>
+    <string name="strSemJogadoresLigados">Não existe nenhum cliente conectado!</string>
 </resources>

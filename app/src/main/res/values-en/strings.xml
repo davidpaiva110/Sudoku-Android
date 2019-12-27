@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Sudoku</string>
+    <string name="title_activity_credits">CreditsActivity</string>
+    <string name="title_activity_player_profile">PlayerProfileActivity</string>
+    <string name="title_activity_results_historic">ResultsHistoricActivity</string>
+    <string name="title_activity_choose_client_server">ChooseClientServerActivity</string>
+    <string name="title_activity_choose_difficulty">ChooseDifficultyActivity</string>
+    <string name="title_activity_game_board_m1">GameBoardM1Activity</string>
     <string name="strCancelar">Cancel</string>
     <string name="strCliente">Client</string>
     <string name="strConfirmar">Confirm</string>
@@ -49,4 +55,7 @@
     <string name="strEsperarClientes">Waiting Clients...</string>
     <string name="strIniciarJogo">"Start the game when at least 1 client is connected!"</string>
     <string name="strIniciar">Start</string>
+    <string name="strSemJogadoresLigados">There are no clients connected!</string>
+    <string name="str_erro_ligacao_net">Error: No connection to internet!</string>
+    <string name="str_ip_do_servidor">Server IP</string>
 </resources>
