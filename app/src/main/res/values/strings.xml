@@ -54,4 +54,5 @@
     <string name="strEsperarClientes">Aguardando Clientes...</string>
     <string name="strIniciarJogo">Inicie o jogo quando estiver pelo menos 1 cliente conectado!</string>
     <string name="strIniciar">Iniciar</string>
+    <string name="strSemJogadoresLigados">Não existe nenhum cliente conectado!</string>
 </resources>
