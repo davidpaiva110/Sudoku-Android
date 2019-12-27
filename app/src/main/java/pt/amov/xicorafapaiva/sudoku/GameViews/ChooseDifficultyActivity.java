@@ -177,7 +177,7 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
      */
     public void createDialogPlayer2Name(){
         editName = new EditText(new ContextThemeWrapper(this, R.style.AppCompatAlertDialogStyle));
-        final AlertDialog ad = new AlertDialog.Builder(this).setTitle("Jogador 2")
+        final AlertDialog ad = new AlertDialog.Builder(this).setTitle(R.string.strJogador_2)
                 .setView(editName)
                 .setPositiveButton(R.string.strConfirmar, new DialogInterface.OnClickListener() {
                     @Override
@@ -200,11 +200,6 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
                 .create();
         editName.setMaxLines(1);
         editName.setText(namePlayer2);
-        Button btn;
-        btn = ad.getButton(AlertDialog.BUTTON_POSITIVE);
-        if(btn != null){
-            btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        }
         ad.show();
         isPlayerNameDialogActive = true;
     }

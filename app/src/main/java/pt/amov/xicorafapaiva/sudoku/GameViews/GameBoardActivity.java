@@ -86,25 +86,27 @@ public class GameBoardActivity extends AppCompatActivity {
                 gameData.setNumberInsertedPlayer(auxGameData.getNumberInsertedPlayer());
                 gameData.setBoard(auxGameData.getBoard());
             } else {
-                //Player1 Name
-                gameData.addPlayerName(PlayerProfileActivity.getPlayerName(this));
-                //Player2 Name
-                if(mode == 1)
-                    gameData.addPlayerName(getIntent().getStringExtra("player2Name"));
                 isServidor = getIntent().getBooleanExtra("isServidor", false);
-                int nr = getIntent().getIntExtra("nr", 9);
-                int nc = getIntent().getIntExtra("nc", 9);
-                ArrayList<Integer> alBoard = getIntent().getIntegerArrayListExtra("board");
-                int[][] tabuleiro = new int[nr][nc];
-                int aux = 0;
-                for (int r = 0; r < nr; r++) {
-                    for (int c = 0; c < nc; c++) {
-                        tabuleiro[r][c] = alBoard.get(aux);
-                        aux++;
+                if(!(mode == 2 && !isServidor)) {
+                    //Player1 Name
+                    gameData.addPlayerName(PlayerProfileActivity.getPlayerName(this));
+                    //Player2 Name
+                    if (mode == 1)
+                        gameData.addPlayerName(getIntent().getStringExtra("player2Name"));
+                    int nr = getIntent().getIntExtra("nr", 9);
+                    int nc = getIntent().getIntExtra("nc", 9);
+                    ArrayList<Integer> alBoard = getIntent().getIntegerArrayListExtra("board");
+                    int[][] tabuleiro = new int[nr][nc];
+                    int aux = 0;
+                    for (int r = 0; r < nr; r++) {
+                        for (int c = 0; c < nc; c++) {
+                            tabuleiro[r][c] = alBoard.get(aux);
+                            aux++;
+                        }
                     }
+                    this.gameData.setBoard(tabuleiro);
+                    this.gameData.setGameMode(mode);
                 }
-                this.gameData.setBoard(tabuleiro);
-                this.gameData.setGameMode(mode);
             }
             FrameLayout flSudoku = findViewById(R.id.flSudoku);
             sudokuView = new Board(this, this.gameData);

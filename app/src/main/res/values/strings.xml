@@ -54,4 +54,6 @@
     <string name="strEsperarClientes">Aguardando Clientes...</string>
     <string name="strIniciarJogo">Inicie o jogo quando estiver pelo menos 1 cliente conectado!</string>
     <string name="strIniciar">Iniciar</string>
+    <string name="str_erro_ligacao_net">Erro: Não existe ligação à Internet!</string>
+    <string name="str_ip_do_servidor">IP do Servidor</string>
 </resources>
