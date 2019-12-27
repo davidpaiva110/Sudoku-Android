@@ -24,6 +24,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -175,6 +177,7 @@ public class GameBoardActivity extends AppCompatActivity {
             public void run() {
                 try {
                     gameSockets[0] = new Socket(serverIP, serverPORT);
+                    Log.d("Paivaaa", "new Socket");
                 } catch (Exception e) {
                     gameSockets[0] = null;
                 }
@@ -188,20 +191,30 @@ public class GameBoardActivity extends AppCompatActivity {
                     });
                     return;
                 }
-                clientServerCommunication.start();
+                clientCommunication.start();
             }
         });
         t.start();
     }
 
-    Thread clientServerCommunication = new Thread(new Runnable() {
+    Thread clientCommunication = new Thread(new Runnable() {
         @Override
         public void run() {
             try {
-                gameInputs[0] = new BufferedReader(new InputStreamReader(
-                        gameSockets[0].getInputStream()));
+                Log.d("Paivaaa", "clientCommunication: inicio do run");
+                gameInputs[0] = new BufferedReader(new InputStreamReader(gameSockets[0].getInputStream()));
                 gameOutputs[0] = new PrintWriter(gameSockets[0].getOutputStream());
+                //Receber o GameData
+                String gameDataJSON = gameInputs[0].readLine();
+                JSONObject jsonObject = new JSONObject(gameDataJSON);
+                int  gd = (int) jsonObject.get("gameData");
+                Log.d("Paivaaa", "REcebi o gameborad");
+                Log.d("Paivaaa", "Valor GameData:" + gd);
+
+                //Enviar o nome e a foto do jogador ao servidor
+
                 while (!Thread.currentThread().isInterrupted()) {
+
 //                    String read = gameInputs[0].readLine();
 //                    final int move = Integer.parseInt(read);
 //                    Log.d("RPS", "Received: " + move);
@@ -213,6 +226,7 @@ public class GameBoardActivity extends AppCompatActivity {
 //                    });
                 }
             } catch (Exception e) {
+                Log.d("Paivaaa", e.toString());
                 procMsg.post(new Runnable() {
                     @Override
                     public void run() {
