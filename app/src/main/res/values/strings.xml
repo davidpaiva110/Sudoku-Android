@@ -58,4 +58,6 @@
     <string name="str_ip_do_servidor">IP do Servidor</string>
     <string name="strSemJogadoresLigados">Não existe nenhum cliente conectado!</string>
     <string name="str_erro_ligaçãoCliente">Impossível estabelecer ligação ao servidor com o IP:</string>
+    <string name="strErroComunicacao">Erro: Ocorreu um erro de comunicação!</string>
+    <string name="strNovoClienteLigado">Cliente conectado!</string>
 </resources>
