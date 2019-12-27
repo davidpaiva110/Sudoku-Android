@@ -6,6 +6,7 @@ import android.widget.ArrayAdapter;
 
 import androidx.lifecycle.ViewModel;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -534,4 +535,13 @@ public class GameData extends ViewModel implements Serializable {
         this.numberInsertedPlayer = numberInsertedPlayer;
     }
 
+    public String toStringJSONFormat(){
+        JSONObject json = new JSONObject();
+        try {
+            json.putOpt("gameData", player);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json.toString();
+    }
 }

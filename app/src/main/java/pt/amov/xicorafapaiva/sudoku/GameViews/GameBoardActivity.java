@@ -141,20 +141,25 @@ public class GameBoardActivity extends AppCompatActivity {
                                 serverSocket = new ServerSocket(PORT);
                                 for (int i = 0; i < MAX_CLIENTS; i++) {
                                     gameSockets[i] = serverSocket.accept();
-                                    Toast.makeText(getApplicationContext(), R.string.strNovoClienteLigado, Toast.LENGTH_LONG).show();
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getApplicationContext(), R.string.strNovoClienteLigado, Toast.LENGTH_LONG).show();
+                                        }
+                                    });
                                 }
                                 serverSocket.close();
                                 serverSocket = null;
                             } catch (SocketException ex){
 
                             }catch (Exception e) {
-                                e.printStackTrace();
                                 gameSockets = null;
                             }
                             procMsg.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     pd.dismiss();
+                                    isProgressDialogActive = false;
                                     if (gameSockets == null) {
                                         Toast.makeText(getApplicationContext(), R.string.strErroComunicacao, Toast.LENGTH_LONG).show();
                                         finish();
@@ -533,10 +538,20 @@ public class GameBoardActivity extends AppCompatActivity {
     Thread serverCommunication = new Thread(new Runnable() {
         @Override
         public void run() {
-            /*try {
-                input = new BufferedReader(new InputStreamReader(
-                        socketGame.getInputStream()));
-                output = new PrintWriter(socketGame.getOutputStream());
+            try {
+                for (int i = 0; i < MAX_CLIENTS; i++) {
+                    if(gameSockets[i] != null){
+                        //Criação dos inputs e outputs
+                        gameInputs[i] = new BufferedReader(new InputStreamReader(gameSockets[i].getInputStream()));
+                        gameOutputs[i] = new PrintWriter(gameSockets[i].getOutputStream());
+                        //Envio do gameData inicial
+                        gameOutputs[i].println(gameData.toStringJSONFormat());
+                        gameOutputs[i].flush();
+                        Log.i("RAFAAA", "toStringJSONFormat: " + gameData.toStringJSONFormat());
+
+                    }
+                }
+/*
                 while (!Thread.currentThread().isInterrupted()) {
                     String read = input.readLine();
                     final int move = Integer.parseInt(read);
@@ -547,9 +562,9 @@ public class GameBoardActivity extends AppCompatActivity {
                             moveOtherPlayer(move);
                         }
                     });
-                }
+                }*/
             } catch (Exception e) {
-                procMsg.post(new Runnable() {
+                /*procMsg.post(new Runnable() {
                     @Override
                     public void run() {
                         finish();
@@ -557,14 +572,7 @@ public class GameBoardActivity extends AppCompatActivity {
                                 R.string.game_finished, Toast.LENGTH_LONG)
                                 .show();
                     }
-                });
-            }*/
-            while (true){
-                try {
-                    Thread.sleep(SECOND);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                });*/
             }
         }
     });
