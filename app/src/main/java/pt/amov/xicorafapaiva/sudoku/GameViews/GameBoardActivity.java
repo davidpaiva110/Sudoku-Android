@@ -127,7 +127,8 @@ public class GameBoardActivity extends AppCompatActivity {
             flSudoku.addView(sudokuView);
             btBackground = findViewById(R.id.btnNotas).getBackground();
             initializeButtons();
-            setupTimer();
+            if(gameData.getGameMode() != 2)
+                setupTimer();
             initializaPlayerNames();
             if(mode == 2){
                 if(isServidor) {
@@ -138,8 +139,10 @@ public class GameBoardActivity extends AppCompatActivity {
                         public void run() {
                             try {
                                 serverSocket = new ServerSocket(PORT);
-                                for (int i = 0; i < MAX_CLIENTS; i++)
-                                        gameSockets[i] = serverSocket.accept();
+                                for (int i = 0; i < MAX_CLIENTS; i++) {
+                                    gameSockets[i] = serverSocket.accept();
+                                    Toast.makeText(getApplicationContext(), R.string.strNovoClienteLigado, Toast.LENGTH_LONG).show();
+                                }
                                 serverSocket.close();
                                 serverSocket = null;
                             } catch (SocketException ex){
@@ -152,8 +155,12 @@ public class GameBoardActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     pd.dismiss();
-                                    if (gameSockets == null) //Colocar toast de aviso
+                                    if (gameSockets == null) {
+                                        Toast.makeText(getApplicationContext(), R.string.strErroComunicacao, Toast.LENGTH_LONG).show();
                                         finish();
+                                    }
+                                    serverCommunication.start();
+                                    setupTimer();
                                 }
                             });
                         }
@@ -435,6 +442,7 @@ public class GameBoardActivity extends AppCompatActivity {
         pd.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.strIniciar), (DialogInterface.OnClickListener) null);
         pd.show();
 
+        //Este listener é feito depois do show() para ser possível carregar no botão sem fechar automaticamente a Dialog
         Button pdButton = pd.getButton(DialogInterface.BUTTON_POSITIVE);
         pdButton.setOnClickListener( new View.OnClickListener() {
             @Override
@@ -443,7 +451,6 @@ public class GameBoardActivity extends AppCompatActivity {
                     try {
                         serverSocket.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
                     }
                 } else{
                     Toast.makeText(getApplicationContext(), R.string.strSemJogadoresLigados, Toast.LENGTH_LONG).show();
@@ -523,5 +530,42 @@ public class GameBoardActivity extends AppCompatActivity {
 
     }
 
-
+    Thread serverCommunication = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            /*try {
+                input = new BufferedReader(new InputStreamReader(
+                        socketGame.getInputStream()));
+                output = new PrintWriter(socketGame.getOutputStream());
+                while (!Thread.currentThread().isInterrupted()) {
+                    String read = input.readLine();
+                    final int move = Integer.parseInt(read);
+                    Log.d("RPS", "Received: " + move);
+                    procMsg.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            moveOtherPlayer(move);
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                procMsg.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                        Toast.makeText(getApplicationContext(),
+                                R.string.game_finished, Toast.LENGTH_LONG)
+                                .show();
+                    }
+                });
+            }*/
+            while (true){
+                try {
+                    Thread.sleep(SECOND);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    });
 }
