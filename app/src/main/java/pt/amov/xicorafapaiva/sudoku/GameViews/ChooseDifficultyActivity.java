@@ -44,34 +44,52 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
     private ArrayList<Integer> aa;
     private Handler h = new Handler();
     private boolean isProgressDialogActive = false;
+    private boolean isPlayerNameDialogActive = false;
 
     //Flag para saber se é o modo SinglePlayer ou Multiplayer ou Jogo em Rede
     private int gameModeFlag = 0;   // 0 -> SinglePlayer    |    1 -> Multiplayer     |    2 -> Jogo Em Rede
-
+    private EditText editName;
+    private String namePlayer2;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_difficulty);
-        if(savedInstanceState == null)
+        if(savedInstanceState == null) {
             gameModeFlag = getIntent().getIntExtra("gameModeFlag", 0);
+            namePlayer2 = getString(R.string.strJogador_2);
+        }
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("pd", isProgressDialogActive);
+        outState.putBoolean("pdPlayerName", isPlayerNameDialogActive);
         outState.putInt("gameMode", gameModeFlag);
+        outState.putIntegerArrayList("aa", aa);
+        outState.putInt("nr", nr);
+        outState.putInt("nc", nc);
+        if(editName != null)
+            namePlayer2 = editName.getText().toString();
+        outState.putString("Player2Name", namePlayer2);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         isProgressDialogActive = savedInstanceState.getBoolean("pd");
+        isPlayerNameDialogActive = savedInstanceState.getBoolean("pdPlayerName");
         gameModeFlag = savedInstanceState.getInt("gameMode");
+        aa = savedInstanceState.getIntegerArrayList("aa");
+        nr = savedInstanceState.getInt("nr");
+        nc = savedInstanceState.getInt("nc");
+        namePlayer2 = savedInstanceState.getString("Player2Name");
         if(isProgressDialogActive == true)
            createProgressDialog();
+        if(isPlayerNameDialogActive == true)
+            createDialogPlayer2Name();
     }
 
     public void onClickCFacil(View view) {
@@ -141,10 +159,11 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
         myIntent.putExtra("nr", nr);
         myIntent.putExtra("nc", nc);
         myIntent.putExtra("mode", gameModeFlag);
-        pd.dismiss();
+        if(pd != null && pd.isShowing())
+            pd.dismiss();
         if(gameModeFlag == 1){
             //Pedir Nome do Jogador
-            createDialogPlayer2Name(myIntent);
+            createDialogPlayer2Name();
         }else{
             startActivity(myIntent);
             finish();
@@ -154,15 +173,19 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
 
     /**
      *  Alert Dialog para pedir o nome do Jogador 2 -> Modo Multiplayer
-     * @param myIntent
      */
-    public void createDialogPlayer2Name(final Intent myIntent){
-        final EditText editName = new EditText(new ContextThemeWrapper(this, R.style.AppCompatAlertDialogStyle));
+    public void createDialogPlayer2Name(){
+        editName = new EditText(new ContextThemeWrapper(this, R.style.AppCompatAlertDialogStyle));
         final AlertDialog ad = new AlertDialog.Builder(this).setTitle("Jogador 2")
                 .setView(editName)
                 .setPositiveButton(R.string.strConfirmar, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        Intent myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
+                        myIntent.putExtra("board", aa);
+                        myIntent.putExtra("nr", nr);
+                        myIntent.putExtra("nc", nc);
+                        myIntent.putExtra("mode", gameModeFlag);
                         myIntent.putExtra("player2Name", editName.getText().toString());
                         startActivity(myIntent);
                         finish();
@@ -172,15 +195,17 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
                     public void onCancel(DialogInterface dialog) {
                         finish();
                     }
-                }).create();
+                })
+                .create();
         editName.setMaxLines(1);
-        editName.setText(R.string.strNome);
+        editName.setText(namePlayer2);
         Button btn;
         btn = ad.getButton(AlertDialog.BUTTON_POSITIVE);
         if(btn != null){
             btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
         ad.show();
+        isPlayerNameDialogActive = true;
     }
 
 

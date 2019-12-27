@@ -5,8 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -18,8 +21,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
@@ -48,7 +55,17 @@ public class GameBoardActivity extends AppCompatActivity {
         this.gameData = ViewModelProviders.of(this).get(GameData.class);
         if(savedInstanceState == null) {
             if(getIntent().getBooleanExtra("existingGame", false) == true){  //Modo 2/3 -> Modo 1
-                gameData = (GameData) getIntent().getSerializableExtra("gameData");
+                GameData auxGameData = (GameData) getIntent().getSerializableExtra("gameData");
+                gameData.setInvalidNumbers(auxGameData.getInvalidNumbers());
+                gameData.setPreSetNumbers(auxGameData.getPreSetNumbers());
+                gameData.setNotes(auxGameData.getNotes());
+                gameData.setInvalideNotes(auxGameData.getInvalideNotes());
+                gameData.setGameTime(auxGameData.getGameTime());
+                gameData.setFinished(auxGameData.isFinished());
+                gameData.setGameMode(auxGameData.getGameMode());
+                gameData.setPlayerScores(auxGameData.getPlayerScores());
+                gameData.setNumberInsertedPlayer(auxGameData.getNumberInsertedPlayer());
+                gameData.setBoard(auxGameData.getBoard());
             } else {
                 //Player1 Name
                 gameData.addPlayerName(PlayerProfileActivity.getPlayerName(this));
@@ -76,6 +93,7 @@ public class GameBoardActivity extends AppCompatActivity {
             btBackground = findViewById(R.id.btnNotas).getBackground();
             initializeButtons();
             setupTimer();
+            initializaPlayerNames();
         }
     }
 
@@ -259,6 +277,7 @@ public class GameBoardActivity extends AppCompatActivity {
         flSudoku.addView(sudokuView);
         btBackground = findViewById(R.id.btnNotas).getBackground();
         restoreButtonsSettings(selectedValue, isOnNotas, isOnApagar);
+        initializaPlayerNames();
     }
 
     private void restoreButtonsSettings(int selectedButton, boolean isOnNotas, boolean isOnApagar){
@@ -293,11 +312,24 @@ public class GameBoardActivity extends AppCompatActivity {
     }
 
     public void initializaPlayerNames(){
-        if(gameData.getGameMode() == 1){
+        if(gameData.getGameMode() == 1){  // Modo 2
+            TextView tvName1 = findViewById(R.id.tvNomePlayer1);
+            tvName1.setText(gameData.getPlayerName(0));
             TextView tvName2 = findViewById(R.id.tvNomePlayer2);
-            tvName2.setText(gameData.getPlayerName(2));
-
+            tvName2.setText(gameData.getPlayerName(1));
+            ImageView imageView = findViewById(R.id.ivPlayer1);
+            ContextWrapper cw = new ContextWrapper(getApplicationContext());
+            File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+            File f=new File(directory.getAbsolutePath(), "profile.jpg");
+            try {
+                if(imageView != null)
+                    imageView.setImageBitmap(BitmapFactory.decodeStream(new FileInputStream(f)));
+            } catch (FileNotFoundException e) {
+            }
         }
+        if(gameData.getGameMode() == 2){  // Modo 3
+        }
+
     }
 
 

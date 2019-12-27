@@ -329,10 +329,23 @@ public class Board extends View {
      * Gravar os resultados do jogo
      */
     public void saveGameResult(){
-        GameHistoryData ghd = new GameHistoryData( PlayerProfileActivity.getPlayerName(getContext()), "M1", gameData.getGameTime(), gameData.getPlayerScore(1));
-        GameHistoryViewModel ghvm = new GameHistoryViewModel(getContext());
-        ghvm.addNewGame(ghd);
-        ghvm.saveHistory();
+        if(gameData.getGameMode() == 0) {
+            GameHistoryData ghd = new GameHistoryData(PlayerProfileActivity.getPlayerName(getContext()), "M1", gameData.getGameTime(), gameData.getPlayerScore(1));
+            GameHistoryViewModel ghvm = new GameHistoryViewModel(getContext());
+            ghvm.addNewGame(ghd);
+            ghvm.saveHistory();
+        }else if(gameData.getGameMode() == 1){
+            int indexWinnerPlayer;
+            if(gameData.getPlayerScore(1) > gameData.getPlayerScore(2))
+                indexWinnerPlayer = 1;
+            else
+                indexWinnerPlayer = 2;
+            GameHistoryData ghd = new GameHistoryData(gameData.getPlayerName(indexWinnerPlayer-1), "M2", gameData.getGameTime(), gameData.getPlayerScore(indexWinnerPlayer));
+            GameHistoryViewModel ghvm = new GameHistoryViewModel(getContext());
+            ghvm.addNewGame(ghd);
+            ghvm.saveHistory();
+
+        }
     }
 
 

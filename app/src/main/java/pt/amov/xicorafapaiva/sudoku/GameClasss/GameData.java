@@ -471,4 +471,61 @@ public class GameData extends ViewModel implements Serializable {
             return null;
         return playerNames.get(indexPLayer);
     }
+
+    public int[][] getInvalidNumbers() {
+        return invalidNumbers;
+    }
+
+    public void setInvalidNumbers(int[][] invalidNumbers) {
+        this.invalidNumbers = invalidNumbers;
+    }
+
+    public boolean[][] getPreSetNumbers() {
+        return preSetNumbers;
+    }
+
+    public void setPreSetNumbers(boolean[][] preSetNumbers) {
+        this.preSetNumbers = preSetNumbers;
+    }
+
+    public int[][][] getNotes() {
+        return notes;
+    }
+
+    public void setNotes(int[][][] notes) {
+        this.notes = notes;
+    }
+
+    public int[][][] getInvalideNotes() {
+        return invalideNotes;
+    }
+
+    public void setInvalideNotes(int[][][] invalideNotes) {
+        this.invalideNotes = invalideNotes;
+    }
+
+    public void setGameTime(int gameTime) {
+        this.gameTime = gameTime;
+    }
+
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
+
+    public int[] getPlayerScores() {
+        return playerScores;
+    }
+
+    public void setPlayerScores(int[] playerScores) {
+        this.playerScores = playerScores;
+    }
+
+    public int[][] getNumberInsertedPlayer() {
+        return numberInsertedPlayer;
+    }
+
+    public void setNumberInsertedPlayer(int[][] numberInsertedPlayer) {
+        this.numberInsertedPlayer = numberInsertedPlayer;
+    }
+
 }
