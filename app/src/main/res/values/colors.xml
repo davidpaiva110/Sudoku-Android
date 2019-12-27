@@ -3,4 +3,10 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="colorBlack">#000000</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorGray">#888888</color>
+    <color name="colorNumbersPlayer1">#000080</color>
+    <color name="colorWrongNumbers">#CC0000</color>
+    <color name="colorNumbersPlayer2">#0B6623</color>
 </resources>

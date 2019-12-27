@@ -12,7 +12,6 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
@@ -67,36 +66,36 @@ public class Board extends View {
     void createPaints(){
         paintMainLines = new Paint(Paint.DITHER_FLAG);
         paintMainLines.setStyle(Paint.Style.FILL_AND_STROKE);
-        paintMainLines.setColor(Color.BLACK);
+        paintMainLines.setColor(getResources().getColor(R.color.colorBlack));
         paintMainLines.setStrokeWidth(8);
 
         paintSubLines = new Paint(paintMainLines);
         paintSubLines.setStrokeWidth(3);
 
         paintMainNumbers = new Paint(paintSubLines);
-        paintMainNumbers.setColor(Color.rgb(0,0,128));
+        paintMainNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer1));
         paintMainNumbers.setTextSize(32);  //Default value que depois será recalculado tendo em conta o tamanho ca célula
         paintMainNumbers.setTextAlign(Paint.Align.CENTER);
 
         paintSmallNumbers = new Paint(paintMainNumbers);
         paintSmallNumbers.setTextSize(12);
         paintSmallNumbers.setStrokeWidth(2);
-        paintSmallNumbers.setColor(Color.rgb(0,0,128));
+        paintSmallNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer1));
 
         paintPreSetNumbers = new Paint(paintMainNumbers);
-        paintPreSetNumbers.setColor(Color.BLACK);
+        paintPreSetNumbers.setColor(getResources().getColor(R.color.colorBlack));
 
         paintWrongNumbers = new Paint(paintMainNumbers);
-        paintWrongNumbers.setColor(Color.RED);
+        paintWrongNumbers.setColor(getResources().getColor(R.color.colorWrongNumbers));
 
         paintSmallWrongNumbers = new Paint(paintSmallNumbers);
-        paintSmallWrongNumbers.setColor(Color.RED);
+        paintSmallWrongNumbers.setColor(getResources().getColor(R.color.colorWrongNumbers));
 
         paintPlayer2SmallNumbers = new Paint(paintSmallNumbers);
-        paintPlayer2SmallNumbers.setColor(Color.rgb(11, 102, 35));
+        paintPlayer2SmallNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer2));
 
         paintPlayer2MainNumbers = new Paint(paintMainNumbers);
-        paintPlayer2MainNumbers.setColor(Color.rgb(11, 102, 35));
+        paintPlayer2MainNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer2));
     }
 
 
@@ -197,14 +196,14 @@ public class Board extends View {
 
 
             if(!gameData.isPreSet(cellY, cellX) && !gameData.isFinished()) {
-                if(!onApagar && !onNotas) {
+                if(!onApagar && !onNotas && gameData.getValue(cellY, cellX) == 0) {
                     gameData.setValue(cellY, cellX, selectedValue);
                     gameData.validateNumber(cellY, cellX);
                     if(gameData.getValue(cellY, cellX) != 0){ //Se o número inserido for válido
                         gameData.validateNotesAfterNewValidNumber(cellY, cellX);
                         gameData.setPlayerOfInsertedNumber(cellY, cellX);
                         gameData.setCorrectNumberTime();
-                        gameData.updatePlayerScore();
+                        gameData.incrementPlayerScore();
                         gameData.checkTerminateGame();
                         if(gameData.isFinished()){
                             // =========== Gravar os resultados do jogo ===========
@@ -246,8 +245,10 @@ public class Board extends View {
                     }
                 }
                 else if(onApagar){
-                    if(gameData.getValue(cellY, cellX)>0)
+                    if(gameData.getValue(cellY, cellX)>0 && gameData.getPlayerOfInsertedNumber(cellY, cellX) == gameData.getPlayer()) {
                         gameData.setValue(cellY, cellX, 0);
+                        gameData.decrementPlayerScore();
+                    }
                     else {
                         if(gameData.getPlayer() == 1)
                             gameData.resetCellNotes(cellY, cellX); //Apaga todas as notas do jogador 1

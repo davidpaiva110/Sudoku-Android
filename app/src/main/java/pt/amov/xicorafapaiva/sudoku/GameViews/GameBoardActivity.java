@@ -106,21 +106,21 @@ public class GameBoardActivity extends AppCompatActivity {
                                     tvTempoJogo.setText("" + gameData.getPlayerTime());
                                     //Atualiza as cores dos nomes do jogador para destacar o jogador atual
                                     if(gameData.getPlayer() == 1){
-                                        ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(Color.rgb(0,0,128));
-                                        ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(Color.rgb(0,0,128));
-                                        ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(Color.rgb(0,0,128));
-                                        ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(Color.GRAY);
-                                        ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(Color.GRAY);
-                                        ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(Color.GRAY);
+                                        ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer1));
+                                        ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer1));
+                                        ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer1));
+                                        ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(getResources().getColor(R.color.colorGray));
+                                        ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(getResources().getColor(R.color.colorGray));
+                                        ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(getResources().getColor(R.color.colorGray));
 
                                     }
                                     else if(gameData.getPlayer() == 2){
-                                        ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(Color.rgb(11, 102, 35));
-                                        ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(Color.rgb(11, 102, 35));
-                                        ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(Color.rgb(11, 102, 35));
-                                        ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(Color.GRAY);
-                                        ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(Color.GRAY);
-                                        ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(Color.GRAY);
+                                        ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer2));
+                                        ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer2));
+                                        ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer2));
+                                        ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(getResources().getColor(R.color.colorGray));
+                                        ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(getResources().getColor(R.color.colorGray));
+                                        ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(getResources().getColor(R.color.colorGray));
                                     }
                                 }
                             }
@@ -157,8 +157,10 @@ public class GameBoardActivity extends AppCompatActivity {
                 dialog.show(getSupportFragmentManager(),"idConfirmarDialog");
                 return true;
             case R.id.solutionIcon:
-                DialogConfirmShowSolution dialogSol = new DialogConfirmShowSolution(sudokuView);
-                dialogSol.show(getSupportFragmentManager(), "idSolutionDialog");
+                if(!gameData.isFinished()) {
+                    DialogConfirmShowSolution dialogSol = new DialogConfirmShowSolution(sudokuView);
+                    dialogSol.show(getSupportFragmentManager(), "idSolutionDialog");
+                }
                 return true;
             case R.id.m1ButtonMenu:   // Botão de volta ao modo 1
                 Intent myIntent;
@@ -181,7 +183,7 @@ public class GameBoardActivity extends AppCompatActivity {
         sudokuView.setSelectedValue(1);
         resetNumbersColor();
         btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        btn.setTextColor(Color.WHITE);
+        btn.setTextColor(getResources().getColor(R.color.colorWhite));
     }
 
     // onClick dos Números
@@ -192,7 +194,7 @@ public class GameBoardActivity extends AppCompatActivity {
         sudokuView.setSelectedValue(number);
         resetNumbersColor();
         btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        btn.setTextColor(Color.WHITE);
+        btn.setTextColor(getResources().getColor(R.color.colorWhite));
     }
 
     private void resetNumbersColor(){
@@ -207,7 +209,7 @@ public class GameBoardActivity extends AppCompatActivity {
                 R.id.btnNumber9};
         for (int i = 0; i < 9; i++) {
             findViewById(buttonsIDs[i]).setBackground(btBackground);
-            ((Button)findViewById(buttonsIDs[i])).setTextColor(Color.BLACK);
+            ((Button)findViewById(buttonsIDs[i])).setTextColor(getResources().getColor(R.color.colorBlack));
         }
     }
 
@@ -215,11 +217,11 @@ public class GameBoardActivity extends AppCompatActivity {
         if(sudokuView.isOnNotas()) {
             sudokuView.setOnNotas(false);
             view.setBackground(btBackground);
-            ((Button)view).setTextColor(Color.BLACK);
+            ((Button)view).setTextColor(getResources().getColor(R.color.colorBlack));
         }else{
             sudokuView.setOnNotas(true);
             view.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            ((Button)view).setTextColor(Color.WHITE);
+            ((Button)view).setTextColor(getResources().getColor(R.color.colorWhite));
         }
     }
 
@@ -227,11 +229,11 @@ public class GameBoardActivity extends AppCompatActivity {
         if(sudokuView.isOnApagar()) {
             sudokuView.setOnApagar(false);
             view.setBackground(btBackground);
-            ((Button)view).setTextColor(Color.BLACK);
+            ((Button)view).setTextColor(getResources().getColor(R.color.colorBlack));
         }else{
             sudokuView.setOnApagar(true);
             view.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            ((Button)view).setTextColor(Color.WHITE);
+            ((Button)view).setTextColor(getResources().getColor(R.color.colorWhite));
         }
     }
 
@@ -275,18 +277,18 @@ public class GameBoardActivity extends AppCompatActivity {
         for (int i = 0; i < 9; i++) {
             if(i == selectedButton){
                 findViewById(buttonsIDs[i]).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                ((Button)findViewById(buttonsIDs[i])).setTextColor(Color.WHITE);
+                ((Button)findViewById(buttonsIDs[i])).setTextColor(getResources().getColor(R.color.colorWhite));
             }
         }
         if(isOnNotas){
             Button btnNotas = (Button)findViewById(R.id.btnNotas);
-            btnNotas.setBackgroundColor(getResources().getColor(R.color.coslorPrimary));
-            btnNotas.setTextColor(Color.WHITE);
+            btnNotas.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            btnNotas.setTextColor(getResources().getColor(R.color.colorWhite));
         }
         if(isOnApagar){
             Button btnApagar = (Button)findViewById(R.id.btnApagar);
             btnApagar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            btnApagar.setTextColor(Color.WHITE);
+            btnApagar.setTextColor(getResources().getColor(R.color.colorWhite));
         }
     }
 

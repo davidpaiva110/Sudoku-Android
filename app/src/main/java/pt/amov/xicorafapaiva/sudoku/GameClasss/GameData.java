@@ -434,8 +434,12 @@ public class GameData extends ViewModel implements Serializable {
         playerTime = CORRECT_NUMBER_TIME;
     }
 
-    public void updatePlayerScore() {
+    public void incrementPlayerScore() {
         playerScores[player - 1]++;
+    }
+
+    public void decrementPlayerScore() {
+        playerScores[player - 1]--;
     }
 
     private void initializePlayerScores(){
