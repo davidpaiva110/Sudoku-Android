@@ -47,9 +47,15 @@ public class GameBoardActivity extends AppCompatActivity {
             setContentView(R.layout.activity_game_board_m2);
         this.gameData = ViewModelProviders.of(this).get(GameData.class);
         if(savedInstanceState == null) {
-            if(getIntent().getBooleanExtra("existingGame", false) == true){
+            if(getIntent().getBooleanExtra("existingGame", false) == true){  //Modo 2/3 -> Modo 1
                 gameData = (GameData) getIntent().getSerializableExtra("gameData");
             } else {
+                //Player1 Name
+                gameData.addPlayerName(PlayerProfileActivity.getPlayerName(this));
+                //Player2 Name
+                if(mode == 1)
+                    gameData.addPlayerName(getIntent().getStringExtra("player2Name"));
+
                 int nr = getIntent().getIntExtra("nr", 9);
                 int nc = getIntent().getIntExtra("nc", 9);
                 ArrayList<Integer> alBoard = getIntent().getIntegerArrayListExtra("board");
@@ -274,13 +280,21 @@ public class GameBoardActivity extends AppCompatActivity {
         }
         if(isOnNotas){
             Button btnNotas = (Button)findViewById(R.id.btnNotas);
-            btnNotas.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            btnNotas.setBackgroundColor(getResources().getColor(R.color.coslorPrimary));
             btnNotas.setTextColor(Color.WHITE);
         }
         if(isOnApagar){
             Button btnApagar = (Button)findViewById(R.id.btnApagar);
             btnApagar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             btnApagar.setTextColor(Color.WHITE);
+        }
+    }
+
+    public void initializaPlayerNames(){
+        if(gameData.getGameMode() == 1){
+            TextView tvName2 = findViewById(R.id.tvNomePlayer2);
+            tvName2.setText(gameData.getPlayerName(2));
+
         }
     }
 

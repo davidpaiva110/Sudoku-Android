@@ -2,6 +2,7 @@ package pt.amov.xicorafapaiva.sudoku.GameClasss;
 
 
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import androidx.lifecycle.ViewModel;
 import org.json.JSONArray;
@@ -9,6 +10,7 @@ import org.json.JSONObject;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import pt.amov.xicorafapaiva.sudoku.GameViews.PlayerProfileActivity;
 import pt.isec.ans.sudokulibrary.Sudoku;
@@ -36,7 +38,11 @@ public class GameData extends ViewModel implements Serializable {
     private int playerTime = INITIAL_PLAYER_TIME; // Tempo que um jogador tem numa jogada
     private int player = 1; // Indica qual o jogador que está a jogar
 
+    //Nomes dos Jogadores
+    private ArrayList<String> playerNames;
+
     public GameData() {
+        playerNames = new ArrayList<String>();
     }
 
     public int[][] getBoard() {
@@ -445,5 +451,20 @@ public class GameData extends ViewModel implements Serializable {
 
     public void setPlayer(int player) {
         this.player = player;
+    }
+
+
+    public void addPlayerName(String playerName){
+        if(playerNames != null){
+            if (playerNames.size() != MAX_PLAYERS){
+                playerNames.add(playerName);
+            }
+        }
+    }
+
+    public String getPlayerName(int indexPLayer){
+        if(indexPLayer > playerNames.size())
+            return null;
+        return playerNames.get(indexPLayer);
     }
 }
