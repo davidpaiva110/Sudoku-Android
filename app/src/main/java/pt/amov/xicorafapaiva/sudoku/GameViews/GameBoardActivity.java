@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -127,7 +129,7 @@ public class GameBoardActivity extends AppCompatActivity {
             initializeButtons();
             setupTimer();
             initializaPlayerNames();
-            if(gameData.getGameMode() == 2){
+            if(mode == 2){
                 if(isServidor) {
                     createProgressDialog();
                     isProgressDialogActive = true;
@@ -158,12 +160,69 @@ public class GameBoardActivity extends AppCompatActivity {
                     });
                     t.start();
                 }
-                else{
-
+                else{  //Cliente Modo 3
+                    String serverIP = getIntent().getStringExtra("serverIP");
+                    int serverPORT = getIntent().getIntExtra("serverPORT", 8899);
+                    startCliente(serverIP, serverPORT);
                 }
             }
         }
     }
+
+    public void startCliente(final String serverIP, final int serverPORT){
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    gameSockets[0] = new Socket(serverIP, serverPORT);
+                } catch (Exception e) {
+                    gameSockets[0] = null;
+                }
+                if (gameSockets[0] == null) {
+                    procMsg.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), R.string.str_erro_ligaçãoCliente + serverIP, Toast.LENGTH_LONG).show();
+                            finish();
+                        }
+                    });
+                    return;
+                }
+                clientServerCommunication.start();
+            }
+        });
+        t.start();
+    }
+
+    Thread clientServerCommunication = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                gameInputs[0] = new BufferedReader(new InputStreamReader(
+                        gameSockets[0].getInputStream()));
+                gameOutputs[0] = new PrintWriter(gameSockets[0].getOutputStream());
+                while (!Thread.currentThread().isInterrupted()) {
+//                    String read = gameInputs[0].readLine();
+//                    final int move = Integer.parseInt(read);
+//                    Log.d("RPS", "Received: " + move);
+//                    procMsg.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            moveOtherPlayer(move);
+//                        }
+//                    });
+                }
+            } catch (Exception e) {
+                procMsg.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // finish();
+                        // Toast.makeText(getApplicationContext(), R.string.game_finished, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }
+    });
 
     private void setupTimer() {
         Thread thTempo = new Thread(new Runnable() {

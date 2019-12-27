@@ -58,4 +58,5 @@
     <string name="strSemJogadoresLigados">There are no clients connected!</string>
     <string name="str_erro_ligacao_net">Error: No connection to internet!</string>
     <string name="str_ip_do_servidor">Server IP</string>
+    <string name="str_erro_ligaçãoCliente">"Unable to connect to server with IP: "</string>
 </resources>
