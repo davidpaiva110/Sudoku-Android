@@ -160,7 +160,7 @@ public class ChooseDifficultyActivity extends AppCompatActivity {
         final EditText editName = new EditText(new ContextThemeWrapper(this, R.style.AppCompatAlertDialogStyle));
         final AlertDialog ad = new AlertDialog.Builder(this).setTitle("Jogador 2")
                 .setView(editName)
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.strConfirmar, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         myIntent.putExtra("player2Name", editName.getText().toString());
