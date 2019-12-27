@@ -46,4 +46,7 @@
     <string name="strmodo_de_jogo">Game Mode</string>
     <string name="strPassarParaM1">Do you want to change the game to Single Player?</string>
     <string name="str_jogador_3">Player 3</string>
+    <string name="strEsperarClientes">Waiting Clients...</string>
+    <string name="strIniciarJogo">"Start the game when at least 1 client is connected!"</string>
+    <string name="strIniciar">Start</string>
 </resources>

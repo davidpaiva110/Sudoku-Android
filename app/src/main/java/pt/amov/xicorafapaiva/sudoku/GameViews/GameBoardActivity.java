@@ -7,12 +7,14 @@ import androidx.lifecycle.ViewModelProviders;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,6 +29,10 @@ import android.widget.TextView;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
@@ -36,6 +42,7 @@ import pt.isec.ans.sudokulibrary.Sudoku;
 public class GameBoardActivity extends AppCompatActivity {
 
     public static final int SECOND = 1000;
+    private static final int PORT = 8899;
 
     private Board sudokuView;
     private Drawable btBackground;
@@ -43,15 +50,27 @@ public class GameBoardActivity extends AppCompatActivity {
     // ViewModel dos dados do Jogo
     private GameData gameData;
 
+    //Estruturas para o modo 3
+    private ProgressDialog pd;
+    private boolean isProgressDialogActive = false;
+    private Handler procMsg = new Handler();
+    private ServerSocket serverSocket=null;
+    private Socket[] clientSockets = null;
+    private BufferedReader[] clientInput;
+    private PrintWriter[] clientOutput;
+    private boolean isServidor = false; //Indica se é servidor ou cliente
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        int mode = getIntent().getIntExtra("mode", 1);
+        int mode = getIntent().getIntExtra("mode", 0);
         if(mode == 0)
             setContentView(R.layout.activity_game_board);
         else if(mode == 1)
             setContentView(R.layout.activity_game_board_m2);
+        else if(mode == 2)
+            setContentView(R.layout.activity_game_board_m3);
         this.gameData = ViewModelProviders.of(this).get(GameData.class);
         if(savedInstanceState == null) {
             if(getIntent().getBooleanExtra("existingGame", false) == true){  //Modo 2/3 -> Modo 1
@@ -72,7 +91,7 @@ public class GameBoardActivity extends AppCompatActivity {
                 //Player2 Name
                 if(mode == 1)
                     gameData.addPlayerName(getIntent().getStringExtra("player2Name"));
-
+                isServidor = getIntent().getBooleanExtra("isServidor", false);
                 int nr = getIntent().getIntExtra("nr", 9);
                 int nc = getIntent().getIntExtra("nc", 9);
                 ArrayList<Integer> alBoard = getIntent().getIntegerArrayListExtra("board");
@@ -94,6 +113,38 @@ public class GameBoardActivity extends AppCompatActivity {
             initializeButtons();
             setupTimer();
             initializaPlayerNames();
+            if(gameData.getGameMode() == 2){
+                if(isServidor) {
+                    createProgressDialog();
+                    isProgressDialogActive = true;
+                    Thread t = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            /*try {
+                                serverSocket = new ServerSocket(PORT);
+                                socketGame = serverSocket.accept();
+                                serverSocket.close();
+                                serverSocket=null;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                socketGame = null;
+                            }
+                            procMsg.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pd.dismiss();
+                                    if (socketGame == null)
+                                        finish();
+                                }
+                            });*/
+                        }
+                    });
+                    t.start();
+                }
+                else{
+
+                }
+            }
         }
     }
 
@@ -259,8 +310,13 @@ public class GameBoardActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         this.gameData = sudokuView.getGameData();
         outState.putBoolean("onApagar", sudokuView.getOnApagar());
+        outState.putBoolean("pd", isProgressDialogActive);
         outState.putBoolean("onNotas", sudokuView.getOnNotas());
         outState.putInt("selectedValue", sudokuView.getSelectedValue());
+        outState.putSerializable("clientSockets", clientSockets);
+        outState.putSerializable("clientInputs", clientInput);
+        outState.putSerializable("clientOutputs", clientOutput);
+        outState.putBoolean("isServidor", isServidor);
         super.onSaveInstanceState(outState);
     }
 
@@ -268,6 +324,11 @@ public class GameBoardActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         int selectedValue = savedInstanceState.getInt("selectedValue");
+        isProgressDialogActive = savedInstanceState.getBoolean("pd");
+        isServidor = savedInstanceState.getBoolean("isServidor");
+        clientSockets = (Socket[]) savedInstanceState.getSerializable("clientSockets");
+        clientInput = (BufferedReader[]) savedInstanceState.getSerializable("clientInputs");
+        clientOutput = (PrintWriter[]) savedInstanceState.getSerializable("clientOutputs");
         boolean isOnNotas = savedInstanceState.getBoolean("onNotas");
         boolean isOnApagar = savedInstanceState.getBoolean("onApagar");
         sudokuView = new Board(this, this.gameData, selectedValue,
@@ -278,6 +339,30 @@ public class GameBoardActivity extends AppCompatActivity {
         btBackground = findViewById(R.id.btnNotas).getBackground();
         restoreButtonsSettings(selectedValue, isOnNotas, isOnApagar);
         initializaPlayerNames();
+        if(isProgressDialogActive == true)
+            createProgressDialog();
+    }
+
+    public void createProgressDialog(){
+        pd = new ProgressDialog(this);
+        pd.setTitle(getString(R.string.strEsperarClientes));
+        pd.setMessage(getString(R.string.strIniciarJogo));
+        pd.setCancelable(false);
+        pd.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.strCancelar), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                finish();
+            }
+        });
+        pd.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.strIniciar), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+            }
+        });
+        pd.show();
     }
 
     private void restoreButtonsSettings(int selectedButton, boolean isOnNotas, boolean isOnApagar){

@@ -51,4 +51,7 @@
     <string name="str_n_meros_acertados">Números Acertados</string>
     <string name="strPassarParaM1">Deseja passar o jogo para o modo Um Jogador?</string>
     <string name="str_jogador_3">Jogador 3</string>
+    <string name="strEsperarClientes">Aguardando Clientes...</string>
+    <string name="strIniciarJogo">Inicie o jogo quando estiver pelo menos 1 cliente conectado!</string>
+    <string name="strIniciar">Iniciar</string>
 </resources>
