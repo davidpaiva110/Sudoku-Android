@@ -130,7 +130,7 @@ public class GameBoardActivity extends AppCompatActivity {
             btBackground = findViewById(R.id.btnNotas).getBackground();
             initializeButtons();
             if(gameData.getGameMode() != 2)
-                setupTimer();
+                thTempo.start();
             initializaPlayerNames();
             if(mode == 2){
                 if(isServidor) {
@@ -167,7 +167,7 @@ public class GameBoardActivity extends AppCompatActivity {
                                         finish();
                                     }
                                     serverCommunication.start();
-                                    setupTimer();
+                                    thTempo.start();
                                 }
                             });
                         }
@@ -213,14 +213,12 @@ public class GameBoardActivity extends AppCompatActivity {
         @Override
         public void run() {
             try {
-                Log.d("Paivaaa", "clientCommunication: inicio do run");
                 gameInputs[0] = new BufferedReader(new InputStreamReader(gameSockets[0].getInputStream()));
                 gameOutputs[0] = new PrintWriter(gameSockets[0].getOutputStream());
                 //Receber o GameData
                 String gameDataJSON = gameInputs[0].readLine();
                 JSONObject jsonObject = new JSONObject(gameDataJSON);
                 int  gd = (int) jsonObject.get("gameData");
-                Log.d("Paivaaa", "REcebi o gameborad");
                 Log.d("Paivaaa", "Valor GameData:" + gd);
 
                 //Enviar o nome e a foto do jogador ao servidor
@@ -250,60 +248,74 @@ public class GameBoardActivity extends AppCompatActivity {
         }
     });
 
-    private void setupTimer() {
-        Thread thTempo = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(!gameData.isFinished()) {
-                    try {
-                        Thread.sleep(SECOND);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                TextView tvTempoJogo = findViewById(R.id.tvTempoJogo);
-                                gameData.incrementGameTime();
-                                if(gameData.getGameMode() == 0)
-                                    tvTempoJogo.setText("" + gameData.getGameTime());
-                                else if(gameData.getGameMode() == 1){
-                                    gameData.decrementPlayerTime();
-                                    if(gameData.getPlayer() == 1)
-                                        ((TextView)findViewById(R.id.tvPontosJogador1)).setText("" + gameData.getPlayerScore(1));
-                                    else if(gameData.getPlayer() == 2)
-                                        ((TextView)findViewById(R.id.tvPontosJogador2)).setText("" + gameData.getPlayerScore(2));
-                                    if(gameData.getPlayerTime() < 0){
-                                        gameData.nextPlayer();
-                                        sudokuView.postInvalidate();
-                                    }
-                                    tvTempoJogo.setText("" + gameData.getPlayerTime());
-                                    //Atualiza as cores dos nomes do jogador para destacar o jogador atual
-                                    if(gameData.getPlayer() == 1){
-                                        ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer1));
-                                        ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer1));
-                                        ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer1));
-                                        ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(getResources().getColor(R.color.colorGray));
-                                        ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(getResources().getColor(R.color.colorGray));
-                                        ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(getResources().getColor(R.color.colorGray));
-
-                                    }
-                                    else if(gameData.getPlayer() == 2){
-                                        ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer2));
-                                        ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer2));
-                                        ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer2));
-                                        ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(getResources().getColor(R.color.colorGray));
-                                        ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(getResources().getColor(R.color.colorGray));
-                                        ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(getResources().getColor(R.color.colorGray));
-                                    }
-                                }
-                            }
-                        });
-                    } catch (InterruptedException e) {
+    Thread thTempo = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Colocar logo inicialmente os segundos e as cores nas textViews
+                        TextView tvTempoJogo = findViewById(R.id.tvTempoJogo);
+                        if(gameData.getGameMode() == 0)
+                            tvTempoJogo.setText("" + gameData.getGameTime());
+                        else if(gameData.getGameMode() == 1) {
+                            tvTempoJogo.setText("" + gameData.getPlayerTime());
+                            updatePlayersColors();
+                        }
                     }
+                });
+                while(!gameData.isFinished()) {
+                    Thread.sleep(SECOND);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            TextView tvTempoJogo = findViewById(R.id.tvTempoJogo);
+                            gameData.incrementGameTime();
+                            if(gameData.getGameMode() == 0)
+                                tvTempoJogo.setText("" + gameData.getGameTime());
+                            else if(gameData.getGameMode() == 1){
+                                gameData.decrementPlayerTime();
+                                if(gameData.getPlayer() == 1)
+                                    ((TextView)findViewById(R.id.tvPontosJogador1)).setText("" + gameData.getPlayerScore(1));
+                                else if(gameData.getPlayer() == 2)
+                                    ((TextView)findViewById(R.id.tvPontosJogador2)).setText("" + gameData.getPlayerScore(2));
+                                if(gameData.getPlayerTime() < 0){
+                                    gameData.nextPlayer();
+                                    updatePlayersColors();
+                                    sudokuView.postInvalidate();
+                                }
+                                tvTempoJogo.setText("" + gameData.getPlayerTime());
+                            }
+                        }
+                    });
                 }
-            }
-        });
-        thTempo.start();
-    }
 
+            } catch (InterruptedException e) {
+            }
+        }
+    });
+
+    private void updatePlayersColors(){
+        //Atualiza as cores dos nomes do jogador para destacar o jogador atual
+        if(gameData.getPlayer() == 1){
+            ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer1));
+            ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer1));
+            ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer1));
+            ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(getResources().getColor(R.color.colorGray));
+            ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(getResources().getColor(R.color.colorGray));
+            ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(getResources().getColor(R.color.colorGray));
+
+        }
+        else if(gameData.getPlayer() == 2){
+            ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer2));
+            ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer2));
+            ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer2));
+            ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(getResources().getColor(R.color.colorGray));
+            ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(getResources().getColor(R.color.colorGray));
+            ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(getResources().getColor(R.color.colorGray));
+        }
+    }
 
     // Criação do Menu
     @Override
@@ -419,6 +431,7 @@ public class GameBoardActivity extends AppCompatActivity {
         outState.putSerializable("clientInputs", gameInputs);
         outState.putSerializable("clientOutputs", gameOutputs);
         outState.putBoolean("isServidor", isServidor);
+        thTempo.interrupt();
         super.onSaveInstanceState(outState);
     }
 
@@ -441,6 +454,7 @@ public class GameBoardActivity extends AppCompatActivity {
         btBackground = findViewById(R.id.btnNotas).getBackground();
         restoreButtonsSettings(selectedValue, isOnNotas, isOnApagar);
         initializaPlayerNames();
+        thTempo.start();
         if(isProgressDialogActive == true)
             createProgressDialog();
     }
