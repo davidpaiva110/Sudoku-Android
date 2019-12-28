@@ -27,6 +27,7 @@ public class GameData extends ViewModel implements Serializable {
     public static final int INITIAL_PLAYER_TIME = 30;
     public static final int CORRECT_NUMBER_TIME = 20;
     public static final int MAX_PLAYERS = 3;
+    public static final int MAX_CLIENTS = 2;
 
     private int [][] board = null;
     private int [][] invalidNumbers = null;
@@ -42,6 +43,11 @@ public class GameData extends ViewModel implements Serializable {
     private int [][][] notesPlayer2 = null;
     private int playerTime = INITIAL_PLAYER_TIME; // Tempo que um jogador tem numa jogada
     private int player = 1; // Indica qual o jogador que está a jogar
+
+    private Socket[] gameSockets = null;
+    private BufferedReader[] gameInputs;
+    private PrintWriter[] gameOutputs;
+    private boolean isServidor = false; //Indica se é servidor ou cliente
 
     //Nomes dos Jogadores
     private ArrayList<String> playerNames;
@@ -70,7 +76,60 @@ public class GameData extends ViewModel implements Serializable {
         this.gameMode = gameMode;
     }
 
+    public boolean isServidor() {
+        return isServidor;
+    }
 
+    public void setServidor(boolean servidor) {
+        isServidor = servidor;
+    }
+
+    public void setGameSocket(int pos, Socket gameSocket) {
+        this.gameSockets[pos] = gameSocket;
+    }
+
+    public void setGameInput(int pos, BufferedReader gameInput) {
+        this.gameInputs[pos] = gameInput;
+    }
+
+    public void setGameOutput(int pos, PrintWriter gameOutput) {
+        this.gameOutputs[pos] = gameOutput;
+    }
+
+    public void setGameSockets(Socket[] gameSockets) {
+        this.gameSockets = gameSockets;
+    }
+
+    public Socket[] getGameSockets() {
+        return gameSockets;
+    }
+
+    public Socket getGameSocket(int pos) {
+        return gameSockets[pos];
+    }
+
+    public BufferedReader getGameInput(int pos) {
+        return gameInputs[pos];
+    }
+
+    public PrintWriter getGameOutputs(int pos) {
+        return gameOutputs[pos];
+    }
+
+    public ArrayList<String> getPlayerNames() {
+        return playerNames;
+    }
+
+    public void initializeCommunicationVariables(){
+        gameSockets = new Socket[MAX_CLIENTS];
+        gameInputs = new BufferedReader[MAX_CLIENTS];
+        gameOutputs = new PrintWriter[MAX_CLIENTS];
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            gameSockets[i] = null;
+            gameInputs[i] = null;
+            gameOutputs[i] = null;
+        }
+    }
 
     public int getPlayerOfInsertedNumber(int row, int column){
         return numberInsertedPlayer[row][column];
@@ -85,10 +144,23 @@ public class GameData extends ViewModel implements Serializable {
     }
 
     public void nextPlayer() {
-        if(player == 1) {
-            player = 2;
-        } else {
-            player = 1;
+        if(gameMode == 1) {
+            if (player == 1) {
+                player = 2;
+            } else {
+                player = 1;
+            }
+        } else if(gameMode == 2){
+            if (player == 1) {
+                player = 2;
+            } else if(player == 2){
+                if(playerNames.size() > 2)
+                    player = 3;
+                else
+                    player = 1;
+
+            } else if(player == 3)
+                player = 1;
         }
         playerTime = INITIAL_PLAYER_TIME;
         resetInvalidNotes(); //Reset para não aparecerem as jogadas inválidas do outro jogador na mudança de jogador

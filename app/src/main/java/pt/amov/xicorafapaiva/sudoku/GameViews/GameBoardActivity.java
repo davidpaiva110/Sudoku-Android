@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.app.ProgressDialog;
@@ -35,6 +36,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -49,7 +51,7 @@ public class GameBoardActivity extends AppCompatActivity {
 
     public static final int SECOND = 1000;
     private static final int PORT = 8899;
-    private static final int MAX_CLIENTS = 2;
+    public static final int TIMEOUT = 5000;
 
     private Board sudokuView;
     private Drawable btBackground;
@@ -62,10 +64,6 @@ public class GameBoardActivity extends AppCompatActivity {
     private boolean isProgressDialogActive = false;
     private Handler procMsg = new Handler();
     private ServerSocket serverSocket=null;
-    private Socket[] gameSockets = null;
-    private BufferedReader[] gameInputs;
-    private PrintWriter[] gameOutputs;
-    private boolean isServidor = false; //Indica se é servidor ou cliente
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,17 +74,8 @@ public class GameBoardActivity extends AppCompatActivity {
             setContentView(R.layout.activity_game_board);
         else if(mode == 1)
             setContentView(R.layout.activity_game_board_m2);
-        else if(mode == 2) {
+        else if(mode == 2)
             setContentView(R.layout.activity_game_board_m3);
-            gameSockets = new Socket[MAX_CLIENTS];
-            gameInputs = new BufferedReader[MAX_CLIENTS];
-            gameOutputs = new PrintWriter[MAX_CLIENTS];
-            for (int i = 0; i < MAX_CLIENTS; i++) {
-                gameSockets[i] = null;
-                gameInputs[i] = null;
-                gameOutputs[i] = null;
-            }
-        }
         this.gameData = ViewModelProviders.of(this).get(GameData.class);
         if(savedInstanceState == null) {
             if(getIntent().getBooleanExtra("existingGame", false) == true){  //Modo 2/3 -> Modo 1
@@ -102,8 +91,8 @@ public class GameBoardActivity extends AppCompatActivity {
                 gameData.setNumberInsertedPlayer(auxGameData.getNumberInsertedPlayer());
                 gameData.setBoard(auxGameData.getBoard());
             } else {
-                isServidor = getIntent().getBooleanExtra("isServidor", false);
-                if(!(mode == 2 && !isServidor)) {
+                gameData.setServidor(getIntent().getBooleanExtra("isServidor", false));
+                if(!(mode == 2 && !gameData.isServidor())) {
                     //Player1 Name
                     gameData.addPlayerName(PlayerProfileActivity.getPlayerName(this));
                     //Player2 Name
@@ -121,19 +110,22 @@ public class GameBoardActivity extends AppCompatActivity {
                         }
                     }
                     this.gameData.setBoard(tabuleiro);
-                    this.gameData.setGameMode(mode);
                 }
+                this.gameData.setGameMode(mode);
             }
             FrameLayout flSudoku = findViewById(R.id.flSudoku);
             sudokuView = new Board(this, this.gameData);
             flSudoku.addView(sudokuView);
             btBackground = findViewById(R.id.btnNotas).getBackground();
             initializeButtons();
+            if(mode == 2)
+                gameData.initializeCommunicationVariables();
             if(gameData.getGameMode() != 2)
                 thTempo.start();
-            initializaPlayerNames();
+            if(!(mode == 2 && !gameData.isServidor()))
+                initializaPlayerNames();
             if(mode == 2){
-                if(isServidor) {
+                if(gameData.isServidor()) {
                     createProgressDialogServer();
                     isProgressDialogActive = true;
                     Thread t = new Thread(new Runnable() {
@@ -141,11 +133,19 @@ public class GameBoardActivity extends AppCompatActivity {
                         public void run() {
                             try {
                                 serverSocket = new ServerSocket(PORT);
-                                for (int i = 0; i < MAX_CLIENTS; i++) {
-                                    gameSockets[i] = serverSocket.accept();
+                                for (int i = 0; i < GameData.MAX_CLIENTS; i++) {
+                                    gameData.setGameSocket(i, serverSocket.accept());
+                                    //Criação dos inputs e outputs
+                                    gameData.setGameInput(i, new BufferedReader(new InputStreamReader(gameData.getGameSocket(i).getInputStream())));
+                                    gameData.setGameOutput(i, new PrintWriter(gameData.getGameSocket(i).getOutputStream()));
+                                    //Recebimento do nome do jogador
+                                    String nameJSON = gameData.getGameInput(i).readLine();
+                                    JSONObject jsonObject = new JSONObject(nameJSON);
+                                    gameData.addPlayerName(jsonObject.getString("name"));
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
+                                            initializaPlayerNames();
                                             Toast.makeText(getApplicationContext(), R.string.strNovoClienteLigado, Toast.LENGTH_LONG).show();
                                         }
                                     });
@@ -155,14 +155,14 @@ public class GameBoardActivity extends AppCompatActivity {
                             } catch (SocketException ex){
 
                             }catch (Exception e) {
-                                gameSockets = null;
+                                gameData.setGameSockets(null);
                             }
                             procMsg.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     pd.dismiss();
                                     isProgressDialogActive = false;
-                                    if (gameSockets == null) {
+                                    if (gameData.getGameSockets() == null) {
                                         Toast.makeText(getApplicationContext(), R.string.strErroComunicacao, Toast.LENGTH_LONG).show();
                                         finish();
                                     }
@@ -190,15 +190,18 @@ public class GameBoardActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    gameSockets[0] = new Socket(serverIP, serverPORT);
+                    gameData.setGameSocket(0, new Socket());
+                    gameData.getGameSocket(0).connect(new InetSocketAddress(serverIP, serverPORT), TIMEOUT);
+
                 } catch (Exception e) {
-                    gameSockets[0] = null;
+                    gameData.setGameSocket(0, null);
                 }
-                if (gameSockets[0] == null) {
+                if (gameData.getGameSocket(0) == null) {
                     procMsg.post(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(getApplicationContext(), R.string.str_erro_ligaçãoCliente + serverIP, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), getString(R.string.str_erro_ligaçãoCliente) + serverIP, Toast.LENGTH_LONG).show();
+                            pd.dismiss();
                             finish();
                         }
                     });
@@ -221,7 +224,7 @@ public class GameBoardActivity extends AppCompatActivity {
                         TextView tvTempoJogo = findViewById(R.id.tvTempoJogo);
                         if(gameData.getGameMode() == 0)
                             tvTempoJogo.setText("" + gameData.getGameTime());
-                        else if(gameData.getGameMode() == 1) {
+                        else if(gameData.getGameMode() > 1) {
                             tvTempoJogo.setText("" + gameData.getPlayerTime());
                             updatePlayersColors();
                         }
@@ -236,12 +239,14 @@ public class GameBoardActivity extends AppCompatActivity {
                             gameData.incrementGameTime();
                             if(gameData.getGameMode() == 0)
                                 tvTempoJogo.setText("" + gameData.getGameTime());
-                            else if(gameData.getGameMode() == 1){
+                            else if(gameData.getGameMode() > 1){
                                 gameData.decrementPlayerTime();
                                 if(gameData.getPlayer() == 1)
                                     ((TextView)findViewById(R.id.tvPontosJogador1)).setText("" + gameData.getPlayerScore(1));
                                 else if(gameData.getPlayer() == 2)
                                     ((TextView)findViewById(R.id.tvPontosJogador2)).setText("" + gameData.getPlayerScore(2));
+                                if(gameData.getGameMode() == 2 && gameData.getPlayer() == 3)
+                                    ((TextView)findViewById(R.id.tvPontosJogador3)).setText("" + gameData.getPlayerScore(3));
                                 if(gameData.getPlayerTime() < 0){
                                     gameData.nextPlayer();
                                     updatePlayersColors();
@@ -251,6 +256,9 @@ public class GameBoardActivity extends AppCompatActivity {
                             }
                         }
                     });
+                    if(gameData.getGameMode() == 2){
+                        sendGameDataToClients();
+                    }
                 }
 
             } catch (InterruptedException e) {
@@ -267,7 +275,11 @@ public class GameBoardActivity extends AppCompatActivity {
             ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(getResources().getColor(R.color.colorGray));
             ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(getResources().getColor(R.color.colorGray));
             ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(getResources().getColor(R.color.colorGray));
-
+            if(gameData.getGameMode() == 2) {
+                ((TextView) findViewById(R.id.tvNomePlayer3)).setTextColor(getResources().getColor(R.color.colorGray));
+                ((TextView) findViewById(R.id.tvPontosJogador3)).setTextColor(getResources().getColor(R.color.colorGray));
+                ((TextView) findViewById(R.id.tvStrPontosJogador3)).setTextColor(getResources().getColor(R.color.colorGray));
+            }
         }
         else if(gameData.getPlayer() == 2){
             ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer2));
@@ -276,6 +288,22 @@ public class GameBoardActivity extends AppCompatActivity {
             ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(getResources().getColor(R.color.colorGray));
             ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(getResources().getColor(R.color.colorGray));
             ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(getResources().getColor(R.color.colorGray));
+            if(gameData.getGameMode() == 2) {
+                ((TextView) findViewById(R.id.tvNomePlayer3)).setTextColor(getResources().getColor(R.color.colorGray));
+                ((TextView) findViewById(R.id.tvPontosJogador3)).setTextColor(getResources().getColor(R.color.colorGray));
+                ((TextView) findViewById(R.id.tvStrPontosJogador3)).setTextColor(getResources().getColor(R.color.colorGray));
+            }
+        }
+        else if(gameData.getPlayer() == 3 && gameData.getGameMode() == 2){
+            ((TextView)findViewById(R.id.tvNomePlayer3)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer3));
+            ((TextView)findViewById(R.id.tvPontosJogador3)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer3));
+            ((TextView)findViewById(R.id.tvStrPontosJogador3)).setTextColor(getResources().getColor(R.color.colorNumbersPlayer3));
+            ((TextView)findViewById(R.id.tvNomePlayer1)).setTextColor(getResources().getColor(R.color.colorGray));
+            ((TextView)findViewById(R.id.tvPontosJogador1)).setTextColor(getResources().getColor(R.color.colorGray));
+            ((TextView)findViewById(R.id.tvStrPontosJogador1)).setTextColor(getResources().getColor(R.color.colorGray));
+            ((TextView)findViewById(R.id.tvNomePlayer2)).setTextColor(getResources().getColor(R.color.colorGray));
+            ((TextView)findViewById(R.id.tvPontosJogador2)).setTextColor(getResources().getColor(R.color.colorGray));
+            ((TextView)findViewById(R.id.tvStrPontosJogador2)).setTextColor(getResources().getColor(R.color.colorGray));
         }
     }
 
@@ -286,7 +314,7 @@ public class GameBoardActivity extends AppCompatActivity {
         int mode = getIntent().getIntExtra("mode", 1);
         if(mode == 0)
             inflater.inflate(R.menu.menu_game_board_activity, menu);
-        else if(mode == 1)
+        else if(mode > 1)
             inflater.inflate(R.menu.menu_modo_2_e_3, menu);
 
         return true;
@@ -389,10 +417,6 @@ public class GameBoardActivity extends AppCompatActivity {
         outState.putBoolean("pd", isProgressDialogActive);
         outState.putBoolean("onNotas", sudokuView.getOnNotas());
         outState.putInt("selectedValue", sudokuView.getSelectedValue());
-        outState.putSerializable("gameSockets", gameSockets);
-        outState.putSerializable("clientInputs", gameInputs);
-        outState.putSerializable("clientOutputs", gameOutputs);
-        outState.putBoolean("isServidor", isServidor);
         thTempo.interrupt();
         super.onSaveInstanceState(outState);
     }
@@ -402,10 +426,6 @@ public class GameBoardActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
         int selectedValue = savedInstanceState.getInt("selectedValue");
         isProgressDialogActive = savedInstanceState.getBoolean("pd");
-        isServidor = savedInstanceState.getBoolean("isServidor");
-        gameSockets = (Socket[]) savedInstanceState.getSerializable("gameSockets");
-        gameInputs = (BufferedReader[]) savedInstanceState.getSerializable("clientInputs");
-        gameOutputs = (PrintWriter[]) savedInstanceState.getSerializable("clientOutputs");
         boolean isOnNotas = savedInstanceState.getBoolean("onNotas");
         boolean isOnApagar = savedInstanceState.getBoolean("onApagar");
         sudokuView = new Board(this, this.gameData, selectedValue,
@@ -416,9 +436,10 @@ public class GameBoardActivity extends AppCompatActivity {
         btBackground = findViewById(R.id.btnNotas).getBackground();
         restoreButtonsSettings(selectedValue, isOnNotas, isOnApagar);
         initializaPlayerNames();
-        thTempo.start();
+        if(!(gameData.getGameMode() == 2) && !gameData.isServidor())
+            thTempo.start();
         if(isProgressDialogActive == true) {
-            if(isServidor)
+            if(gameData.isServidor())
                 createProgressDialogServer();
             else
                 createProgressDialogClient();
@@ -435,7 +456,7 @@ public class GameBoardActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                finish();
+                ((Activity)getApplicationContext()).finish();
             }
         });
         pd.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.strIniciar), (DialogInterface.OnClickListener) null);
@@ -446,7 +467,7 @@ public class GameBoardActivity extends AppCompatActivity {
         pdButton.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick ( View view ) {
-                if(gameSockets[0] != null) { //Se houver pelo menos 1 cliente
+                if(gameData.getGameSocket(0) != null) { //Se houver pelo menos 1 cliente
                     try {
                         serverSocket.close();
                     } catch (IOException e) {
@@ -533,36 +554,51 @@ public class GameBoardActivity extends AppCompatActivity {
             }
         }
         if(gameData.getGameMode() == 2){  // Modo 3
+            TextView tvName1 = findViewById(R.id.tvNomePlayer1);
+            tvName1.setText(gameData.getPlayerName(0));
+            if(gameData.getGameSocket(0) != null) {
+                TextView tvName2 = findViewById(R.id.tvNomePlayer2);
+                tvName2.setText(gameData.getPlayerName(1));
+                ((TextView)findViewById(R.id.tvPontosJogador2)).setText("0");
+                ((TextView)findViewById(R.id.tvStrPontosJogador2)).setText(getString(R.string.strPontos));
+            } else{
+                ((TextView)findViewById(R.id.tvNomePlayer2)).setText("");
+                ((TextView)findViewById(R.id.tvPontosJogador2)).setText("");
+                ((TextView)findViewById(R.id.tvStrPontosJogador2)).setText("");
+            }
+            if(gameData.getGameSocket(1) != null) {
+                TextView tvName3 = findViewById(R.id.tvNomePlayer3);
+                tvName3.setText(gameData.getPlayerName(2));
+                ((TextView)findViewById(R.id.tvPontosJogador2)).setText("0");
+                ((TextView)findViewById(R.id.tvStrPontosJogador2)).setText(getString(R.string.strPontos));
+            } else {
+                ((TextView)findViewById(R.id.tvNomePlayer3)).setText("");
+                ((TextView)findViewById(R.id.tvPontosJogador3)).setText("");
+                ((TextView)findViewById(R.id.tvStrPontosJogador3)).setText("");
+            }
         }
 
+    }
+
+    public void sendGameDataToClients(){
+        for (int i = 0; i < GameData.MAX_CLIENTS; i++) {
+            if(gameData.getGameSocket(i) != null){
+                gameData.getGameOutputs(i).println(gameData.toStringJSONFormat());
+                gameData.getGameOutputs(i).flush();
+            }
+        }
     }
 
     Thread serverCommunication = new Thread(new Runnable() {
         @Override
         public void run() {
             try {
-                for (int i = 0; i < MAX_CLIENTS; i++) {
-                    if(gameSockets[i] != null){
-                        //Criação dos inputs e outputs
-                        gameInputs[i] = new BufferedReader(new InputStreamReader(gameSockets[i].getInputStream()));
-                        gameOutputs[i] = new PrintWriter(gameSockets[i].getOutputStream());
-                        //Envio do gameData inicial
-                        gameOutputs[i].println(gameData.toStringJSONFormat());
-                        gameOutputs[i].flush();
-                    }
-                }
-/*
+                //Envio do gameData inicial aos clientes
+                sendGameDataToClients();
+                //Loop de espera por jogadas dos clientes
                 while (!Thread.currentThread().isInterrupted()) {
-                    String read = input.readLine();
-                    final int move = Integer.parseInt(read);
-                    Log.d("RPS", "Received: " + move);
-                    procMsg.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            moveOtherPlayer(move);
-                        }
-                    });
-                }*/
+
+                }
             } catch (Exception e) {
                 /*procMsg.post(new Runnable() {
                     @Override
@@ -581,20 +617,27 @@ public class GameBoardActivity extends AppCompatActivity {
         @Override
         public void run() {
             try {
-                gameInputs[0] = new BufferedReader(new InputStreamReader(gameSockets[0].getInputStream()));
-                gameOutputs[0] = new PrintWriter(gameSockets[0].getOutputStream());
-                //Receber o GameData
-                String gameDataJSON = gameInputs[0].readLine();
+                gameData.setGameInput(0, new BufferedReader(new InputStreamReader(gameData.getGameSocket(0).getInputStream())));
+                gameData.setGameOutput(0, new PrintWriter(gameData.getGameSocket(0).getOutputStream()));
+                //Enviar o nome e a foto do jogador ao servidor
+                JSONObject jsonPlayerName = new JSONObject();
+                jsonPlayerName.put("name", PlayerProfileActivity.getPlayerName(getApplicationContext()));
+                gameData.getGameOutputs(0).println(jsonPlayerName.toString());
+                gameData.getGameOutputs(0).flush();
+
+                //Receber o GameData Inicial
+                String gameDataJSON = gameData.getGameInput(0).readLine();
                 JSONObject jsonObject = new JSONObject(gameDataJSON);
                 gameData.updateThroughJSON(jsonObject);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         sudokuView.invalidate();
-
+                        initializaPlayerNames();
+                        updatePlayersColors();
+                        ((TextView)findViewById(R.id.tvTempoJogo)).setText("" + gameData.getPlayerTime());
                     }
                 });
-                //Enviar o nome e a foto do jogador ao servidor
 
                 //Terminar a dialog para começar a jogar
                 procMsg.post(new Runnable() {
@@ -602,27 +645,29 @@ public class GameBoardActivity extends AppCompatActivity {
                     public void run() {
                         pd.dismiss();
                         isProgressDialogActive = false;
-                        /*if (gameSockets[0] == null) {
-                            Toast.makeText(getApplicationContext(), R.string.strErroComunicacao, Toast.LENGTH_LONG).show();
-                            finish();
-                        }*/
                     }
                 });
 
-                while (!Thread.currentThread().isInterrupted()) {
-
-//                    String read = gameInputs[0].readLine();
-//                    final int move = Integer.parseInt(read);
-//                    Log.d("RPS", "Received: " + move);
-//                    procMsg.post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            moveOtherPlayer(move);
-//                        }
-//                    });
+                while (!Thread.currentThread().isInterrupted()) { // !!!!!!!!!!!!! E enquanto não o jog não tiver terminado!
+                    //Atualizar o GameData e a view
+                    gameDataJSON = gameData.getGameInput(0).readLine();
+                    jsonObject = new JSONObject(gameDataJSON);
+                    gameData.updateThroughJSON(jsonObject);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sudokuView.invalidate();
+                            initializaPlayerNames();
+                            updatePlayersColors();
+                            ((TextView)findViewById(R.id.tvPontosJogador1)).setText("" + gameData.getPlayerScore(1));
+                            ((TextView)findViewById(R.id.tvPontosJogador2)).setText("" + gameData.getPlayerScore(2));
+                            if(gameData.getPlayerNames().size() > 2)
+                                ((TextView)findViewById(R.id.tvPontosJogador3)).setText("" + gameData.getPlayerScore(3));
+                            ((TextView)findViewById(R.id.tvTempoJogo)).setText("" + gameData.getPlayerTime());
+                        }
+                    });
                 }
             } catch (Exception e) {
-                Log.d("Paivaaa", e.toString());
                 procMsg.post(new Runnable() {
                     @Override
                     public void run() {

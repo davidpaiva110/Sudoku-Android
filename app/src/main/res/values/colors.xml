@@ -9,4 +9,5 @@
     <color name="colorNumbersPlayer1">#000080</color>
     <color name="colorWrongNumbers">#CC0000</color>
     <color name="colorNumbersPlayer2">#0B6623</color>
+    <color name="colorNumbersPlayer3">#B88C06</color>
 </resources>
