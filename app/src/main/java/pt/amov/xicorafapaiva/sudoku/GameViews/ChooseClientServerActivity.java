@@ -93,12 +93,14 @@ public class ChooseClientServerActivity extends AppCompatActivity {
                         myIntent.putExtra("serverIP", editIP.getText().toString());
                         myIntent.putExtra("serverPORT", PORT);
                         myIntent.putExtra("mode", GAME_MODE_3);
+                        dialog.dismiss();
                         startActivity(myIntent);
                         finish();
                     }
                 }).setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
+                        dialog.dismiss();
                         finish();
                     }
                 })

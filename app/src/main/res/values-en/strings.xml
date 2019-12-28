@@ -61,4 +61,6 @@
     <string name="str_erro_ligaçãoCliente">"Unable to connect to server with IP: "</string>
     <string name="strErroComunicacao">Error: A communication error occurred!</string>
     <string name="strNovoClienteLigado">Client connected!</string>
+    <string name="strEsperarInicio">Waiting for the start...</string>
+    <string name="strEsperarInicioServidor">Waiting for the server to begin the game!</string>
 </resources>

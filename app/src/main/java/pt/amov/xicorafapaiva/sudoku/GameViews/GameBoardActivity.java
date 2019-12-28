@@ -134,7 +134,7 @@ public class GameBoardActivity extends AppCompatActivity {
             initializaPlayerNames();
             if(mode == 2){
                 if(isServidor) {
-                    createProgressDialog();
+                    createProgressDialogServer();
                     isProgressDialogActive = true;
                     Thread t = new Thread(new Runnable() {
                         @Override
@@ -175,6 +175,8 @@ public class GameBoardActivity extends AppCompatActivity {
                     t.start();
                 }
                 else{  //Cliente Modo 3
+                    createProgressDialogClient();
+                    isProgressDialogActive = true;
                     String serverIP = getIntent().getStringExtra("serverIP");
                     int serverPORT = getIntent().getIntExtra("serverPORT", 8899);
                     startCliente(serverIP, serverPORT);
@@ -189,7 +191,6 @@ public class GameBoardActivity extends AppCompatActivity {
             public void run() {
                 try {
                     gameSockets[0] = new Socket(serverIP, serverPORT);
-                    Log.d("Paivaaa", "new Socket");
                 } catch (Exception e) {
                     gameSockets[0] = null;
                 }
@@ -208,45 +209,6 @@ public class GameBoardActivity extends AppCompatActivity {
         });
         t.start();
     }
-
-    Thread clientCommunication = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            try {
-                gameInputs[0] = new BufferedReader(new InputStreamReader(gameSockets[0].getInputStream()));
-                gameOutputs[0] = new PrintWriter(gameSockets[0].getOutputStream());
-                //Receber o GameData
-                String gameDataJSON = gameInputs[0].readLine();
-                JSONObject jsonObject = new JSONObject(gameDataJSON);
-                int  gd = (int) jsonObject.get("gameTime");
-                Log.i("RAFAAA", "Valor gameTime:" + gd);
-
-                //Enviar o nome e a foto do jogador ao servidor
-
-                while (!Thread.currentThread().isInterrupted()) {
-
-//                    String read = gameInputs[0].readLine();
-//                    final int move = Integer.parseInt(read);
-//                    Log.d("RPS", "Received: " + move);
-//                    procMsg.post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            moveOtherPlayer(move);
-//                        }
-//                    });
-                }
-            } catch (Exception e) {
-                Log.d("Paivaaa", e.toString());
-                procMsg.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        // finish();
-                        // Toast.makeText(getApplicationContext(), R.string.game_finished, Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-        }
-    });
 
     Thread thTempo = new Thread(new Runnable() {
         @Override
@@ -455,11 +417,15 @@ public class GameBoardActivity extends AppCompatActivity {
         restoreButtonsSettings(selectedValue, isOnNotas, isOnApagar);
         initializaPlayerNames();
         thTempo.start();
-        if(isProgressDialogActive == true)
-            createProgressDialog();
+        if(isProgressDialogActive == true) {
+            if(isServidor)
+                createProgressDialogServer();
+            else
+                createProgressDialogClient();
+        }
     }
 
-    public void createProgressDialog(){
+    public void createProgressDialogServer(){
         String ip = getLocalIpAddress();
         pd = new ProgressDialog(this);
         pd.setTitle(getString(R.string.strEsperarClientes));
@@ -490,6 +456,14 @@ public class GameBoardActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void createProgressDialogClient(){
+        pd = new ProgressDialog(this);
+        pd.setTitle(getString(R.string.strEsperarInicio));
+        pd.setMessage(getString(R.string.strEsperarInicioServidor));
+        pd.setCancelable(false);
+        pd.show();
     }
 
     public static String getLocalIpAddress() {
@@ -575,8 +549,6 @@ public class GameBoardActivity extends AppCompatActivity {
                         //Envio do gameData inicial
                         gameOutputs[i].println(gameData.toStringJSONFormat());
                         gameOutputs[i].flush();
-                        Log.i("RAFAAA", "toStringJSONFormat: " + gameData.toStringJSONFormat());
-
                     }
                 }
 /*
@@ -604,4 +576,62 @@ public class GameBoardActivity extends AppCompatActivity {
             }
         }
     });
+
+    Thread clientCommunication = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                gameInputs[0] = new BufferedReader(new InputStreamReader(gameSockets[0].getInputStream()));
+                gameOutputs[0] = new PrintWriter(gameSockets[0].getOutputStream());
+                //Receber o GameData
+                String gameDataJSON = gameInputs[0].readLine();
+                JSONObject jsonObject = new JSONObject(gameDataJSON);
+                gameData.updateThroughJSON(jsonObject);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sudokuView.invalidate();
+
+                    }
+                });
+                //Enviar o nome e a foto do jogador ao servidor
+
+                //Terminar a dialog para começar a jogar
+                procMsg.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        pd.dismiss();
+                        isProgressDialogActive = false;
+                        /*if (gameSockets[0] == null) {
+                            Toast.makeText(getApplicationContext(), R.string.strErroComunicacao, Toast.LENGTH_LONG).show();
+                            finish();
+                        }*/
+                    }
+                });
+
+                while (!Thread.currentThread().isInterrupted()) {
+
+//                    String read = gameInputs[0].readLine();
+//                    final int move = Integer.parseInt(read);
+//                    Log.d("RPS", "Received: " + move);
+//                    procMsg.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            moveOtherPlayer(move);
+//                        }
+//                    });
+                }
+            } catch (Exception e) {
+                Log.d("Paivaaa", e.toString());
+                procMsg.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // finish();
+                        // Toast.makeText(getApplicationContext(), R.string.game_finished, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }
+    });
+
 }

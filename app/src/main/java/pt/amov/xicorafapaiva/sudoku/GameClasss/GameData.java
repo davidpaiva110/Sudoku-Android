@@ -585,4 +585,63 @@ public class GameData extends ViewModel implements Serializable {
         }
         return json.toString();
     }
+
+    public void updateThroughJSON(JSONObject json){
+        int intObj, intObj2;
+        boolean boleanObj;
+        try {
+            intObj = (int) json.get("gameTime");
+            gameTime = intObj;
+            boleanObj = (boolean) json.get("finished");
+            finished = boleanObj;
+            intObj = (int) json.get("gameMode");
+            gameMode = intObj;
+            intObj = (int) json.get("playerTime");
+            playerTime = intObj;
+            intObj = (int) json.get("player");
+            player = intObj;
+            JSONArray board = json.optJSONArray("board");
+            JSONArray invalidNumbers = json.optJSONArray("invalidNumbers");
+            JSONArray preSetNumbers = json.optJSONArray("preSetNumbers");
+            JSONArray numberInsertedPlayer = json.optJSONArray("numberInsertedPlayer");
+            JSONArray notes = json.optJSONArray("notes");
+            JSONArray invalideNotes = json.optJSONArray("invalideNotes");
+            JSONArray notesPlayer2 = json.optJSONArray("notesPlayer2");
+            JSONArray playerScores = json.optJSONArray("playerScores");
+            JSONArray playerNames = json.optJSONArray("playerNames");
+            if(this.board == null) this.board = new int[BOARD_SIZE][BOARD_SIZE];
+            if(this.invalidNumbers == null) this.invalidNumbers = new int[BOARD_SIZE][BOARD_SIZE];
+            if(this.preSetNumbers == null) this.preSetNumbers = new boolean[BOARD_SIZE][BOARD_SIZE];
+            if(this.numberInsertedPlayer == null) this.numberInsertedPlayer = new int[BOARD_SIZE][BOARD_SIZE];
+            if(this.notes == null) this.notes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
+            if(this.notesPlayer2 == null) this.notesPlayer2 = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
+            if(this.invalideNotes == null) this.invalideNotes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
+            if(this.playerScores == null) this.playerScores = new int[MAX_PLAYERS];
+            if(this.playerNames == null) this.playerNames = new ArrayList<>();
+            intObj = intObj2 = 0;
+            for (int i = 0; i < BOARD_SIZE; i++) {
+                for (int j = 0; j < BOARD_SIZE; j++) {
+                    this.board[i][j] = board.getInt(intObj);
+                    this.invalidNumbers[i][j] = invalidNumbers.optInt(intObj);
+                    this.preSetNumbers[i][j] = preSetNumbers.optBoolean(intObj);
+                    this.numberInsertedPlayer[i][j] = numberInsertedPlayer.optInt(intObj);
+                    for (int k = 0; k < BOARD_SIZE; k++) {
+                        this.notes[i][j][k] = notes.optInt(intObj2);
+                        this.invalideNotes[i][j][k] = invalideNotes.optInt(intObj2);
+                        this.notesPlayer2[i][j][k] = notesPlayer2.optInt(intObj2);
+                        intObj2++;
+                    }
+                    intObj++;
+                }
+            }
+            for (int i = 0; i < playerScores.length(); i++) {
+                this.playerScores[i] = playerScores.optInt(i);
+            }
+            this.playerNames.clear();
+            for (int i = 0; i < playerNames.length(); i++) {
+                this.playerNames.add(playerNames.optString(i));
+            }
+        } catch (JSONException e) {
+        }
+    }
 }
