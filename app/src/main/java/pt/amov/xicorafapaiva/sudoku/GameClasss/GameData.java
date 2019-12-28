@@ -536,11 +536,52 @@ public class GameData extends ViewModel implements Serializable {
     }
 
     public String toStringJSONFormat(){
+        JSONObject gameDatajson = new JSONObject();
         JSONObject json = new JSONObject();
         try {
-            json.putOpt("gameData", player);
+            json.put("finished", finished);
+            json.put("gameMode", gameMode);
+            json.put("playerTime", playerTime);
+            json.put("player", player);
+            JSONArray board = new JSONArray();
+            JSONArray invalidNumbers = new JSONArray();
+            JSONArray preSetNumbers = new JSONArray();
+            JSONArray numberInsertedPlayer = new JSONArray();
+            JSONArray notes = new JSONArray();
+            JSONArray invalideNotes = new JSONArray();
+            JSONArray notesPlayer2 = new JSONArray();
+            JSONArray playerScores = new JSONArray();
+            JSONArray playerNames = new JSONArray();
+            for (int i = 0; i < BOARD_SIZE; i++) {
+                for (int j = 0; j < BOARD_SIZE; j++) {
+                    board.put(this.board[i][j]);
+                    invalidNumbers.put(this.invalidNumbers[i][j]);
+                    preSetNumbers.put(this.preSetNumbers[i][j]);
+                    numberInsertedPlayer.put(this.numberInsertedPlayer[i][j]);
+                    for (int k = 0; k < BOARD_SIZE; k++) {
+                        notes.put(this.notes[i][j][k]);
+                        invalideNotes.put(this.invalideNotes[i][j][k]);
+                        notesPlayer2.put(this.notesPlayer2[i][j][k]);
+                    }
+                }
+            }
+            for (int i = 0; i < MAX_PLAYERS; i++) {
+                playerScores.put(this.playerScores[i]);
+            }
+            for (String name:this.playerNames) {
+                playerNames.put(name);
+            }
+            json.put("board", board);
+            json.put("invalidNumbers", invalidNumbers);
+            json.put("preSetNumbers", preSetNumbers);
+            json.put("numberInsertedPlayer", numberInsertedPlayer);
+            json.put("notes", notes);
+            json.put("invalideNotes", invalideNotes);
+            json.put("notesPlayer2", notesPlayer2);
+            json.put("playerScores", playerScores);
+            json.put("playerNames", playerNames);
+            json.put("gameTime", gameTime);
         } catch (JSONException e) {
-            e.printStackTrace();
         }
         return json.toString();
     }

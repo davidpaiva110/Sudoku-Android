@@ -218,8 +218,8 @@ public class GameBoardActivity extends AppCompatActivity {
                 //Receber o GameData
                 String gameDataJSON = gameInputs[0].readLine();
                 JSONObject jsonObject = new JSONObject(gameDataJSON);
-                int  gd = (int) jsonObject.get("gameData");
-                Log.d("Paivaaa", "Valor GameData:" + gd);
+                int  gd = (int) jsonObject.get("gameTime");
+                Log.i("RAFAAA", "Valor gameTime:" + gd);
 
                 //Enviar o nome e a foto do jogador ao servidor
 
