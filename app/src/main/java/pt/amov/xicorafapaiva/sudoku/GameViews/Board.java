@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -37,8 +38,10 @@ public class Board extends View {
     private Paint paintPreSetNumbers;
     private Paint paintMainNumbers;
     private Paint paintPlayer2MainNumbers;
+    private Paint paintPlayer3MainNumbers;
     private Paint paintSmallNumbers;
     private Paint paintPlayer2SmallNumbers;
+    private Paint paintPlayer3SmallNumbers;
     private Paint paintWrongNumbers;
     private Paint paintSmallWrongNumbers;
 
@@ -96,6 +99,12 @@ public class Board extends View {
 
         paintPlayer2MainNumbers = new Paint(paintMainNumbers);
         paintPlayer2MainNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer2));
+
+        paintPlayer3SmallNumbers = new Paint(paintSmallNumbers);
+        paintPlayer3SmallNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer3));
+
+        paintPlayer3MainNumbers = new Paint(paintMainNumbers);
+        paintPlayer3MainNumbers.setColor(getResources().getColor(R.color.colorNumbersPlayer3));
     }
 
 
@@ -117,10 +126,12 @@ public class Board extends View {
         //Alterar o tamanho da letra em função do tamanho de cada célula
         paintMainNumbers.setTextSize(cellH/2);
         paintPlayer2MainNumbers.setTextSize(cellH/2);
+        paintPlayer3MainNumbers.setTextSize(cellH/2);
         paintWrongNumbers.setTextSize(cellH/2);
         paintPreSetNumbers.setTextSize(cellH/2);
         paintSmallNumbers.setTextSize(cellH/4);
         paintPlayer2SmallNumbers.setTextSize(cellH/4);
+        paintPlayer3SmallNumbers.setTextSize(cellH/4);
         paintSmallWrongNumbers.setTextSize(cellH/4);
 
         for(int r = 0; r < BOARD_SIZE; r++){
@@ -141,13 +152,17 @@ public class Board extends View {
                                 canvas.drawText("" + n, x, y, paintMainNumbers);
                             else if (gameData.getPlayerOfInsertedNumber(r, c) == 2)
                                 canvas.drawText("" + n, x, y, paintPlayer2MainNumbers);
+                            else if (gameData.getPlayerOfInsertedNumber(r, c) == 3)
+                                canvas.drawText("" + n, x, y, paintPlayer3MainNumbers);
                         }
                     }
                 } else if(!gameData.numberIsValid(r, c)) {
                     n = gameData.getInvalidNumber(r ,c);
                     canvas.drawText("" + n, x, y, paintWrongNumbers);
-                    Thread th = new Thread(new RunnableInvalidNumber(r, c, n, false));
-                    th.start();
+                    if(!(gameData.getGameMode() == 2 && !gameData.isServidor())) {
+                        Thread th = new Thread(new RunnableInvalidNumber(r, c, n, false));
+                        th.start();
+                    }
                 } else {
                     //Primeira posição célula pequenina
                     x = c *cellW + cellW / 6;
@@ -157,6 +172,8 @@ public class Board extends View {
                         notes = gameData.getCellNotes(r,c);
                     else if(gameData.getPlayer() == 2)
                         notes = gameData.getPlayer2CellNotes(r,c);
+                    else if(gameData.getPlayer() == 3)
+                        notes = gameData.getPlayer3CellNotes(r,c);
                     for(int p = 0; p < BOARD_SIZE; p++){
                         int xp = x + p % 3 * cellW/3 ;
                         int yp = y + p / 3 * cellH/3 + cellH/9;
@@ -165,6 +182,8 @@ public class Board extends View {
                                 canvas.drawText("" + notes[p], xp, yp, paintSmallNumbers);
                             else if(gameData.getPlayer() == 2)
                                 canvas.drawText("" + notes[p], xp, yp, paintPlayer2SmallNumbers);
+                            else if(gameData.getPlayer() == 3)
+                                canvas.drawText("" + notes[p], xp, yp, paintPlayer3SmallNumbers);
                         }
                         else if(!gameData.noteIsValid(r, c, p)) {
                             n = gameData.getInvalidNote(r ,c, p);
@@ -183,7 +202,7 @@ public class Board extends View {
         if(event.getAction() == MotionEvent.ACTION_DOWN){  // Importante para dizermos que manifestamos interesse nele
             return  true;
         }
-        if(event.getAction() == MotionEvent.ACTION_UP){
+        if(event.getAction() == MotionEvent.ACTION_UP) {
             int px = (int) event.getX();
             int py = (int) event.getY();
             int w = getWidth();
@@ -194,69 +213,72 @@ public class Board extends View {
             int cellX = px / cellW;
             int cellY = py / cellH;
 
-
-            if(!gameData.isPreSet(cellY, cellX) && !gameData.isFinished()) {
-                if(!onApagar && !onNotas && gameData.getValue(cellY, cellX) == 0) {
-                    gameData.setValue(cellY, cellX, selectedValue);
-                    gameData.validateNumber(cellY, cellX);
-                    if(gameData.getValue(cellY, cellX) != 0){ //Se o número inserido for válido
-                        gameData.validateNotesAfterNewValidNumber(cellY, cellX);
-                        gameData.setPlayerOfInsertedNumber(cellY, cellX);
-                        gameData.setCorrectNumberTime();
-                        gameData.incrementPlayerScore();
-                        gameData.checkTerminateGame();
-                        if(gameData.isFinished()){
-                            // =========== Gravar os resultados do jogo ===========
-                            saveGameResult();
-                            // ====================================================
-                            AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AppCompatAlertDialogStyle)
-                                    .setTitle(R.string.strGanhou)
-                                    .setMessage(R.string.strTerminouJogo)
-                                    .setIcon(android.R.drawable.ic_dialog_info)
-                                    .setPositiveButton(R.string.strOK, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            Activity activity = (Activity)getContext();
-                                            activity.finish();
-                                        }
-                                    }) //Ao clicar no botão voltar à página principal. Como fazer?
-                                    .create();
-                            Button btn;
-                            btn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                            if(btn != null){
-                                btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            if (cellX < 9 && cellY < 9) {
+                if (!gameData.isPreSet(cellY, cellX) && !gameData.isFinished() && !(gameData.getGameMode() == 2 && !gameData.isServidor()) && !(gameData.getGameMode() == 2 && gameData.getPlayer() > 1)) {
+                    if (!onApagar && !onNotas && gameData.getValue(cellY, cellX) == 0) {
+                        gameData.setValue(cellY, cellX, selectedValue);
+                        gameData.validateNumber(cellY, cellX);
+                        if (gameData.getValue(cellY, cellX) != 0) { //Se o número inserido for válido
+                            gameData.validateNotesAfterNewValidNumber(cellY, cellX);
+                            gameData.setPlayerOfInsertedNumber(cellY, cellX);
+                            gameData.setCorrectNumberTime();
+                            gameData.incrementPlayerScore();
+                            gameData.checkTerminateGame();
+                            if (gameData.isFinished()) {
+                                // =========== Gravar os resultados do jogo ===========
+                                saveGameResult();
+                                // ====================================================
+                                AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AppCompatAlertDialogStyle)
+                                        .setTitle(R.string.strGanhou)
+                                        .setMessage(R.string.strTerminouJogo)
+                                        .setIcon(android.R.drawable.ic_dialog_info)
+                                        .setPositiveButton(R.string.strOK, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Activity activity = (Activity) getContext();
+                                                activity.finish();
+                                            }
+                                        }) //Ao clicar no botão voltar à página principal.
+                                        .create();
+                                Button btn;
+                                btn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                                if (btn != null) {
+                                    btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                                }
+                                dialog.show();
                             }
-                            dialog.show();
+                        }
+                    } else if (!onApagar && onNotas) {
+                        if (gameData.getPlayer() == 1) {
+                            if (gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
+                                gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
+                                gameData.validateNumber(cellY, cellX, selectedValue, 1);
+                            } else
+                                gameData.setCellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
+                        } else if (gameData.getPlayer() == 2) {
+                            if (gameData.getPlayer2CellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
+                                gameData.setPlayer2CellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
+                                gameData.validateNumber(cellY, cellX, selectedValue, 2);
+                            } else
+                                gameData.setPlayer2CellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
+                        }
+                    } else if (onApagar) {
+                        if (gameData.getValue(cellY, cellX) > 0 && gameData.getPlayerOfInsertedNumber(cellY, cellX) == gameData.getPlayer()) {
+                            gameData.setValue(cellY, cellX, 0);
+                            gameData.decrementPlayerScore();
+                        } else {
+                            if (gameData.getPlayer() == 1)
+                                gameData.resetCellNotes(cellY, cellX); //Apaga todas as notas do jogador 1
+                            else if (gameData.getPlayer() == 2)
+                                gameData.resetPlayer2CellNotes(cellY, cellX); //Apaga todas as notas do jogador 2
                         }
                     }
-                } else if(!onApagar && onNotas) {
-                    if(gameData.getPlayer() == 1) {
-                        if (gameData.getCellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
-                            gameData.setCellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
-                            gameData.validateNumber(cellY, cellX, selectedValue, 1);
-                        } else
-                            gameData.setCellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
-                    } else if(gameData.getPlayer() == 2){
-                        if (gameData.getPlayer2CellNote(cellY, cellX, selectedValue - 1) == 0) { //Verifica se o valor já está nas notas
-                            gameData.setPlayer2CellNote(cellY, cellX, selectedValue - 1, selectedValue); //Se não estiver coloca
-                            gameData.validateNumber(cellY, cellX, selectedValue, 2);
-                        } else
-                            gameData.setPlayer2CellNote(cellY, cellX, selectedValue - 1, 0); //Se já estiver, retira
-                    }
+                    invalidate(); // faz um refresh
+                } else if (!gameData.isPreSet(cellY, cellX) && !gameData.isFinished() && gameData.getGameMode() == 2 && !gameData.isServidor() && gameData.getPlayer() > 1) {
+                    //Envio da jogada ao servidor para validação
+                    Thread thSendMoveToServer = new Thread(new RunnableSendMoveToServer(cellY, cellX, selectedValue, onNotas, onApagar));
+                    thSendMoveToServer.start();
                 }
-                else if(onApagar){
-                    if(gameData.getValue(cellY, cellX)>0 && gameData.getPlayerOfInsertedNumber(cellY, cellX) == gameData.getPlayer()) {
-                        gameData.setValue(cellY, cellX, 0);
-                        gameData.decrementPlayerScore();
-                    }
-                    else {
-                        if(gameData.getPlayer() == 1)
-                            gameData.resetCellNotes(cellY, cellX); //Apaga todas as notas do jogador 1
-                        else if(gameData.getPlayer() == 2)
-                            gameData.resetPlayer2CellNotes(cellY, cellX); //Apaga todas as notas do jogador 2
-                    }
-                }
-                invalidate(); // faz um refresh
             }
         }
         return super.onTouchEvent(event);
@@ -348,5 +370,26 @@ public class Board extends View {
         }
     }
 
+    class RunnableSendMoveToServer implements Runnable{
+
+        private int row;
+        private int column;
+        private int value;
+        private boolean isNota;
+        private boolean isApaga;
+
+        public RunnableSendMoveToServer(int row, int column, int value, boolean isNota, boolean isApaga) {
+            this.row = row;
+            this.column = column;
+            this.value = value;
+            this.isNota = isNota;
+            this.isApaga = isApaga;
+        }
+
+        @Override
+        public void run() {
+            gameData.sendMoveToServer(row, column, value, isNota, isApaga);
+        }
+    }
 
 }

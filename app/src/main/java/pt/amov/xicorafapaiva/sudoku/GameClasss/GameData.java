@@ -27,6 +27,7 @@ public class GameData extends ViewModel implements Serializable {
     public static final int INITIAL_PLAYER_TIME = 30;
     public static final int CORRECT_NUMBER_TIME = 20;
     public static final int MAX_PLAYERS = 3;
+    public static final int MAX_CLIENTS = 2;
 
     private int [][] board = null;
     private int [][] invalidNumbers = null;
@@ -40,8 +41,14 @@ public class GameData extends ViewModel implements Serializable {
     private int [][] numberInsertedPlayer = null; // Jogador que inseriu um número
     // Estruturas para modos 2 e 3
     private int [][][] notesPlayer2 = null;
+    private int [][][] notesPlayer3 = null;
     private int playerTime = INITIAL_PLAYER_TIME; // Tempo que um jogador tem numa jogada
     private int player = 1; // Indica qual o jogador que está a jogar
+
+    private Socket[] gameSockets = null;
+    private BufferedReader[] gameInputs;
+    private PrintWriter[] gameOutputs;
+    private boolean isServidor = false; //Indica se é servidor ou cliente
 
     //Nomes dos Jogadores
     private ArrayList<String> playerNames;
@@ -70,7 +77,60 @@ public class GameData extends ViewModel implements Serializable {
         this.gameMode = gameMode;
     }
 
+    public boolean isServidor() {
+        return isServidor;
+    }
 
+    public void setServidor(boolean servidor) {
+        isServidor = servidor;
+    }
+
+    public void setGameSocket(int pos, Socket gameSocket) {
+        this.gameSockets[pos] = gameSocket;
+    }
+
+    public void setGameInput(int pos, BufferedReader gameInput) {
+        this.gameInputs[pos] = gameInput;
+    }
+
+    public void setGameOutput(int pos, PrintWriter gameOutput) {
+        this.gameOutputs[pos] = gameOutput;
+    }
+
+    public void setGameSockets(Socket[] gameSockets) {
+        this.gameSockets = gameSockets;
+    }
+
+    public Socket[] getGameSockets() {
+        return gameSockets;
+    }
+
+    public Socket getGameSocket(int pos) {
+        return gameSockets[pos];
+    }
+
+    public BufferedReader getGameInput(int pos) {
+        return gameInputs[pos];
+    }
+
+    public PrintWriter getGameOutputs(int pos) {
+        return gameOutputs[pos];
+    }
+
+    public ArrayList<String> getPlayerNames() {
+        return playerNames;
+    }
+
+    public void initializeCommunicationVariables(){
+        gameSockets = new Socket[MAX_CLIENTS];
+        gameInputs = new BufferedReader[MAX_CLIENTS];
+        gameOutputs = new PrintWriter[MAX_CLIENTS];
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            gameSockets[i] = null;
+            gameInputs[i] = null;
+            gameOutputs[i] = null;
+        }
+    }
 
     public int getPlayerOfInsertedNumber(int row, int column){
         return numberInsertedPlayer[row][column];
@@ -85,10 +145,23 @@ public class GameData extends ViewModel implements Serializable {
     }
 
     public void nextPlayer() {
-        if(player == 1) {
-            player = 2;
-        } else {
-            player = 1;
+        if(gameMode == 1) {
+            if (player == 1) {
+                player = 2;
+            } else {
+                player = 1;
+            }
+        } else if(gameMode == 2){
+            if (player == 1) {
+                player = 2;
+            } else if(player == 2){
+                if(playerNames.size() > 2)
+                    player = 3;
+                else
+                    player = 1;
+
+            } else if(player == 3)
+                player = 1;
         }
         playerTime = INITIAL_PLAYER_TIME;
         resetInvalidNotes(); //Reset para não aparecerem as jogadas inválidas do outro jogador na mudança de jogador
@@ -130,6 +203,8 @@ public class GameData extends ViewModel implements Serializable {
                         notes[row][column][value - 1] = 0;
                     if(playerOfNotes == 2)
                         notesPlayer2[row][column][value - 1] = 0;
+                    if(playerOfNotes == 3)
+                        notesPlayer3[row][column][value - 1] = 0;
                 }
                 board[row][column] = 0;
                 numberInsertedPlayer[row][column] = 0;
@@ -145,6 +220,8 @@ public class GameData extends ViewModel implements Serializable {
                         notes[row][column][value - 1] = 0;
                     if(playerOfNotes == 2)
                         notesPlayer2[row][column][value - 1] = 0;
+                    if(playerOfNotes == 3)
+                        notesPlayer3[row][column][value - 1] = 0;
                 }
                 board[row][column] = 0;
                 numberInsertedPlayer[row][column] = 0;
@@ -168,6 +245,8 @@ public class GameData extends ViewModel implements Serializable {
                             notes[row][column][value - 1] = 0;
                         if(playerOfNotes == 2)
                             notesPlayer2[row][column][value - 1] = 0;
+                        if(playerOfNotes == 3)
+                            notesPlayer3[row][column][value - 1] = 0;
                     }
                     board[row][column] = 0;
                     numberInsertedPlayer[row][column] = 0;
@@ -186,6 +265,8 @@ public class GameData extends ViewModel implements Serializable {
                     notes[row][column][value - 1] = 0;
                 if(playerOfNotes == 2)
                     notesPlayer2[row][column][value - 1] = 0;
+                if(playerOfNotes == 3)
+                    notesPlayer3[row][column][value - 1] = 0;
             }
             board[row][column] = 0;
             numberInsertedPlayer[row][column] = 0;
@@ -261,12 +342,14 @@ public class GameData extends ViewModel implements Serializable {
     private void initializeNotes(){
         notes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
         notesPlayer2 = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
+        notesPlayer3 = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
         invalideNotes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
         for (int i = 0; i < BOARD_SIZE; i++)
             for (int j = 0; j < BOARD_SIZE; j++)
                 for (int k = 0; k < BOARD_SIZE; k++) {
                     notes[i][j][k] = 0;
                     notesPlayer2[i][j][k] = 0;
+                    notesPlayer3[i][j][k] = 0;
                     invalideNotes[i][j][k] = 0;
                 }
     }
@@ -279,6 +362,10 @@ public class GameData extends ViewModel implements Serializable {
         return notesPlayer2[row][column];
     }
 
+    public int[] getPlayer3CellNotes(int row, int column){
+        return notesPlayer3[row][column];
+    }
+
     public int getCellNote(int row, int column, int position){
         return notes[row][column][position];
     }
@@ -287,12 +374,20 @@ public class GameData extends ViewModel implements Serializable {
         return notesPlayer2[row][column][position];
     }
 
+    public int getPlayer3CellNote(int row, int column, int position){
+        return notesPlayer3[row][column][position];
+    }
+
     public void setCellNote(int row, int column, int position, int value){
         notes[row][column][position] = value;
     }
 
     public void setPlayer2CellNote(int row, int column, int position, int value){
         notesPlayer2[row][column][position] = value;
+    }
+
+    public void setPlayer3CellNote(int row, int column, int position, int value){
+        notesPlayer3[row][column][position] = value;
     }
 
     public void resetCellNotes(int row, int column){
@@ -307,6 +402,11 @@ public class GameData extends ViewModel implements Serializable {
         }
     }
 
+    public void resetPlayer3CellNotes(int row, int column){
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            notesPlayer3[row][column][i] = 0;
+        }
+    }
 
     private int[][] resolveBoard() {
         int [][] sol = null;
@@ -382,11 +482,17 @@ public class GameData extends ViewModel implements Serializable {
                     validateNumber(row, i, j + 1, 1);
                 if (i != row && notes[i][column][j] != 0 && board[i][column] == 0)
                     validateNumber(i, column, j + 1, 1);
-                if(gameMode == 1){
+                if(gameMode > 1){
                     if (i != column && notesPlayer2[row][i][j] != 0 && board[row][i] == 0)
                         validateNumber(row, i, j + 1, 2);
                     if (i != row && notesPlayer2[i][column][j] != 0 && board[i][column] == 0)
                         validateNumber(i, column, j + 1, 2);
+                    if(playerNames.size() > 2){
+                        if (i != column && notesPlayer3[row][i][j] != 0 && board[row][i] == 0)
+                            validateNumber(row, i, j + 1, 3);
+                        if (i != row && notesPlayer3[i][column][j] != 0 && board[i][column] == 0)
+                            validateNumber(i, column, j + 1, 3);
+                    }
                 }
             }
         }
@@ -400,9 +506,13 @@ public class GameData extends ViewModel implements Serializable {
                 for (int j = 0; j < BOARD_SIZE; j++) { //Percorre todas as notas
                     if (subRow != row && subColumn != column && notes[subRow][subColumn][j] != 0 && board[subRow][subColumn] == 0)
                         validateNumber(subRow, subColumn, j + 1, 1);
-                    if (gameMode == 1) {
+                    if (gameMode > 1) {
                         if (subRow != row && subColumn != column && notesPlayer2[subRow][subColumn][j] != 0 && board[subRow][subColumn] == 0)
                             validateNumber(subRow, subColumn, j + 1, 2);
+                        if(playerNames.size() > 2){
+                            if (subRow != row && subColumn != column && notesPlayer3[subRow][subColumn][j] != 0 && board[subRow][subColumn] == 0)
+                                validateNumber(subRow, subColumn, j + 1, 3);
+                        }
                     }
                 }
             }
@@ -552,6 +662,7 @@ public class GameData extends ViewModel implements Serializable {
             JSONArray notesPlayer2 = new JSONArray();
             JSONArray playerScores = new JSONArray();
             JSONArray playerNames = new JSONArray();
+            JSONArray notesPlayer3 = new JSONArray();
             for (int i = 0; i < BOARD_SIZE; i++) {
                 for (int j = 0; j < BOARD_SIZE; j++) {
                     board.put(this.board[i][j]);
@@ -562,6 +673,7 @@ public class GameData extends ViewModel implements Serializable {
                         notes.put(this.notes[i][j][k]);
                         invalideNotes.put(this.invalideNotes[i][j][k]);
                         notesPlayer2.put(this.notesPlayer2[i][j][k]);
+                        notesPlayer3.put(this.notesPlayer3[i][j][k]);
                     }
                 }
             }
@@ -578,11 +690,91 @@ public class GameData extends ViewModel implements Serializable {
             json.put("notes", notes);
             json.put("invalideNotes", invalideNotes);
             json.put("notesPlayer2", notesPlayer2);
+            json.put("notesPlayer3", notesPlayer3);
             json.put("playerScores", playerScores);
             json.put("playerNames", playerNames);
             json.put("gameTime", gameTime);
         } catch (JSONException e) {
         }
         return json.toString();
+    }
+
+    public void updateThroughJSON(JSONObject json){
+        int intObj, intObj2;
+        boolean boleanObj;
+        try {
+            intObj = (int) json.get("gameTime");
+            gameTime = intObj;
+            boleanObj = (boolean) json.get("finished");
+            finished = boleanObj;
+            intObj = (int) json.get("gameMode");
+            gameMode = intObj;
+            intObj = (int) json.get("playerTime");
+            playerTime = intObj;
+            intObj = (int) json.get("player");
+            player = intObj;
+            JSONArray board = json.optJSONArray("board");
+            JSONArray invalidNumbers = json.optJSONArray("invalidNumbers");
+            JSONArray preSetNumbers = json.optJSONArray("preSetNumbers");
+            JSONArray numberInsertedPlayer = json.optJSONArray("numberInsertedPlayer");
+            JSONArray notes = json.optJSONArray("notes");
+            JSONArray invalideNotes = json.optJSONArray("invalideNotes");
+            JSONArray notesPlayer2 = json.optJSONArray("notesPlayer2");
+            JSONArray notesPlayer3 = json.optJSONArray("notesPlayer3");
+            JSONArray playerScores = json.optJSONArray("playerScores");
+            JSONArray playerNames = json.optJSONArray("playerNames");
+            if(this.board == null) this.board = new int[BOARD_SIZE][BOARD_SIZE];
+            if(this.invalidNumbers == null) this.invalidNumbers = new int[BOARD_SIZE][BOARD_SIZE];
+            if(this.preSetNumbers == null) this.preSetNumbers = new boolean[BOARD_SIZE][BOARD_SIZE];
+            if(this.numberInsertedPlayer == null) this.numberInsertedPlayer = new int[BOARD_SIZE][BOARD_SIZE];
+            if(this.notes == null) this.notes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
+            if(this.notesPlayer2 == null) this.notesPlayer2 = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
+            if(this.notesPlayer3 == null) this.notesPlayer3 = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
+            if(this.invalideNotes == null) this.invalideNotes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
+            if(this.playerScores == null) this.playerScores = new int[MAX_PLAYERS];
+            if(this.playerNames == null) this.playerNames = new ArrayList<>();
+            intObj = intObj2 = 0;
+            for (int i = 0; i < BOARD_SIZE; i++) {
+                for (int j = 0; j < BOARD_SIZE; j++) {
+                    this.board[i][j] = board.getInt(intObj);
+                    this.invalidNumbers[i][j] = invalidNumbers.optInt(intObj);
+                    this.preSetNumbers[i][j] = preSetNumbers.optBoolean(intObj);
+                    this.numberInsertedPlayer[i][j] = numberInsertedPlayer.optInt(intObj);
+                    for (int k = 0; k < BOARD_SIZE; k++) {
+                        this.notes[i][j][k] = notes.optInt(intObj2);
+                        this.invalideNotes[i][j][k] = invalideNotes.optInt(intObj2);
+                        this.notesPlayer2[i][j][k] = notesPlayer2.optInt(intObj2);
+                        this.notesPlayer3[i][j][k] = notesPlayer3.optInt(intObj2);
+                        intObj2++;
+                    }
+                    intObj++;
+                }
+            }
+            for (int i = 0; i < playerScores.length(); i++) {
+                this.playerScores[i] = playerScores.optInt(i);
+            }
+            this.playerNames.clear();
+            for (int i = 0; i < playerNames.length(); i++) {
+                this.playerNames.add(playerNames.optString(i));
+            }
+        } catch (JSONException e) {
+        }
+    }
+
+    public void sendMoveToServer(int row, int column, int value, boolean onNotas, boolean onApagar){
+        if(!isServidor){
+            try {
+
+                JSONObject jsonMove = new JSONObject();
+                jsonMove.put("row", row);
+                jsonMove.put("column", column);
+                jsonMove.put("onNotas", onNotas);
+                jsonMove.put("onApagar", onApagar);
+                jsonMove.put("value", value);
+                gameOutputs[0].println(jsonMove.toString());
+                gameOutputs[0].flush();
+            } catch (JSONException e) {
+            }
+        }
     }
 }

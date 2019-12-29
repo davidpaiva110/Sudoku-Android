@@ -53,7 +53,7 @@
     <string name="strPassarParaM1">Do you want to change the game to Single Player?</string>
     <string name="str_jogador_3">Player 3</string>
     <string name="strEsperarClientes">Waiting Clients...</string>
-    <string name="strIniciarJogo">"Start the game when at least 1 client is connected!"</string>
+    <string name="strIniciarJogo">"The game will start automatically when 2 clients are connected! You can also start the game with only 1 client connected!"</string>
     <string name="strIniciar">Start</string>
     <string name="strSemJogadoresLigados">There are no clients connected!</string>
     <string name="str_erro_ligacao_net">Error: No connection to internet!</string>
@@ -61,4 +61,6 @@
     <string name="str_erro_ligaçãoCliente">"Unable to connect to server with IP: "</string>
     <string name="strErroComunicacao">Error: A communication error occurred!</string>
     <string name="strNovoClienteLigado">Client connected!</string>
+    <string name="strEsperarInicio">Waiting for the start...</string>
+    <string name="strEsperarInicioServidor">Waiting for the server to begin the game!</string>
 </resources>
