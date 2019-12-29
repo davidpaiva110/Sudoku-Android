@@ -144,7 +144,7 @@ public class Board extends View {
                     if(gameData.isPreSet(r,c))
                         canvas.drawText(""+n, x, y, paintPreSetNumbers);
                     else {
-                        if(gameData.getGameMode() == 0 || gameData.isFinished()){
+                        if(gameData.getGameMode() == 0){
                             canvas.drawText("" + n, x, y, paintMainNumbers);
                         }
                         else {
@@ -228,24 +228,11 @@ public class Board extends View {
                                 // =========== Gravar os resultados do jogo ===========
                                 saveGameResult();
                                 // ====================================================
-                                AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AppCompatAlertDialogStyle)
-                                        .setTitle(R.string.strGanhou)
-                                        .setMessage(R.string.strTerminouJogo)
-                                        .setIcon(android.R.drawable.ic_dialog_info)
-                                        .setPositiveButton(R.string.strOK, new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                Activity activity = (Activity) getContext();
-                                                activity.finish();
-                                            }
-                                        }) //Ao clicar no botão voltar à página principal.
-                                        .create();
-                                Button btn;
-                                btn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                                if (btn != null) {
-                                    btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                                if(!(gameData.getGameMode() == 2 && gameData.getPlayerWinner() != 0)) {
+                                    showEndGameMessage(true);
+                                } else {
+                                    showEndGameMessage(false);
                                 }
-                                dialog.show();
                             }
                         }
                     } else if (!onApagar && onNotas) {
@@ -282,6 +269,46 @@ public class Board extends View {
             }
         }
         return super.onTouchEvent(event);
+    }
+
+    private void showEndGameMessage(boolean isWinner){
+        AlertDialog dialog;
+        if(isWinner) {
+            dialog = new AlertDialog.Builder(getContext(), R.style.AppCompatAlertDialogStyle)
+                    .setTitle(R.string.strGanhou)
+                    .setMessage(R.string.strTerminouJogo)
+                    .setCancelable(false)
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .setPositiveButton(R.string.strOK, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Activity activity = (Activity) getContext();
+                            activity.finish();
+                        }
+                    }) //Ao clicar no botão voltar à página principal.
+                    .create();
+        }
+        else{
+            dialog = new AlertDialog.Builder(getContext(), R.style.AppCompatAlertDialogStyle)
+                    .setTitle(R.string.strPerder)
+                    .setMessage(R.string.strPerdeuJogo)
+                    .setCancelable(false)
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .setPositiveButton(R.string.strOK, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Activity activity = (Activity) getContext();
+                            activity.finish();
+                        }
+                    }) //Ao clicar no botão voltar à página principal.
+                    .create();
+        }
+        Button btn;
+        btn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        if (btn != null) {
+            btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        }
+        dialog.show();
     }
 
     public void setSelectedValue(int selectedValue) {

@@ -531,6 +531,15 @@ public class GameData extends ViewModel implements Serializable {
         return finished;
     }
 
+    public int getPlayerWinner(){
+        if(isFinished()){
+            if(playerScores[0] > playerScores[1] && playerScores[0] > playerScores[2]) return 0;
+            if(playerScores[1] > playerScores[0] && playerScores[1] > playerScores[2]) return 1;
+            if(playerScores[2] > playerScores[1] && playerScores[2] > playerScores[0]) return 2;
+        }
+        return -1;
+    }
+
     public void checkTerminateGame(){
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
@@ -540,6 +549,35 @@ public class GameData extends ViewModel implements Serializable {
         }
         // O jogo terminou
         finished = true;
+        //Notificação dos clientes caso seja o modo 3
+        if(gameMode == 2){
+            Thread thNotify = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < MAX_CLIENTS; i++) {
+                        if(gameSockets[i] != null){
+                            try {
+                                boolean isWinner = false;
+                                //Verificação se é o vencedor ou não
+                                if(getPlayerWinner() == i + 1)
+                                    isWinner = true;
+                                //Enviar a indicação que o jogo terminou aos clientes
+                                JSONObject jsonFinish = new JSONObject();
+                                jsonFinish.put("finish", true);
+                                jsonFinish.put("winner", isWinner);
+                                jsonFinish.put("winnerName", getPlayerName(getPlayerWinner()));
+                                jsonFinish.put("time", getGameTime());
+                                jsonFinish.put("numbersAchieved", getPlayerScore(getPlayerWinner() + 1));
+                                gameOutputs[i].println(jsonFinish.toString());
+                                gameOutputs[i].flush();
+                            } catch (JSONException e) {
+                            }
+                        }
+                    }
+                }
+            });
+            thNotify.start();
+        }
     }
 
     public void showSolution(){

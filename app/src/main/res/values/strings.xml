@@ -62,4 +62,6 @@
     <string name="strNovoClienteLigado">Cliente conectado!</string>
     <string name="strEsperarInicio">Aguardando o início do jogo...</string>
     <string name="strEsperarInicioServidor">Aguarde que o servidor inicie o jogo!</string>
+    <string name="strPerdeuJogo">Perdeu o jogo! Boa sorte para a próxima vez!</string>
+    <string name="strPerder">Perdeu</string>
 </resources>

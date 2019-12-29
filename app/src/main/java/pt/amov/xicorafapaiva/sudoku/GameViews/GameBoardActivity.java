@@ -46,13 +46,15 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryData;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryViewModel;
 import pt.amov.xicorafapaiva.sudoku.R;
 
 public class GameBoardActivity extends AppCompatActivity {
 
     public static final int SECOND = 1000;
     private static final int PORT = 8899;
-    public static final int TIMEOUT = 5000;
+    public static final int TIMEOUT = 2000;
 
     private Board sudokuView;
     private Drawable btBackground;
@@ -65,6 +67,7 @@ public class GameBoardActivity extends AppCompatActivity {
     private boolean isProgressDialogActive = false;
     private Handler procMsg = new Handler();
     private ServerSocket serverSocket=null;
+    Thread serverCommunicationPlayer1 = null, serverCommunicationPlayer2 = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,10 +170,10 @@ public class GameBoardActivity extends AppCompatActivity {
                                         Toast.makeText(getApplicationContext(), R.string.strErroComunicacao, Toast.LENGTH_LONG).show();
                                         finish();
                                     }
-                                    Thread serverCommunicationPlayer1 = new Thread(new RunnableThreadServer(2));
+                                    serverCommunicationPlayer1 = new Thread(new RunnableThreadServer(2));
                                     serverCommunicationPlayer1.start();
                                     if(gameData.getGameSocket(1) != null) {
-                                        Thread serverCommunicationPlayer2 = new Thread(new RunnableThreadServer(3));
+                                        serverCommunicationPlayer2 = new Thread(new RunnableThreadServer(3));
                                         serverCommunicationPlayer2.start();
                                     }
                                     thTempo.start();
@@ -442,7 +445,7 @@ public class GameBoardActivity extends AppCompatActivity {
         btBackground = findViewById(R.id.btnNotas).getBackground();
         restoreButtonsSettings(selectedValue, isOnNotas, isOnApagar);
         initializaPlayerNames();
-        if(!(gameData.getGameMode() == 2) && !gameData.isServidor())
+        if(!(gameData.getGameMode() == 2 && !gameData.isServidor()))
             thTempo.start();
         if(isProgressDialogActive == true) {
             if(gameData.isServidor())
@@ -683,24 +686,35 @@ public class GameBoardActivity extends AppCompatActivity {
                     }
                 });
 
-                while (!Thread.currentThread().isInterrupted()) { // !!!!!!!!!!!!! E enquanto não o jog não tiver terminado!
-                    //Atualizar o GameData e a view
+                while (!Thread.currentThread().isInterrupted()) {
                     gameDataJSON = gameData.getGameInput(0).readLine();
                     jsonObject = new JSONObject(gameDataJSON);
-                    gameData.updateThroughJSON(jsonObject);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            sudokuView.invalidate();
-                            initializaPlayerNames();
-                            updatePlayersColors();
-                            ((TextView)findViewById(R.id.tvPontosJogador1)).setText("" + gameData.getPlayerScore(1));
-                            ((TextView)findViewById(R.id.tvPontosJogador2)).setText("" + gameData.getPlayerScore(2));
-                            if(gameData.getPlayerNames().size() > 2)
-                                ((TextView)findViewById(R.id.tvPontosJogador3)).setText("" + gameData.getPlayerScore(3));
-                            ((TextView)findViewById(R.id.tvTempoJogo)).setText("" + gameData.getPlayerTime());
-                        }
-                    });
+                    Boolean finished = jsonObject.optBoolean("finish", false);
+                    if(finished){
+                        Boolean winner = jsonObject.optBoolean("winner");
+                        String name = jsonObject.optString("winnerName");
+                        int time = jsonObject.optInt("time");
+                        int numbers = jsonObject.optInt("numbersAchieved");
+                        saveGameResultMode3(name, time, numbers);
+                        showEndGameMessage(winner);
+                    }
+                    else {
+                        //Atualizar o GameData e a view
+                        gameData.updateThroughJSON(jsonObject);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                sudokuView.invalidate();
+                                initializaPlayerNames();
+                                updatePlayersColors();
+                                ((TextView) findViewById(R.id.tvPontosJogador1)).setText("" + gameData.getPlayerScore(1));
+                                ((TextView) findViewById(R.id.tvPontosJogador2)).setText("" + gameData.getPlayerScore(2));
+                                if (gameData.getPlayerNames().size() > 2)
+                                    ((TextView) findViewById(R.id.tvPontosJogador3)).setText("" + gameData.getPlayerScore(3));
+                                ((TextView) findViewById(R.id.tvTempoJogo)).setText("" + gameData.getPlayerTime());
+                            }
+                        });
+                    }
                 }
             } catch (Exception e) {
                 procMsg.post(new Runnable() {
@@ -714,6 +728,74 @@ public class GameBoardActivity extends AppCompatActivity {
         }
     });
 
+    private void showEndGameMessage(boolean isWinner){ ;
+        if(isWinner) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlertDialog dialog = new AlertDialog.Builder(GameBoardActivity.this, R.style.AppCompatAlertDialogStyle)
+                            .setTitle(R.string.strGanhou)
+                            .setMessage(R.string.strTerminouJogo)
+                            .setIcon(android.R.drawable.ic_dialog_info)
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.strOK, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if(gameData.isServidor()){
+                                        serverCommunicationPlayer1.interrupt();
+                                        if(serverCommunicationPlayer2 != null)
+                                            serverCommunicationPlayer2.interrupt();
+                                    } else {
+                                        clientCommunication.interrupt();
+                                    }
+                                    finish();
+                                }
+                            }) //Ao clicar no botão voltar à página principal.
+                            .create();
+                    Button btn;
+                    btn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                    if (btn != null) {
+                        btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    }
+                    dialog.show();
+                }
+            });
+        }
+        else{
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlertDialog dialog = new AlertDialog.Builder(GameBoardActivity.this, R.style.AppCompatAlertDialogStyle)
+                            .setTitle(R.string.strPerder)
+                            .setMessage(R.string.strPerdeuJogo)
+                            .setCancelable(false)
+                            .setIcon(android.R.drawable.ic_dialog_info)
+                            .setPositiveButton(R.string.strOK, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if(gameData.isServidor()){
+                                        serverCommunicationPlayer1.interrupt();
+                                        if(serverCommunicationPlayer2 != null)
+                                            serverCommunicationPlayer2.interrupt();
+                                    } else {
+                                        clientCommunication.interrupt();
+                                    }
+                                    finish();
+                                }
+                            }) //Ao clicar no botão voltar à página principal.
+                            .create();
+                    Button btn;
+                    btn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                    if (btn != null) {
+                        btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    }
+                    dialog.show();
+                }
+            });
+        }
+
+    }
+
     private void validateMove(int row, int column, int value, boolean onNotas, boolean onApagar){
         if(!onApagar && !onNotas && gameData.getValue(row, column) == 0) {
             gameData.setValue(row, column, value);
@@ -726,26 +808,13 @@ public class GameBoardActivity extends AppCompatActivity {
                 gameData.checkTerminateGame();
                 if(gameData.isFinished()){
                     // =========== Gravar os resultados do jogo ===========
-                    //saveGameResult();
+                    saveGameResultMode3();
                     // ====================================================
-                    AlertDialog dialog = new AlertDialog.Builder(getApplicationContext(), R.style.AppCompatAlertDialogStyle)
-                            .setTitle(R.string.strGanhou)
-                            .setMessage(R.string.strTerminouJogo)
-                            .setIcon(android.R.drawable.ic_dialog_info)
-                            .setPositiveButton(R.string.strOK, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Activity activity = (Activity)getApplicationContext();
-                                        activity.finish();
-                                    }
-                                })
-                            .create();
-                    Button btn;
-                    btn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                    if(btn != null){
-                        btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    if(!(gameData.getGameMode() == 2 && gameData.getPlayerWinner() != 0)) {
+                        showEndGameMessage(true);
+                    } else {
+                        showEndGameMessage(false);
                     }
-                    dialog.show();
                 }
             }
         } else if(!onApagar && onNotas) {
@@ -784,5 +853,25 @@ public class GameBoardActivity extends AppCompatActivity {
             }
         }
         //invalidate(); // faz um refresh
+    }
+
+    /**
+     * Gravar os resultados do jogo no modo 3
+     */
+    public void saveGameResultMode3(){
+        int indexWinnerPlayer = gameData.getPlayerWinner();
+        GameHistoryData ghd = new GameHistoryData(gameData.getPlayerName(indexWinnerPlayer), "M3", gameData.getGameTime(), gameData.getPlayerScore(indexWinnerPlayer + 1));
+        GameHistoryViewModel ghvm = new GameHistoryViewModel(GameBoardActivity.this);
+        ghvm.addNewGame(ghd);
+        ghvm.saveHistory();
+
+    }
+
+    public void saveGameResultMode3(String winner, int time, int numbersAchive){
+        GameHistoryData ghd = new GameHistoryData(winner, "M3", time, numbersAchive);
+        GameHistoryViewModel ghvm = new GameHistoryViewModel(GameBoardActivity.this);
+        ghvm.addNewGame(ghd);
+        ghvm.saveHistory();
+
     }
 }
