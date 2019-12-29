@@ -52,7 +52,7 @@
     <string name="strPassarParaM1">Deseja passar o jogo para o modo Um Jogador?</string>
     <string name="str_jogador_3">Jogador 3</string>
     <string name="strEsperarClientes">Aguardando Clientes...</string>
-    <string name="strIniciarJogo">Inicie o jogo quando estiver pelo menos 1 cliente conectado!</string>
+    <string name="strIniciarJogo">O jogo irá iniciar automaticamente quando estiverem 2 clientes conectados! Pode também iniciar o jogo apenas com 1 cliente conectado!</string>
     <string name="strIniciar">Iniciar</string>
     <string name="str_erro_ligacao_net">Erro: Não existe ligação à Internet!</string>
     <string name="str_ip_do_servidor">IP do Servidor</string>

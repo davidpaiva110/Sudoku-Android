@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.app.ProgressDialog;
@@ -166,7 +167,12 @@ public class GameBoardActivity extends AppCompatActivity {
                                         Toast.makeText(getApplicationContext(), R.string.strErroComunicacao, Toast.LENGTH_LONG).show();
                                         finish();
                                     }
-                                    serverCommunication.start();
+                                    Thread serverCommunicationPlayer1 = new Thread(new RunnableThreadServer(2));
+                                    serverCommunicationPlayer1.start();
+                                    if(gameData.getGameSocket(1) != null) {
+                                        Thread serverCommunicationPlayer2 = new Thread(new RunnableThreadServer(3));
+                                        serverCommunicationPlayer2.start();
+                                    }
                                     thTempo.start();
                                 }
                             });
@@ -224,7 +230,7 @@ public class GameBoardActivity extends AppCompatActivity {
                         TextView tvTempoJogo = findViewById(R.id.tvTempoJogo);
                         if(gameData.getGameMode() == 0)
                             tvTempoJogo.setText("" + gameData.getGameTime());
-                        else if(gameData.getGameMode() > 1) {
+                        else if(gameData.getGameMode() > 0) {
                             tvTempoJogo.setText("" + gameData.getPlayerTime());
                             updatePlayersColors();
                         }
@@ -239,7 +245,7 @@ public class GameBoardActivity extends AppCompatActivity {
                             gameData.incrementGameTime();
                             if(gameData.getGameMode() == 0)
                                 tvTempoJogo.setText("" + gameData.getGameTime());
-                            else if(gameData.getGameMode() > 1){
+                            else if(gameData.getGameMode() > 0){
                                 gameData.decrementPlayerTime();
                                 if(gameData.getPlayer() == 1)
                                     ((TextView)findViewById(R.id.tvPontosJogador1)).setText("" + gameData.getPlayerScore(1));
@@ -314,7 +320,7 @@ public class GameBoardActivity extends AppCompatActivity {
         int mode = getIntent().getIntExtra("mode", 1);
         if(mode == 0)
             inflater.inflate(R.menu.menu_game_board_activity, menu);
-        else if(mode > 1)
+        else if(mode > 0)
             inflater.inflate(R.menu.menu_modo_2_e_3, menu);
 
         return true;
@@ -455,8 +461,14 @@ public class GameBoardActivity extends AppCompatActivity {
         pd.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.strCancelar), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                if(serverSocket!=null) {
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                    }
+                }
                 dialog.dismiss();
-                ((Activity)getApplicationContext()).finish();
+                finish();
             }
         });
         pd.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.strIniciar), (DialogInterface.OnClickListener) null);
@@ -556,7 +568,7 @@ public class GameBoardActivity extends AppCompatActivity {
         if(gameData.getGameMode() == 2){  // Modo 3
             TextView tvName1 = findViewById(R.id.tvNomePlayer1);
             tvName1.setText(gameData.getPlayerName(0));
-            if(gameData.getGameSocket(0) != null) {
+            if(gameData.getPlayerNames().size() > 1) {
                 TextView tvName2 = findViewById(R.id.tvNomePlayer2);
                 tvName2.setText(gameData.getPlayerName(1));
                 ((TextView)findViewById(R.id.tvPontosJogador2)).setText("0");
@@ -566,11 +578,11 @@ public class GameBoardActivity extends AppCompatActivity {
                 ((TextView)findViewById(R.id.tvPontosJogador2)).setText("");
                 ((TextView)findViewById(R.id.tvStrPontosJogador2)).setText("");
             }
-            if(gameData.getGameSocket(1) != null) {
+            if(gameData.getPlayerNames().size() > 2) {
                 TextView tvName3 = findViewById(R.id.tvNomePlayer3);
                 tvName3.setText(gameData.getPlayerName(2));
-                ((TextView)findViewById(R.id.tvPontosJogador2)).setText("0");
-                ((TextView)findViewById(R.id.tvStrPontosJogador2)).setText(getString(R.string.strPontos));
+                ((TextView)findViewById(R.id.tvPontosJogador3)).setText("0");
+                ((TextView)findViewById(R.id.tvStrPontosJogador3)).setText(getString(R.string.strPontos));
             } else {
                 ((TextView)findViewById(R.id.tvNomePlayer3)).setText("");
                 ((TextView)findViewById(R.id.tvPontosJogador3)).setText("");
@@ -589,7 +601,14 @@ public class GameBoardActivity extends AppCompatActivity {
         }
     }
 
-    Thread serverCommunication = new Thread(new Runnable() {
+    class RunnableThreadServer implements Runnable{
+
+        private int player;
+
+        public RunnableThreadServer(int player) {
+            this.player = player;
+        }
+
         @Override
         public void run() {
             try {
@@ -597,7 +616,23 @@ public class GameBoardActivity extends AppCompatActivity {
                 sendGameDataToClients();
                 //Loop de espera por jogadas dos clientes
                 while (!Thread.currentThread().isInterrupted()) {
-
+                    String jsonMove = gameData.getGameInput(player - 2).readLine();
+                    JSONObject jsonObject = new JSONObject(jsonMove);
+                    int row = (int)jsonObject.get("row");
+                    int column = (int)jsonObject.get("column");
+                    boolean onNotas = (boolean)jsonObject.get("onNotas");
+                    boolean onApagar = (boolean)jsonObject.get("onApagar");
+                    int value = (int)jsonObject.get("value");
+                    if(gameData.getPlayer() == player) {
+                        validateMove(row, column, value, onNotas, onApagar);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                sudokuView.invalidate();
+                            }
+                        });
+                        sendGameDataToClients();
+                    }
                 }
             } catch (Exception e) {
                 /*procMsg.post(new Runnable() {
@@ -611,7 +646,7 @@ public class GameBoardActivity extends AppCompatActivity {
                 });*/
             }
         }
-    });
+    }
 
     Thread clientCommunication = new Thread(new Runnable() {
         @Override
@@ -679,4 +714,75 @@ public class GameBoardActivity extends AppCompatActivity {
         }
     });
 
+    private void validateMove(int row, int column, int value, boolean onNotas, boolean onApagar){
+        if(!onApagar && !onNotas && gameData.getValue(row, column) == 0) {
+            gameData.setValue(row, column, value);
+            gameData.validateNumber(row, column);
+            if(gameData.getValue(row, column) != 0){ //Se o número inserido for válido
+                gameData.validateNotesAfterNewValidNumber(row, column);
+                gameData.setPlayerOfInsertedNumber(row, column);
+                gameData.setCorrectNumberTime();
+                gameData.incrementPlayerScore();
+                gameData.checkTerminateGame();
+                if(gameData.isFinished()){
+                    // =========== Gravar os resultados do jogo ===========
+                    //saveGameResult();
+                    // ====================================================
+                    AlertDialog dialog = new AlertDialog.Builder(getApplicationContext(), R.style.AppCompatAlertDialogStyle)
+                            .setTitle(R.string.strGanhou)
+                            .setMessage(R.string.strTerminouJogo)
+                            .setIcon(android.R.drawable.ic_dialog_info)
+                            .setPositiveButton(R.string.strOK, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Activity activity = (Activity)getApplicationContext();
+                                        activity.finish();
+                                    }
+                                })
+                            .create();
+                    Button btn;
+                    btn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                    if(btn != null){
+                        btn.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                    }
+                    dialog.show();
+                }
+            }
+        } else if(!onApagar && onNotas) {
+            if(gameData.getPlayer() == 1) {
+                if (gameData.getCellNote(row, column, value - 1) == 0) { //Verifica se o valor já está nas notas
+                    gameData.setCellNote(row, column, value - 1, value); //Se não estiver coloca
+                    gameData.validateNumber(row, column, value, 1);
+                } else
+                    gameData.setCellNote(row, column, value - 1, 0); //Se já estiver, retira
+            } else if(gameData.getPlayer() == 2){
+                if (gameData.getPlayer2CellNote(row, column, value - 1) == 0) { //Verifica se o valor já está nas notas
+                    gameData.setPlayer2CellNote(row, column, value - 1, value); //Se não estiver coloca
+                    gameData.validateNumber(row, column, value, 2);
+                } else
+                    gameData.setPlayer2CellNote(row, column, value - 1, 0); //Se já estiver, retira
+            } else if(gameData.getPlayer() == 3){
+                if (gameData.getPlayer3CellNote(row, column, value - 1) == 0) { //Verifica se o valor já está nas notas
+                    gameData.setPlayer3CellNote(row, column, value - 1, value); //Se não estiver coloca
+                    gameData.validateNumber(row, column, value, 3);
+                } else
+                    gameData.setPlayer3CellNote(row, column, value - 1, 0); //Se já estiver, retira
+            }
+        }
+        else if(onApagar){
+            if(gameData.getValue(row, column)>0 && gameData.getPlayerOfInsertedNumber(row, column) == gameData.getPlayer()) {
+                gameData.setValue(row, column, 0);
+                gameData.decrementPlayerScore();
+            }
+            else {
+                if(gameData.getPlayer() == 1)
+                    gameData.resetCellNotes(row, column); //Apaga todas as notas do jogador 1
+                else if(gameData.getPlayer() == 2)
+                    gameData.resetPlayer2CellNotes(row, column); //Apaga todas as notas do jogador 2
+                else if(gameData.getPlayer() == 3)
+                    gameData.resetPlayer3CellNotes(row, column); //Apaga todas as notas do jogador 3
+            }
+        }
+        //invalidate(); // faz um refresh
+    }
 }
