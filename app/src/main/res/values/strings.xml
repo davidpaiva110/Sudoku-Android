@@ -38,9 +38,9 @@
     <string name="strCarregarJogo">Carregar Jogo</string>
     <string name="strPorFavorAguarde">Por favor, aguarde...</string>
     <string name="strApagar">Apagar</string>
-    <string name="strPontos">Pontos</string>
+    <string name="strPontos">Pontos </string>
     <string name="strJogador_1">Jogador 1 </string>
-    <string name="strPontos_">Pontos:</string>
+    <string name="strPontos_">Pontos: </string>
     <string name="strJogador_2">Jogador 2 </string>
     <string name="strTerminouJogo">Parabéns! Ganhou o jogo!</string>
     <string name="strGanhou">Ganhou</string>
@@ -54,11 +54,11 @@
     <string name="strEsperarClientes">Aguardando Clientes...</string>
     <string name="strIniciarJogo">O jogo irá iniciar automaticamente quando estiverem 2 clientes conectados! Pode também iniciar o jogo apenas com 1 cliente conectado!</string>
     <string name="strIniciar">Iniciar</string>
-    <string name="str_erro_ligacao_net">Erro: Não existe ligação à Internet!</string>
+    <string name="str_erro_ligacao_net">Não existe ligação à Internet!</string>
     <string name="str_ip_do_servidor">IP do Servidor</string>
     <string name="strSemJogadoresLigados">Não existe nenhum cliente conectado!</string>
     <string name="str_erro_ligaçãoCliente">Impossível estabelecer ligação ao servidor com o IP:</string>
-    <string name="strErroComunicacao">Erro: Ocorreu um erro de comunicação!</string>
+    <string name="strErroComunicacao">Ocorreu um erro de comunicação!</string>
     <string name="strNovoClienteLigado">Cliente conectado!</string>
     <string name="strEsperarInicio">Aguardando o início do jogo...</string>
     <string name="strEsperarInicioServidor">Aguarde que o servidor inicie o jogo!</string>

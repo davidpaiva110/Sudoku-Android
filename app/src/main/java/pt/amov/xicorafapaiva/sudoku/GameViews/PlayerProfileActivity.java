@@ -76,7 +76,10 @@ public class PlayerProfileActivity extends AppCompatActivity {
             name = r.readLine();
             r.close();
         } catch (IOException e) {
+            name = null;
         }
-        return name;
+        if(name != null)
+            return name;
+        return "Jogador";
     }
 }

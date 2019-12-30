@@ -110,15 +110,21 @@ public class GameData extends ViewModel implements Serializable {
     }
 
     public Socket getGameSocket(int pos) {
-        return gameSockets[pos];
+        if(gameSockets!= null)
+            return gameSockets[pos];
+        return null;
     }
 
     public BufferedReader getGameInput(int pos) {
-        return gameInputs[pos];
+        if(gameInputs!= null)
+            return gameInputs[pos];
+        return null;
     }
 
     public PrintWriter getGameOutputs(int pos) {
-        return gameOutputs[pos];
+        if(gameOutputs!= null)
+            return gameOutputs[pos];
+        return null;
     }
 
     public ArrayList<String> getPlayerNames() {
@@ -835,6 +841,16 @@ public class GameData extends ViewModel implements Serializable {
             }
 
         } catch (JSONException e) {
+        }
+    }
+
+
+    public void sendGameDataToClients(){
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            if(gameSockets[i] != null){
+                gameOutputs[i].println(toStringJSONFormat());
+                gameOutputs[i].flush();
+            }
         }
     }
 

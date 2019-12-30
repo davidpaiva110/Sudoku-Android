@@ -40,7 +40,7 @@
     <string name="strPorFavorAguarde">" Please wait..."</string>
     <string name="strJogador_1">Player 1</string>
     <string name="strJogador_2">Player 2</string>
-    <string name="strPontos">Points</string>
+    <string name="strPontos">Points </string>
     <string name="strPontos_">"Points: "</string>
     <string name="strApagar">Erase</string>
     <string name="strTerminouJogo">Congratulations! You won the game!</string>
@@ -56,10 +56,10 @@
     <string name="strIniciarJogo">"The game will start automatically when 2 clients are connected! You can also start the game with only 1 client connected!"</string>
     <string name="strIniciar">Start</string>
     <string name="strSemJogadoresLigados">There are no clients connected!</string>
-    <string name="str_erro_ligacao_net">Error: No connection to internet!</string>
+    <string name="str_erro_ligacao_net">No connection to internet!</string>
     <string name="str_ip_do_servidor">Server IP</string>
     <string name="str_erro_ligaçãoCliente">"Unable to connect to server with IP: "</string>
-    <string name="strErroComunicacao">Error: A communication error occurred!</string>
+    <string name="strErroComunicacao">A communication error occurred!</string>
     <string name="strNovoClienteLigado">Client connected!</string>
     <string name="strEsperarInicio">Waiting for the start...</string>
     <string name="strEsperarInicioServidor">Waiting for the server to begin the game!</string>
