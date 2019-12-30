@@ -10,7 +10,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 
-public class GameHistoryViewModel  {
+public class GameHistory {
 
     public static final String HISTORY_FILE_NAME ="historico.bin";
     public static final int MAX_GAMES_SAVED = 10;
@@ -19,7 +19,7 @@ public class GameHistoryViewModel  {
     private Context context;
 
 
-    public GameHistoryViewModel(Context context) {
+    public GameHistory(Context context) {
         this.lastGames = new ArrayList<>();
         this.context = context;
         readHistory();

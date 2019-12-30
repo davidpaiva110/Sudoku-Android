@@ -6,10 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 
-import android.graphics.Color;
 import android.graphics.Paint;
 
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -17,7 +15,7 @@ import android.widget.Button;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryData;
-import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryViewModel;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistory;
 import pt.amov.xicorafapaiva.sudoku.R;
 
 
@@ -380,7 +378,7 @@ public class Board extends View {
     public void saveGameResult(){
         if(gameData.getGameMode() == 0) {
             GameHistoryData ghd = new GameHistoryData(PlayerProfileActivity.getPlayerName(getContext()), "M1", gameData.getGameTime(), gameData.getPlayerScore(1));
-            GameHistoryViewModel ghvm = new GameHistoryViewModel(getContext());
+            GameHistory ghvm = new GameHistory(getContext());
             ghvm.addNewGame(ghd);
             ghvm.saveHistory();
         }else if(gameData.getGameMode() == 1){
@@ -390,7 +388,7 @@ public class Board extends View {
             else
                 indexWinnerPlayer = 2;
             GameHistoryData ghd = new GameHistoryData(gameData.getPlayerName(indexWinnerPlayer-1), "M2", gameData.getGameTime(), gameData.getPlayerScore(indexWinnerPlayer));
-            GameHistoryViewModel ghvm = new GameHistoryViewModel(getContext());
+            GameHistory ghvm = new GameHistory(getContext());
             ghvm.addNewGame(ghd);
             ghvm.saveHistory();
 

@@ -3,7 +3,6 @@ package pt.amov.xicorafapaiva.sudoku.GameViews;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -15,7 +14,7 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryData;
-import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryViewModel;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistory;
 import pt.amov.xicorafapaiva.sudoku.R;
 
 public class ResultsHistoricActivity extends AppCompatActivity {
@@ -42,7 +41,7 @@ public class ResultsHistoricActivity extends AppCompatActivity {
      */
     public void readHistory() {
         try {
-            FileInputStream fis = getApplicationContext().openFileInput(GameHistoryViewModel.HISTORY_FILE_NAME);
+            FileInputStream fis = getApplicationContext().openFileInput(GameHistory.HISTORY_FILE_NAME);
             ObjectInputStream is = new ObjectInputStream(fis);
             ArrayList<GameHistoryData> array = (ArrayList<GameHistoryData>) is.readObject();
             historicos = array;

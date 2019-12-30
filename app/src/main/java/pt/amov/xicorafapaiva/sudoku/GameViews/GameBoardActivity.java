@@ -16,7 +16,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -50,7 +49,7 @@ import java.util.Enumeration;
 
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameData;
 import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryData;
-import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistoryViewModel;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.GameHistory;
 import pt.amov.xicorafapaiva.sudoku.R;
 
 public class GameBoardActivity extends AppCompatActivity {
@@ -957,7 +956,7 @@ public class GameBoardActivity extends AppCompatActivity {
     public void saveGameResultMode3(){
         int indexWinnerPlayer = gameData.getPlayerWinner();
         GameHistoryData ghd = new GameHistoryData(gameData.getPlayerName(indexWinnerPlayer), "M3", gameData.getGameTime(), gameData.getPlayerScore(indexWinnerPlayer + 1));
-        GameHistoryViewModel ghvm = new GameHistoryViewModel(GameBoardActivity.this);
+        GameHistory ghvm = new GameHistory(GameBoardActivity.this);
         ghvm.addNewGame(ghd);
         ghvm.saveHistory();
 
@@ -965,7 +964,7 @@ public class GameBoardActivity extends AppCompatActivity {
 
     public void saveGameResultMode3(String winner, int time, int numbersAchive){
         GameHistoryData ghd = new GameHistoryData(winner, "M3", time, numbersAchive);
-        GameHistoryViewModel ghvm = new GameHistoryViewModel(GameBoardActivity.this);
+        GameHistory ghvm = new GameHistory(GameBoardActivity.this);
         ghvm.addNewGame(ghd);
         ghvm.saveHistory();
 
