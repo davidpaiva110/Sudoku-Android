@@ -1,6 +1,7 @@
 package pt.amov.xicorafapaiva.sudoku.GameClasss;
 
 
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
@@ -52,9 +53,12 @@ public class GameData extends ViewModel implements Serializable {
 
     //Nomes dos Jogadores
     private ArrayList<String> playerNames;
+    //Fotos dos Jogadores
+    private ArrayList<String> playerPics;
 
     public GameData() {
         playerNames = new ArrayList<String>();
+        playerPics = new ArrayList<>();
     }
 
     public int[][] getBoard() {
@@ -621,6 +625,19 @@ public class GameData extends ViewModel implements Serializable {
         }
     }
 
+    public void addPlayerPic(String playerPic){
+        if(playerPics != null){
+            if(playerPics.size() != MAX_PLAYERS){
+                if(playerPic != null)
+                    playerPics.add(playerPic);
+            }
+        }
+    }
+
+    public ArrayList<String> getPlayerPics() {
+        return playerPics;
+    }
+
     public String getPlayerName(int indexPLayer){
         if(indexPLayer > playerNames.size())
             return null;
@@ -700,6 +717,7 @@ public class GameData extends ViewModel implements Serializable {
             JSONArray notesPlayer2 = new JSONArray();
             JSONArray playerScores = new JSONArray();
             JSONArray playerNames = new JSONArray();
+            JSONArray playerPics = new JSONArray();
             JSONArray notesPlayer3 = new JSONArray();
             for (int i = 0; i < BOARD_SIZE; i++) {
                 for (int j = 0; j < BOARD_SIZE; j++) {
@@ -721,6 +739,10 @@ public class GameData extends ViewModel implements Serializable {
             for (String name:this.playerNames) {
                 playerNames.put(name);
             }
+            for (String pic:this.playerPics) {
+                playerPics.put(pic);
+            }
+
             json.put("board", board);
             json.put("invalidNumbers", invalidNumbers);
             json.put("preSetNumbers", preSetNumbers);
@@ -731,6 +753,7 @@ public class GameData extends ViewModel implements Serializable {
             json.put("notesPlayer3", notesPlayer3);
             json.put("playerScores", playerScores);
             json.put("playerNames", playerNames);
+            json.put("playerPics", playerPics);
             json.put("gameTime", gameTime);
         } catch (JSONException e) {
         }
@@ -761,6 +784,7 @@ public class GameData extends ViewModel implements Serializable {
             JSONArray notesPlayer3 = json.optJSONArray("notesPlayer3");
             JSONArray playerScores = json.optJSONArray("playerScores");
             JSONArray playerNames = json.optJSONArray("playerNames");
+            JSONArray playerPics = json.optJSONArray("playerPics");
             if(this.board == null) this.board = new int[BOARD_SIZE][BOARD_SIZE];
             if(this.invalidNumbers == null) this.invalidNumbers = new int[BOARD_SIZE][BOARD_SIZE];
             if(this.preSetNumbers == null) this.preSetNumbers = new boolean[BOARD_SIZE][BOARD_SIZE];
@@ -771,6 +795,7 @@ public class GameData extends ViewModel implements Serializable {
             if(this.invalideNotes == null) this.invalideNotes = new int[BOARD_SIZE][BOARD_SIZE][BOARD_SIZE];
             if(this.playerScores == null) this.playerScores = new int[MAX_PLAYERS];
             if(this.playerNames == null) this.playerNames = new ArrayList<>();
+            if(this.playerPics == null) this.playerNames = new ArrayList<>();
             intObj = intObj2 = 0;
             for (int i = 0; i < BOARD_SIZE; i++) {
                 for (int j = 0; j < BOARD_SIZE; j++) {
@@ -795,6 +820,11 @@ public class GameData extends ViewModel implements Serializable {
             for (int i = 0; i < playerNames.length(); i++) {
                 this.playerNames.add(playerNames.optString(i));
             }
+            this.playerPics.clear();
+            for (int i = 0; i < playerPics.length(); i++) {
+                this.playerPics.add(playerPics.optString(i));
+            }
+
         } catch (JSONException e) {
         }
     }

@@ -11,10 +11,12 @@ import android.content.ContextWrapper;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +30,7 @@ import android.widget.Toast;
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -137,6 +140,8 @@ public class GameBoardActivity extends AppCompatActivity {
                         public void run() {
                             try {
                                 serverSocket = new ServerSocket(PORT);
+                                Bitmap bm = getPlayerPhotoProfile();
+                                gameData.addPlayerPic(BitMapToString(bm));
                                 for (int i = 0; i < GameData.MAX_CLIENTS; i++) {
                                     gameData.setGameSocket(i, serverSocket.accept());
                                     //Criação dos inputs e outputs
@@ -146,6 +151,11 @@ public class GameBoardActivity extends AppCompatActivity {
                                     String nameJSON = gameData.getGameInput(i).readLine();
                                     JSONObject jsonObject = new JSONObject(nameJSON);
                                     gameData.addPlayerName(jsonObject.getString("name"));
+                                    //Recebimento da foto do jogador
+                                    String playerPicJSON = gameData.getGameInput(i).readLine();
+                                    jsonObject = new JSONObject(playerPicJSON);
+                                    gameData.addPlayerPic(jsonObject.getString("playerPic"));
+
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -559,37 +569,56 @@ public class GameBoardActivity extends AppCompatActivity {
             TextView tvName2 = findViewById(R.id.tvNomePlayer2);
             tvName2.setText(gameData.getPlayerName(1));
             ImageView imageView = findViewById(R.id.ivPlayer1);
-            ContextWrapper cw = new ContextWrapper(getApplicationContext());
-            File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-            File f=new File(directory.getAbsolutePath(), "profile.jpg");
-            try {
-                if(imageView != null)
-                    imageView.setImageBitmap(BitmapFactory.decodeStream(new FileInputStream(f)));
-            } catch (FileNotFoundException e) {
-            }
+            if(imageView != null)
+                imageView.setImageBitmap(getPlayerPhotoProfile());
         }
         if(gameData.getGameMode() == 2){  // Modo 3
             TextView tvName1 = findViewById(R.id.tvNomePlayer1);
             tvName1.setText(gameData.getPlayerName(0));
+            ImageView ivPlayer1 = findViewById(R.id.ivPlayer1);
+            if(ivPlayer1 != null) {
+                String str = gameData.getPlayerPics().get(0);
+                Bitmap bm = StringToBitMap(str);
+                if(bm != null)
+                    ivPlayer1.setImageBitmap(bm);
+            }
             if(gameData.getPlayerNames().size() > 1) {
                 TextView tvName2 = findViewById(R.id.tvNomePlayer2);
                 tvName2.setText(gameData.getPlayerName(1));
                 ((TextView)findViewById(R.id.tvPontosJogador2)).setText("0");
                 ((TextView)findViewById(R.id.tvStrPontosJogador2)).setText(getString(R.string.strPontos));
+                ImageView ivPlayer2 = findViewById(R.id.ivPlayer2);
+                if(ivPlayer2 != null) {
+                    String str = gameData.getPlayerPics().get(1);
+                    Bitmap bm = StringToBitMap(str);
+                    ivPlayer2.setImageBitmap(bm);
+                }
             } else{
                 ((TextView)findViewById(R.id.tvNomePlayer2)).setText("");
                 ((TextView)findViewById(R.id.tvPontosJogador2)).setText("");
                 ((TextView)findViewById(R.id.tvStrPontosJogador2)).setText("");
+                ImageView ivPlayer2 = findViewById(R.id.ivPlayer3);
+                if(ivPlayer2 != null)
+                    ivPlayer2.setImageBitmap(null);
             }
             if(gameData.getPlayerNames().size() > 2) {
                 TextView tvName3 = findViewById(R.id.tvNomePlayer3);
                 tvName3.setText(gameData.getPlayerName(2));
                 ((TextView)findViewById(R.id.tvPontosJogador3)).setText("0");
                 ((TextView)findViewById(R.id.tvStrPontosJogador3)).setText(getString(R.string.strPontos));
+                ImageView ivPlayer3 = findViewById(R.id.ivPlayer3);
+                if(ivPlayer3 != null) {
+                    String str = gameData.getPlayerPics().get(2);
+                    Bitmap bm = StringToBitMap(str);
+                    ivPlayer3.setImageBitmap(bm);
+                }
             } else {
                 ((TextView)findViewById(R.id.tvNomePlayer3)).setText("");
                 ((TextView)findViewById(R.id.tvPontosJogador3)).setText("");
                 ((TextView)findViewById(R.id.tvStrPontosJogador3)).setText("");
+                ImageView ivPlayer3 = findViewById(R.id.ivPlayer3);
+                if(ivPlayer3 != null)
+                    ivPlayer3.setImageBitmap(null);
             }
         }
 
@@ -657,10 +686,17 @@ public class GameBoardActivity extends AppCompatActivity {
             try {
                 gameData.setGameInput(0, new BufferedReader(new InputStreamReader(gameData.getGameSocket(0).getInputStream())));
                 gameData.setGameOutput(0, new PrintWriter(gameData.getGameSocket(0).getOutputStream()));
-                //Enviar o nome e a foto do jogador ao servidor
+                //Enviar o nome ao servidor
                 JSONObject jsonPlayerName = new JSONObject();
                 jsonPlayerName.put("name", PlayerProfileActivity.getPlayerName(getApplicationContext()));
                 gameData.getGameOutputs(0).println(jsonPlayerName.toString());
+                gameData.getGameOutputs(0).flush();
+                //Enviar a foto ao servidor
+                JSONObject jsonPlayerPic = new JSONObject();
+                Bitmap playerPic = getPlayerPhotoProfile();
+                String playerPicString = BitMapToString(playerPic);
+                jsonPlayerPic.put("playerPic", playerPicString);
+                gameData.getGameOutputs(0).println(jsonPlayerPic.toString());
                 gameData.getGameOutputs(0).flush();
 
                 //Receber o GameData Inicial
@@ -874,4 +910,40 @@ public class GameBoardActivity extends AppCompatActivity {
         ghvm.saveHistory();
 
     }
+
+    public String BitMapToString(Bitmap bitmap){
+        ByteArrayOutputStream baos=new  ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG,100, baos);
+        byte [] b=baos.toByteArray();
+        String temp=Base64.encodeToString(b, Base64.DEFAULT);
+        return temp;
+    }
+
+    public Bitmap StringToBitMap(String encodedString){
+        try {
+            byte [] encodeByte=Base64.decode(encodedString,Base64.DEFAULT);
+            Bitmap bitmap=BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+            return bitmap;
+        } catch(Exception e) {
+            e.getMessage();
+            return null;
+        }
+    }
+
+    public Bitmap getPlayerPhotoProfile(){
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        // path to /data/data/sudoku/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        String path = directory.getAbsolutePath();
+        try {
+            File f=new File(path, "profile.jpg");
+            return BitmapFactory.decodeStream(new FileInputStream(f));
+        }
+        catch (FileNotFoundException e)
+        {
+            return null;
+        }
+    }
+
+
 }
