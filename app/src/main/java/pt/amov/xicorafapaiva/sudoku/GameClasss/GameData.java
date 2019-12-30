@@ -287,6 +287,9 @@ public class GameData extends ViewModel implements Serializable {
                 invalidNumbers[i][j] = 0;
     }
 
+    public void setBoardFromOtherMode(int [][] board){
+        this.board = board;
+    }
 
     public  void setBoard(int [][] board){
         try {
@@ -586,6 +589,12 @@ public class GameData extends ViewModel implements Serializable {
 
     public void showSolution(){
         board = resolveBoard();
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                if(numberInsertedPlayer[i][j] == 0)
+                    numberInsertedPlayer[i][j] = 1;
+            }
+        }
         finished = true;
     }
 
