@@ -17,7 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import pt.amov.xicorafapaiva.sudoku.Player;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.Player;
 import pt.amov.xicorafapaiva.sudoku.R;
 
 public class PlayerProfileActivity extends AppCompatActivity {

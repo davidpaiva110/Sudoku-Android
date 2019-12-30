@@ -29,7 +29,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import pt.amov.xicorafapaiva.sudoku.Player;
+import pt.amov.xicorafapaiva.sudoku.GameClasss.Player;
 import pt.amov.xicorafapaiva.sudoku.R;
 
 public class EditPlayerProfileActivity extends AppCompatActivity {

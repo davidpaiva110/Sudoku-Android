@@ -1,4 +1,4 @@
-package pt.amov.xicorafapaiva.sudoku;
+package pt.amov.xicorafapaiva.sudoku.GameClasss;
 
 import android.graphics.Bitmap;
 
