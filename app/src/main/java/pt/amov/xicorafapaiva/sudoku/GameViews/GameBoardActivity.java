@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -26,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -83,17 +83,16 @@ public class GameBoardActivity extends AppCompatActivity {
         this.gameData = ViewModelProviders.of(this).get(GameData.class);
         if(savedInstanceState == null) {
             if(getIntent().getBooleanExtra("existingGame", false) == true){  //Modo 2/3 -> Modo 1
-                GameData auxGameData = (GameData) getIntent().getSerializableExtra("gameData");
-                gameData.setInvalidNumbers(auxGameData.getInvalidNumbers());
-                gameData.setPreSetNumbers(auxGameData.getPreSetNumbers());
-                gameData.setNotes(auxGameData.getNotes());
-                gameData.setInvalideNotes(auxGameData.getInvalideNotes());
-                gameData.setGameTime(auxGameData.getGameTime());
-                gameData.setFinished(auxGameData.isFinished());
-                gameData.setGameMode(auxGameData.getGameMode());
-                gameData.setPlayerScores(auxGameData.getPlayerScores());
-                gameData.setNumberInsertedPlayer(auxGameData.getNumberInsertedPlayer());
-                gameData.setBoard(auxGameData.getBoard());
+                gameData.setInvalidNumbers((int [][])getIntent().getSerializableExtra("invalidNumbers"));
+                gameData.setPreSetNumbers((boolean [][])getIntent().getSerializableExtra("preSetNumbers"));
+                gameData.setNotes((int [][][])getIntent().getSerializableExtra("notes"));
+                gameData.setInvalideNotes((int [][][])getIntent().getSerializableExtra("invalidNotes"));
+                gameData.setGameTime(getIntent().getIntExtra("gameTime", 0  ));
+                gameData.setFinished(getIntent().getBooleanExtra("finished", false));
+                gameData.setGameMode(getIntent().getIntExtra("mode", 0));
+                gameData.setPlayerScores((int [])getIntent().getSerializableExtra("playerScores"));
+                gameData.setNumberInsertedPlayer((int[][]) getIntent().getSerializableExtra("numberInsertedPlayer"));
+                gameData.setBoardFromOtherMode((int[][]) getIntent().getSerializableExtra("board"));
             } else {
                 gameData.setServidor(getIntent().getBooleanExtra("isServidor", false));
                 if(!(mode == 2 && !gameData.isServidor())) {
@@ -323,9 +322,10 @@ public class GameBoardActivity extends AppCompatActivity {
         int mode = getIntent().getIntExtra("mode", 1);
         if(mode == 0)
             inflater.inflate(R.menu.menu_game_board_activity, menu);
-        else if(mode > 0)
+        else if(!(mode == 2 && !getIntent().getBooleanExtra("isServidor", false)))
             inflater.inflate(R.menu.menu_modo_2_e_3, menu);
-
+        else
+            inflater.inflate(R.menu.menu_modo_3_cliente, menu);
         return true;
     }
 
@@ -335,7 +335,7 @@ public class GameBoardActivity extends AppCompatActivity {
     {
         switch (item.getItemId()) {
             case R.id.homeIcon:
-                DialogConfirmBackHome dialog = new DialogConfirmBackHome();
+                DialogConfirmBackHome dialog = new DialogConfirmBackHome(gameData, serverCommunicationPlayer1, serverCommunicationPlayer2, thTempo, clientCommunication);
                 dialog.show(getSupportFragmentManager(),"idConfirmarDialog");
                 return true;
             case R.id.solutionIcon:
@@ -345,13 +345,23 @@ public class GameBoardActivity extends AppCompatActivity {
                 }
                 return true;
             case R.id.m1ButtonMenu:   // Botão de volta ao modo 1
-                Intent myIntent;
-                myIntent = new Intent(getBaseContext(),   GameBoardActivity.class);
-                myIntent.putExtra("gameData", gameData);
-                myIntent.putExtra("mode", 0);
-                myIntent.putExtra("existingGame", true);
-                DialogConfirmChangeToM1 dialogChange = new DialogConfirmChangeToM1(gameData, myIntent);
-                dialogChange.show(getSupportFragmentManager(), "idChangeDialog");
+                if(!gameData.isFinished()) {
+                    Intent myIntent;
+                    myIntent = new Intent(getBaseContext(), GameBoardActivity.class);
+                    myIntent.putExtra("invalidNumbers", gameData.getInvalidNumbers());
+                    myIntent.putExtra("preSetNumbers", gameData.getPreSetNumbers());
+                    myIntent.putExtra("notes", gameData.getNotes());
+                    myIntent.putExtra("invalidNotes", gameData.getInvalideNotes());
+                    myIntent.putExtra("gameTime", gameData.getGameTime());
+                    myIntent.putExtra("finished", gameData.isFinished());
+                    myIntent.putExtra("playerScores", gameData.getPlayerScores());
+                    myIntent.putExtra("numberInsertedPlayer", gameData.getNumberInsertedPlayer());
+                    myIntent.putExtra("board", gameData.getBoard());
+                    myIntent.putExtra("mode", 0);
+                    myIntent.putExtra("existingGame", true);
+                    DialogConfirmChangeToM1 dialogChange = new DialogConfirmChangeToM1(myIntent, gameData, serverCommunicationPlayer1, serverCommunicationPlayer2, thTempo, clientCommunication);
+                    dialogChange.show(getSupportFragmentManager(), "idChangeDialog");
+                }
                 return true;
 
             default:
@@ -359,6 +369,27 @@ public class GameBoardActivity extends AppCompatActivity {
         }
     }
 
+    private void changeToMode1(){
+        if(!gameData.isFinished()) {
+            Intent myIntent;
+            myIntent = new Intent(getBaseContext(), GameBoardActivity.class);
+            myIntent.putExtra("invalidNumbers", gameData.getInvalidNumbers());
+            myIntent.putExtra("preSetNumbers", gameData.getPreSetNumbers());
+            myIntent.putExtra("notes", gameData.getNotes());
+            myIntent.putExtra("invalidNotes", gameData.getInvalideNotes());
+            myIntent.putExtra("gameTime", gameData.getGameTime());
+            myIntent.putExtra("finished", gameData.isFinished());
+            myIntent.putExtra("playerScores", gameData.getPlayerScores());
+            myIntent.putExtra("numberInsertedPlayer", gameData.getNumberInsertedPlayer());
+            myIntent.putExtra("board", gameData.getBoard());
+            myIntent.putExtra("mode", 0);
+            myIntent.putExtra("existingGame", true);
+            if(clientCommunication != null)
+                clientCommunication.interrupt();
+            finish();
+            startActivity(myIntent);
+        }
+    }
 
     private void initializeButtons(){
         Button btn = (Button)findViewById(R.id.btnNumber1);
@@ -621,20 +652,46 @@ public class GameBoardActivity extends AppCompatActivity {
                 while (!Thread.currentThread().isInterrupted()) {
                     String jsonMove = gameData.getGameInput(player - 2).readLine();
                     JSONObject jsonObject = new JSONObject(jsonMove);
-                    int row = (int)jsonObject.get("row");
-                    int column = (int)jsonObject.get("column");
-                    boolean onNotas = (boolean)jsonObject.get("onNotas");
-                    boolean onApagar = (boolean)jsonObject.get("onApagar");
-                    int value = (int)jsonObject.get("value");
-                    if(gameData.getPlayer() == player) {
-                        validateMove(row, column, value, onNotas, onApagar);
-                        runOnUiThread(new Runnable() {
+                    Boolean changeToMode1 = jsonObject.optBoolean("changeToMode1", false);
+                    if(changeToMode1){
+                        thTempo.interrupt();
+                        Thread thToMode1 = new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                sudokuView.invalidate();
+                                for (int i = 0; i < GameData.MAX_CLIENTS; i++) {
+                                    if (gameData.getGameOutputs(i) != null) {
+                                        JSONObject jsonToMode1 = new JSONObject();
+                                        try {
+                                            jsonToMode1.put("changeToMode1", true);
+                                        } catch (JSONException e) {
+                                        }
+                                        gameData.getGameOutputs(i).println(jsonToMode1.toString());
+                                        gameData.getGameOutputs(i).flush();
+                                    }
+                                }
+                                serverCommunicationPlayer1.interrupt();
+                                if (serverCommunicationPlayer2 != null)
+                                    serverCommunicationPlayer2.interrupt();
                             }
                         });
-                        sendGameDataToClients();
+                        thToMode1.start();
+                        changeToMode1();
+                    } else {
+                        int row = (int) jsonObject.get("row");
+                        int column = (int) jsonObject.get("column");
+                        boolean onNotas = (boolean) jsonObject.get("onNotas");
+                        boolean onApagar = (boolean) jsonObject.get("onApagar");
+                        int value = (int) jsonObject.get("value");
+                        if (gameData.getPlayer() == player) {
+                            validateMove(row, column, value, onNotas, onApagar);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    sudokuView.invalidate();
+                                }
+                            });
+                            sendGameDataToClients();
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -690,6 +747,7 @@ public class GameBoardActivity extends AppCompatActivity {
                     gameDataJSON = gameData.getGameInput(0).readLine();
                     jsonObject = new JSONObject(gameDataJSON);
                     Boolean finished = jsonObject.optBoolean("finish", false);
+                    Boolean changeToMode1 = jsonObject.optBoolean("changeToMode1", false);
                     if(finished){
                         Boolean winner = jsonObject.optBoolean("winner");
                         String name = jsonObject.optString("winnerName");
@@ -698,7 +756,9 @@ public class GameBoardActivity extends AppCompatActivity {
                         saveGameResultMode3(name, time, numbers);
                         showEndGameMessage(winner);
                     }
-                    else {
+                    else if(changeToMode1) {
+                        changeToMode1();
+                    } else {
                         //Atualizar o GameData e a view
                         gameData.updateThroughJSON(jsonObject);
                         runOnUiThread(new Runnable() {
@@ -873,5 +933,56 @@ public class GameBoardActivity extends AppCompatActivity {
         ghvm.addNewGame(ghd);
         ghvm.saveHistory();
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(gameData.getGameMode() == 2){
+            if(gameData.isServidor()){
+                thTempo.interrupt();
+                Thread thToMode1 = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i = 0; i < GameData.MAX_CLIENTS; i++) {
+                            if (gameData.getGameOutputs(i) != null) {
+                                JSONObject jsonToMode1 = new JSONObject();
+                                try {
+                                    jsonToMode1.put("changeToMode1", true);
+                                } catch (JSONException e) {
+                                }
+                                gameData.getGameOutputs(i).println(jsonToMode1.toString());
+                                gameData.getGameOutputs(i).flush();
+                            }
+                        }
+                        serverCommunicationPlayer1.interrupt();
+                        if (serverCommunicationPlayer2 != null)
+                            serverCommunicationPlayer2.interrupt();
+                    }
+                });
+                thToMode1.start();
+            } else {
+                Thread thToMode1 = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        JSONObject jsonToMode1 = new JSONObject();
+                        try {
+                            jsonToMode1.put("changeToMode1", true);
+                        } catch (JSONException e) {
+                        }
+                        clientCommunication.interrupt();
+                        gameData.getGameOutputs(0).println(jsonToMode1.toString());
+                        gameData.getGameOutputs(0).flush();
+                        try {
+                            gameData.getGameOutputs(0).close();
+                            gameData.getGameInput(0).close();
+                            gameData.getGameSocket(0).close();
+                        } catch (IOException e) {
+                        }
+                    }
+                });
+                thToMode1.start();
+            }
+        }
+        super.onBackPressed();
     }
 }
