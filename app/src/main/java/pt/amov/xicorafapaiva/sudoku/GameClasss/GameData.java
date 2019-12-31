@@ -51,6 +51,7 @@ public class GameData extends ViewModel implements Serializable {
     private ServerSocket serverSocket=null;
     private BufferedReader[] gameInputs;
     private PrintWriter[] gameOutputs;
+    private boolean hasStarted = false;
     private boolean isServidor = false; //Indica se é servidor ou cliente
 
     //Nomes dos Jogadores
@@ -85,6 +86,14 @@ public class GameData extends ViewModel implements Serializable {
 
     public boolean isServidor() {
         return isServidor;
+    }
+
+    public boolean isHasStarted() {
+        return hasStarted;
+    }
+
+    public void setHasStarted(boolean hasStarted) {
+        this.hasStarted = hasStarted;
     }
 
     public void setServidor(boolean servidor) {
