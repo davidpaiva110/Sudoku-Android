@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class GameData extends ViewModel implements Serializable {
     private int player = 1; // Indica qual o jogador que está a jogar
 
     private Socket[] gameSockets = null;
+    private ServerSocket serverSocket=null;
     private BufferedReader[] gameInputs;
     private PrintWriter[] gameOutputs;
     private boolean isServidor = false; //Indica se é servidor ou cliente
@@ -87,6 +89,14 @@ public class GameData extends ViewModel implements Serializable {
 
     public void setServidor(boolean servidor) {
         isServidor = servidor;
+    }
+
+    public ServerSocket getServerSocket() {
+        return serverSocket;
+    }
+
+    public void setServerSocket(ServerSocket serverSocket) {
+        this.serverSocket = serverSocket;
     }
 
     public void setGameSocket(int pos, Socket gameSocket) {
@@ -624,6 +634,7 @@ public class GameData extends ViewModel implements Serializable {
     }
 
     public int getPlayerScore(int player){
+        if(playerScores == null) return 0;
         return playerScores[player - 1];
     }
 
@@ -654,7 +665,7 @@ public class GameData extends ViewModel implements Serializable {
     }
 
     public String getPlayerName(int indexPLayer){
-        if(indexPLayer > playerNames.size())
+        if(indexPLayer >= playerNames.size())
             return null;
         return playerNames.get(indexPLayer);
     }

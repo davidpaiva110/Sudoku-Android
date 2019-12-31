@@ -71,7 +71,6 @@ public class GameBoardActivity extends AppCompatActivity {
     private ProgressDialog pd;
     private boolean isProgressDialogActive = false;
     private Handler procMsg = new Handler();
-    private ServerSocket serverSocket=null;
     Thread serverCommunicationPlayer1 = null, serverCommunicationPlayer2 = null;
 
     @Override
@@ -140,11 +139,11 @@ public class GameBoardActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             try {
-                                serverSocket = new ServerSocket(PORT);
+                                gameData.setServerSocket(new ServerSocket(PORT));
                                 Bitmap bm = getPlayerPhotoProfile();
                                 gameData.addPlayerPic(BitMapToString(bm));
                                 for (int i = 0; i < GameData.MAX_CLIENTS; i++) {
-                                    gameData.setGameSocket(i, serverSocket.accept());
+                                    gameData.setGameSocket(i, gameData.getServerSocket().accept());
                                     //Criação dos inputs e outputs
                                     gameData.setGameInput(i, new BufferedReader(new InputStreamReader(gameData.getGameSocket(i).getInputStream())));
                                     gameData.setGameOutput(i, new PrintWriter(gameData.getGameSocket(i).getOutputStream()));
@@ -165,8 +164,8 @@ public class GameBoardActivity extends AppCompatActivity {
                                         }
                                     });
                                 }
-                                serverSocket.close();
-                                serverSocket = null;
+                                gameData.getServerSocket().close();
+                                gameData.setServerSocket(null);
                             } catch (SocketException ex){
 
                             }catch (Exception e) {
@@ -545,9 +544,9 @@ public class GameBoardActivity extends AppCompatActivity {
         pd.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.strCancelar), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(serverSocket!=null) {
+                if(gameData.getServerSocket()!=null) {
                     try {
-                        serverSocket.close();
+                        gameData.getServerSocket().close();
                     } catch (IOException e) {
                     }
                 }
@@ -576,7 +575,7 @@ public class GameBoardActivity extends AppCompatActivity {
             public void onClick ( View view ) {
                 if(gameData.getGameSocket(0) != null) { //Se houver pelo menos 1 cliente
                     try {
-                        serverSocket.close();
+                        gameData.getServerSocket().close();
                     } catch (IOException e) {
                     }
                 } else{
@@ -659,10 +658,12 @@ public class GameBoardActivity extends AppCompatActivity {
             tvName1.setText(gameData.getPlayerName(0));
             ImageView ivPlayer1 = findViewById(R.id.ivPlayer1);
             if(ivPlayer1 != null) {
-                String str = gameData.getPlayerPics().get(0);
-                Bitmap bm = StringToBitMap(str);
-                if(bm != null)
-                    ivPlayer1.setImageBitmap(bm);
+                if(gameData.getPlayerPics().size() > 0) {
+                    String str = gameData.getPlayerPics().get(0);
+                    Bitmap bm = StringToBitMap(str);
+                    if (bm != null)
+                        ivPlayer1.setImageBitmap(bm);
+                }
             }
             if(gameData.getPlayerNames().size() > 1) {
                 TextView tvName2 = findViewById(R.id.tvNomePlayer2);
@@ -671,9 +672,11 @@ public class GameBoardActivity extends AppCompatActivity {
                 ((TextView)findViewById(R.id.tvStrPontosJogador2)).setText(getString(R.string.strPontos));
                 ImageView ivPlayer2 = findViewById(R.id.ivPlayer2);
                 if(ivPlayer2 != null) {
-                    String str = gameData.getPlayerPics().get(1);
-                    Bitmap bm = StringToBitMap(str);
-                    ivPlayer2.setImageBitmap(bm);
+                    if(gameData.getPlayerPics().size() > 1) {
+                        String str = gameData.getPlayerPics().get(1);
+                        Bitmap bm = StringToBitMap(str);
+                        ivPlayer2.setImageBitmap(bm);
+                    }
                 }
             } else{
                 ((TextView)findViewById(R.id.tvNomePlayer2)).setText("");
@@ -690,9 +693,11 @@ public class GameBoardActivity extends AppCompatActivity {
                 ((TextView)findViewById(R.id.tvStrPontosJogador3)).setText(getString(R.string.strPontos));
                 ImageView ivPlayer3 = findViewById(R.id.ivPlayer3);
                 if(ivPlayer3 != null) {
-                    String str = gameData.getPlayerPics().get(2);
-                    Bitmap bm = StringToBitMap(str);
-                    ivPlayer3.setImageBitmap(bm);
+                    if(gameData.getPlayerPics().size() > 2) {
+                        String str = gameData.getPlayerPics().get(2);
+                        Bitmap bm = StringToBitMap(str);
+                        ivPlayer3.setImageBitmap(bm);
+                    }
                 }
             } else {
                 ((TextView)findViewById(R.id.tvNomePlayer3)).setText("");
