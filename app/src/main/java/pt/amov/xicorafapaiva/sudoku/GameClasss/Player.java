@@ -36,7 +36,9 @@ public class Player extends ViewModel  {
     }
 
     public String getPlayerName() {
-        return playerName;
+        if(playerName != null)
+            return playerName;
+        return "Jogador";
     }
 
     public void setPlayerName(String playerName) {

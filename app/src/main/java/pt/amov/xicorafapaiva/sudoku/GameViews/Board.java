@@ -131,7 +131,6 @@ public class Board extends View {
         paintPlayer2SmallNumbers.setTextSize(cellH/4);
         paintPlayer3SmallNumbers.setTextSize(cellH/4);
         paintSmallWrongNumbers.setTextSize(cellH/4);
-
         for(int r = 0; r < BOARD_SIZE; r++){
             for(int c = 0; c < BOARD_SIZE; c++){
                 int n = gameData.getValue(r,c);
@@ -259,6 +258,15 @@ public class Board extends View {
                         }
                     }
                     invalidate(); // faz um refresh
+                    if(gameData.getGameMode() == 2 && gameData.isServidor()) {
+                        Thread thUpdateClients = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                gameData.sendGameDataToClients();
+                            }
+                        });
+                        thUpdateClients.start();
+                    }
                 } else if (!gameData.isPreSet(cellY, cellX) && !gameData.isFinished() && gameData.getGameMode() == 2 && !gameData.isServidor() && gameData.getPlayer() > 1) {
                     //Envio da jogada ao servidor para validação
                     Thread thSendMoveToServer = new Thread(new RunnableSendMoveToServer(cellY, cellX, selectedValue, onNotas, onApagar));
