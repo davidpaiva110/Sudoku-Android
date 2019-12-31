@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -134,7 +135,63 @@ public class GameBoardActivity extends AppCompatActivity {
                 if(gameData.isServidor()) {
                     createProgressDialogServer();
                     isProgressDialogActive = true;
-                    thWaitingClients.start();
+                    Thread t = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                gameData.setServerSocket(new ServerSocket(PORT));
+                                Bitmap bm = getPlayerPhotoProfile();
+                                gameData.addPlayerPic(BitMapToString(bm));
+                                for (int i = 0; i < GameData.MAX_CLIENTS; i++) {
+                                    gameData.setGameSocket(i, gameData.getServerSocket().accept());
+                                    //Criação dos inputs e outputs
+                                    gameData.setGameInput(i, new BufferedReader(new InputStreamReader(gameData.getGameSocket(i).getInputStream())));
+                                    gameData.setGameOutput(i, new PrintWriter(gameData.getGameSocket(i).getOutputStream()));
+                                    //Recebimento do nome do jogador
+                                    String nameJSON = gameData.getGameInput(i).readLine();
+                                    JSONObject jsonObject = new JSONObject(nameJSON);
+                                    gameData.addPlayerName(jsonObject.getString("name"));
+                                    //Recebimento da foto do jogador
+                                    String playerPicJSON = gameData.getGameInput(i).readLine();
+                                    jsonObject = new JSONObject(playerPicJSON);
+                                    gameData.addPlayerPic(jsonObject.getString("playerPic"));
+
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            initializaPlayerNames();
+                                            Toast.makeText(getApplicationContext(), R.string.strNovoClienteLigado, Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+                                gameData.getServerSocket().close();
+                                gameData.setServerSocket(null);
+                            } catch (SocketException ex){
+
+                            }catch (Exception e) {
+                                gameData.setGameSockets(null);
+                            }
+                            procMsg.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pd.dismiss();
+                                    isProgressDialogActive = false;
+                                    if (gameData.getGameSockets() == null) {
+                                        Toast.makeText(getApplicationContext(), R.string.strErroComunicacao, Toast.LENGTH_LONG).show();
+                                        finish();
+                                    }
+                                    serverCommunicationPlayer1 = new Thread(new RunnableThreadServer(2));
+                                    serverCommunicationPlayer1.start();
+                                    if(gameData.getGameSocket(1) != null) {
+                                        serverCommunicationPlayer2 = new Thread(new RunnableThreadServer(3));
+                                        serverCommunicationPlayer2.start();
+                                    }
+                                    thTempo.start();
+                                }
+                            });
+                        }
+                    });
+                    t.start();
                 }
                 else{  //Cliente Modo 3
                     createProgressDialogClient();
@@ -146,66 +203,6 @@ public class GameBoardActivity extends AppCompatActivity {
             }
         }
     }
-
-    Thread thWaitingClients = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            try {
-                gameData.setServerSocket(new ServerSocket(PORT));
-                Bitmap bm = getPlayerPhotoProfile();
-                gameData.addPlayerPic(BitMapToString(bm));
-                for (int i = 0; i < GameData.MAX_CLIENTS; i++) {
-                    if(gameData.getGameSocket(i) != null) continue;
-                    gameData.setGameSocket(i, gameData.getServerSocket().accept());
-                    //Criação dos inputs e outputs
-                    gameData.setGameInput(i, new BufferedReader(new InputStreamReader(gameData.getGameSocket(i).getInputStream())));
-                    gameData.setGameOutput(i, new PrintWriter(gameData.getGameSocket(i).getOutputStream()));
-                    //Recebimento do nome do jogador
-                    String nameJSON = gameData.getGameInput(i).readLine();
-                    JSONObject jsonObject = new JSONObject(nameJSON);
-                    gameData.addPlayerName(jsonObject.getString("name"));
-                    //Recebimento da foto do jogador
-                    String playerPicJSON = gameData.getGameInput(i).readLine();
-                    jsonObject = new JSONObject(playerPicJSON);
-                    gameData.addPlayerPic(jsonObject.getString("playerPic"));
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            initializaPlayerNames();
-                            Toast.makeText(getApplicationContext(), R.string.strNovoClienteLigado, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    gameData.setHasStarted(true);
-                }
-                gameData.getServerSocket().close();
-                gameData.setServerSocket(null);
-            } catch (SocketException ex) {
-            } catch (Exception e) {
-                gameData.setGameSockets(null);
-            }
-            if(gameData.isHasStarted() && !thWaitingClients.isInterrupted()) {
-                procMsg.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        pd.dismiss();
-                        isProgressDialogActive = false;
-                        if (gameData.getGameSockets() == null) {
-                            Toast.makeText(getApplicationContext(), R.string.strErroComunicacao, Toast.LENGTH_LONG).show();
-                            finish();
-                        }
-                        serverCommunicationPlayer1 = new Thread(new RunnableThreadServer(2));
-                        serverCommunicationPlayer1.start();
-                        if (gameData.getGameSocket(1) != null) {
-                            serverCommunicationPlayer2 = new Thread(new RunnableThreadServer(3));
-                            serverCommunicationPlayer2.start();
-                        }
-                        thTempo.start();
-                    }
-                });
-            }
-        }
-    });
 
     public void startCliente(final String serverIP, final int serverPORT){
         Thread t = new Thread(new Runnable() {
@@ -483,14 +480,6 @@ public class GameBoardActivity extends AppCompatActivity {
             if(gameData.getGameMode() == 2 && !gameData.isServidor()) {
                 clientCommunication.interrupt();
             }
-            if(gameData.getGameMode() == 2 && gameData.isServidor()) {
-                try {
-                    gameData.getServerSocket().close();
-                } catch (IOException e) {
-
-                }
-                thWaitingClients.interrupt();
-            }
         } else{
             if(gameData.getGameMode() == 2 && !gameData.isServidor()){
                 if(clientCommunication != null && clientCommunication.isAlive())
@@ -537,10 +526,9 @@ public class GameBoardActivity extends AppCompatActivity {
             }
         }
         if(isProgressDialogActive == true) {
-            if(gameData.isServidor()) {
+            if(gameData.isServidor())
                 createProgressDialogServer();
-                thWaitingClients.start();
-            } else {
+            else {
                 createProgressDialogClient();
                 clientCommunication.start();
             }
@@ -590,7 +578,6 @@ public class GameBoardActivity extends AppCompatActivity {
                         gameData.getServerSocket().close();
                     } catch (IOException e) {
                     }
-                    gameData.setHasStarted(true);
                 } else{
                     Toast.makeText(getApplicationContext(), R.string.strSemJogadoresLigados, Toast.LENGTH_LONG).show();
                 }
@@ -791,7 +778,7 @@ public class GameBoardActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), R.string.strErroComunicacao, Toast.LENGTH_LONG).show();
                     }
                 });
-                 changeToMode1();
+                changeToMode1();
             }
         }
     }
