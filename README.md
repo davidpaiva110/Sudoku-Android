@@ -1,6 +1,6 @@
 Practical assignment of the subject of Mobile Architecture's  - Academic Year 2019/20 - Degree in Computer Engineering - ISEC
 
-This work aimed to develop the Sudoku game for Android.
+This practical assignment aimed to develop the Sudoku game for Android.
 
 This application has three game modes:
 - SinglePlayer
